@@ -1,6 +1,6 @@
 from typing import List
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 class RawIngredient(BaseModel):
@@ -8,9 +8,17 @@ class RawIngredient(BaseModel):
     quantity: float = Field(..., gt=0)
     unit: str = Field(..., min_length=1)
 
+    @field_validator("name", "unit")
+    @classmethod
+    def strip_and_reject_blank(cls, value: str) -> str:
+        stripped = value.strip()
+        if not stripped:
+            raise ValueError("no puede estar vacío ni contener solo espacios")
+        return stripped
+
 
 class NormalizeRequest(BaseModel):
-    ingredients: List[RawIngredient]
+    ingredients: List[RawIngredient] = Field(..., min_length=1)
 
 
 class NormalizedIngredient(BaseModel):

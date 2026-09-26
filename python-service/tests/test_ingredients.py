@@ -26,3 +26,22 @@ def test_normalize_rejects_invalid_quantity():
     payload = {"ingredients": [{"name": "Sal", "quantity": -1, "unit": "g"}]}
     response = client.post("/ingredients/normalize", json=payload)
     assert response.status_code == 422
+
+
+def test_normalize_rejects_blank_name():
+    payload = {"ingredients": [{"name": "   ", "quantity": 1, "unit": "kg"}]}
+    response = client.post("/ingredients/normalize", json=payload)
+    assert response.status_code == 422
+
+
+def test_normalize_rejects_empty_list():
+    response = client.post("/ingredients/normalize", json={"ingredients": []})
+    assert response.status_code == 422
+
+
+def test_normalize_keeps_small_quantities_visible():
+    payload = {"ingredients": [{"name": "Levadura", "quantity": 0.004, "unit": "kg"}]}
+    response = client.post("/ingredients/normalize", json=payload)
+    assert response.status_code == 200
+    body = response.json()
+    assert body["items"][0]["quantity"] == 0.004

@@ -22,7 +22,7 @@ def normalize_ingredients(payload: NormalizeRequest) -> NormalizeResponse:
         merged[key] = merged.get(key, 0) + item.quantity
 
     normalized = [
-        NormalizedIngredient(name=name, quantity=round(quantity, 2), unit=unit)
+        NormalizedIngredient(name=name, quantity=round(quantity, 3), unit=unit)
         for (name, unit), quantity in merged.items()
     ]
 
