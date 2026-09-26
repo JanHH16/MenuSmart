@@ -1,21 +1,38 @@
 import { Injectable } from '@angular/core';
-import { HttpEvent, HttpHandler, HttpInterceptor, HttpRequest } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import {
+  HttpErrorResponse,
+  HttpEvent,
+  HttpHandler,
+  HttpInterceptor,
+  HttpRequest,
+} from '@angular/common/http';
+import { Router } from '@angular/router';
+import { Observable, catchError, throwError } from 'rxjs';
 import { AuthService } from '../services/auth.service';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly router: Router,
+  ) {}
 
   intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
     const token = this.authService.getToken();
-    if (!token) {
-      return next.handle(request);
-    }
+    const authRequest = token
+      ? request.clone({ setHeaders: { Authorization: `Bearer ${token}` } })
+      : request;
 
-    const authRequest = request.clone({
-      setHeaders: { Authorization: `Bearer ${token}` },
-    });
-    return next.handle(authRequest);
+    return next.handle(authRequest).pipe(
+      catchError((error: unknown) => {
+        if (error instanceof HttpErrorResponse && error.status === 401) {
+          // El token ya no es válido (expiró o el backend lo rechazó):
+          // cerramos la sesión localmente y mandamos al usuario a loguearse de nuevo.
+          this.authService.logout();
+          this.router.navigateByUrl('/login');
+        }
+        return throwError(() => error);
+      }),
+    );
   }
 }
