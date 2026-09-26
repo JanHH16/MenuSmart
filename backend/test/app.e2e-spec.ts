@@ -13,14 +13,18 @@ describe('AppController (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    // Replica la configuracion real de bootstrap() en main.ts, para que este
+    // e2e test valide el comportamiento tal como corre en produccion.
+    app.setGlobalPrefix('api', { exclude: ['health'] });
     await app.init();
   });
 
-  it('/ (GET)', () => {
-    return request(app.getHttpServer())
-      .get('/')
-      .expect(200)
-      .expect('Hello World!');
+  it('/api (GET)', () => {
+    return request(app.getHttpServer()).get('/api').expect(200).expect('Hello World!');
+  });
+
+  it('/health (GET) queda fuera del prefijo', () => {
+    return request(app.getHttpServer()).get('/health').expect(200);
   });
 
   afterEach(async () => {

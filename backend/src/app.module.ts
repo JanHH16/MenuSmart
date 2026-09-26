@@ -21,9 +21,10 @@ import { IngredientsModule } from './ingredients/ingredients.module';
         password: config.get<string>('DATABASE_PASSWORD'),
         database: config.get<string>('DATABASE_NAME'),
         autoLoadEntities: true,
-        // TODO: pasar a migraciones formales antes de cerrar la EP1 (sección 5 del
-        // enunciado exige "estrategia de migraciones"); synchronize=true es solo
-        // para acelerar el desarrollo inicial.
+        migrations: [__dirname + '/migrations/*{.ts,.js}'],
+        migrationsRun: true,
+        // En desarrollo, synchronize agiliza iterar sobre entidades nuevas;
+        // en producción la única fuente de verdad del esquema son las migraciones.
         synchronize: config.get<string>('NODE_ENV') !== 'production',
       }),
     }),
