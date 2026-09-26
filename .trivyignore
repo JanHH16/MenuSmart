@@ -1,0 +1,21 @@
+# Vulnerabilidades revisadas manualmente y aceptadas temporalmente.
+# Quitar la excepcion apenas el escaneo deje de reportarla (indica que el
+# repositorio de paquetes ya publico la version corregida).
+
+# libexpat (imagen base nginx:alpine) - la version corregida (2.8.5-r0) aun
+# no esta publicada en el repositorio estable de paquetes de Alpine al momento
+# de este build; no hay nada que instalar todavia del lado nuestro.
+CVE-2026-93990
+
+# msgpack (imagen python-service) - se reporta solo como copia interna
+# vendorizada dentro de pip (pip/_vendor/msgpack), no como paquete instalado
+# por separado; no es explotable independientemente y no se puede actualizar
+# sin que el propio pip cambie su copia vendorizada.
+GHSA-6v7p-g79w-8964
+
+# setuptools (imagen python-service) - se verifico manualmente dentro de la
+# imagen (find + dpkg) y solo existe una copia instalada, ya actualizada a
+# la version mas reciente (84.0.0); esta version antigua reportada (70.3.0)
+# no corresponde a ningun archivo real encontrado, parece ser un artefacto
+# del escaner leyendo metadata vendorizada. Revisar en escaneos futuros.
+CVE-2025-47273

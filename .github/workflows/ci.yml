@@ -1,0 +1,194 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Backend (NestJS)
+  # ---------------------------------------------------------------------------
+  backend:
+    name: Backend - lint, build, pruebas
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: menusmart
+          POSTGRES_PASSWORD: ${{ secrets.JWT_SECRET_TEST || 'ci-password' }}
+          POSTGRES_DB: menusmart
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U menusmart"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_HOST: localhost
+      DATABASE_PORT: 5432
+      DATABASE_USER: menusmart
+      DATABASE_PASSWORD: ${{ secrets.JWT_SECRET_TEST || 'ci-password' }}
+      DATABASE_NAME: menusmart
+      JWT_SECRET: ${{ secrets.JWT_SECRET_TEST || 'ci-only-secret-not-real' }}
+      JWT_EXPIRES_IN: 3600s
+      PYTHON_SERVICE_URL: http://localhost:8000
+      NODE_ENV: development
+    steps:
+      - name: Obtener el codigo fuente
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: "npm"
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Instalar dependencias (reproducible)
+        working-directory: backend
+        run: npm ci
+
+      - name: Lint
+        working-directory: backend
+        run: npm run lint
+
+      - name: Build
+        working-directory: backend
+        run: npm run build
+
+      - name: Pruebas unitarias
+        working-directory: backend
+        run: npm run test
+
+      - name: Pruebas de integracion (e2e)
+        working-directory: backend
+        run: npm run test:e2e
+
+      - name: Analisis de dependencias vulnerables
+        working-directory: backend
+        run: npm audit --omit=dev --audit-level=critical
+
+  # ---------------------------------------------------------------------------
+  # Frontend (Angular / Ionic)
+  # ---------------------------------------------------------------------------
+  frontend:
+    name: Frontend - lint, build, pruebas
+    runs-on: ubuntu-latest
+    steps:
+      - name: Obtener el codigo fuente
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Instalar dependencias (reproducible)
+        working-directory: frontend
+        run: npm ci
+
+      - name: Lint
+        working-directory: frontend
+        run: npx ng lint
+
+      - name: Build
+        working-directory: frontend
+        run: npm run build
+
+      - name: Pruebas unitarias
+        working-directory: frontend
+        run: npx ng test --watch=false
+
+      - name: Analisis de dependencias vulnerables
+        working-directory: frontend
+        run: npm audit --omit=dev --audit-level=critical
+
+  # ---------------------------------------------------------------------------
+  # Servicio Python (FastAPI)
+  # ---------------------------------------------------------------------------
+  python-service:
+    name: Python - lint, pruebas
+    runs-on: ubuntu-latest
+    steps:
+      - name: Obtener el codigo fuente
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+          cache: "pip"
+          cache-dependency-path: python-service/requirements-dev.txt
+
+      - name: Instalar dependencias (reproducible)
+        working-directory: python-service
+        run: pip install -r requirements-dev.txt
+
+      - name: Lint (ruff)
+        working-directory: python-service
+        run: ruff check app tests
+
+      - name: Analisis estatico de seguridad (bandit)
+        working-directory: python-service
+        run: |
+          pip install bandit
+          bandit -r app
+
+      - name: Pruebas unitarias
+        working-directory: python-service
+        run: pytest
+
+      - name: Analisis de dependencias vulnerables
+        working-directory: python-service
+        run: |
+          pip install pip-audit
+          pip-audit -r requirements.txt
+
+  # ---------------------------------------------------------------------------
+  # Seguridad transversal: secretos expuestos
+  # ---------------------------------------------------------------------------
+  secrets-scan:
+    name: Deteccion de secretos (gitleaks)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Obtener el codigo fuente
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Ejecutar gitleaks
+        run: |
+          docker run --rm -v "$PWD:/repo" zricethezav/gitleaks:latest detect \
+            --source /repo --config /repo/.gitleaks.toml --exit-code 1 --redact --no-banner
+
+  # ---------------------------------------------------------------------------
+  # Construccion y analisis de vulnerabilidades de imagenes Docker
+  # (solo si todo lo anterior paso: quality gate)
+  # ---------------------------------------------------------------------------
+  docker-images:
+    name: Build y escaneo de imagenes Docker
+    runs-on: ubuntu-latest
+    needs: [backend, frontend, python-service, secrets-scan]
+    strategy:
+      matrix:
+        service: [backend, frontend, python-service]
+    steps:
+      - name: Obtener el codigo fuente
+        uses: actions/checkout@v4
+
+      - name: Construir imagen de ${{ matrix.service }}
+        run: docker build -t menusmart-${{ matrix.service }}:${{ github.sha }} ./${{ matrix.service }}
+
+      - name: Escaneo de vulnerabilidades (Trivy)
+        uses: aquasecurity/trivy-action@0.29.0
+        with:
+          image-ref: menusmart-${{ matrix.service }}:${{ github.sha }}
+          format: table
+          severity: CRITICAL,HIGH
+          exit-code: "1"
+          ignore-unfixed: true
+          trivyignores: .trivyignore

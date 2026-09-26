@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 
@@ -9,10 +9,8 @@ import { AuthService } from '../../core/services/auth.service';
   standalone: false,
 })
 export class PlanSemanalPage {
-  constructor(
-    private readonly authService: AuthService,
-    private readonly router: Router,
-  ) {}
+  private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
 
   logout(): void {
     this.authService.logout();

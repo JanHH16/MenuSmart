@@ -16,9 +16,11 @@
       <ion-input type="password" formControlName="password"></ion-input>
     </ion-item>
 
-    <ion-text color="danger" *ngIf="errorMessage">
-      <p>{{ errorMessage }}</p>
-    </ion-text>
+    @if (errorMessage) {
+      <ion-text color="danger">
+        <p>{{ errorMessage }}</p>
+      </ion-text>
+    }
 
     <ion-button expand="block" type="submit" [disabled]="form.invalid || loading">
       Iniciar sesión
