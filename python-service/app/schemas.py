@@ -1,4 +1,3 @@
-from typing import List
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -18,7 +17,7 @@ class RawIngredient(BaseModel):
 
 
 class NormalizeRequest(BaseModel):
-    ingredients: List[RawIngredient] = Field(..., min_length=1)
+    ingredients: list[RawIngredient] = Field(..., min_length=1)
 
 
 class NormalizedIngredient(BaseModel):
@@ -28,6 +27,6 @@ class NormalizedIngredient(BaseModel):
 
 
 class NormalizeResponse(BaseModel):
-    items: List[NormalizedIngredient]
+    items: list[NormalizedIngredient]
     original_count: int
     normalized_count: int
