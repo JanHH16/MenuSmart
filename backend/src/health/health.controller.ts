@@ -1,8 +1,8 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Logger } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { catchError, firstValueFrom, of, timeout } from 'rxjs';
+import { firstValueFrom, timeout } from 'rxjs';
 
 interface DependencyStatus {
   status: 'ok' | 'error';
@@ -11,6 +11,8 @@ interface DependencyStatus {
 
 @Controller('health')
 export class HealthController {
+  private readonly logger = new Logger(HealthController.name);
+
   constructor(
     @InjectDataSource() private readonly dataSource: DataSource,
     private readonly httpService: HttpService,
@@ -38,19 +40,20 @@ export class HealthController {
       await this.dataSource.query('SELECT 1');
       return { status: 'ok' };
     } catch (error) {
-      return { status: 'error', message: (error as Error).message };
+      const message = (error as Error).message;
+      this.logger.warn(`Chequeo de PostgreSQL falló: ${message}`);
+      return { status: 'error', message };
     }
   }
 
   private async checkPythonService(): Promise<DependencyStatus> {
-    const request$ = this.httpService.get('/health').pipe(
-      timeout(2000),
-      catchError(() => of(null)),
-    );
-    const response = await firstValueFrom(request$);
-    if (!response) {
-      return { status: 'error', message: 'El servicio Python no respondió' };
+    try {
+      await firstValueFrom(this.httpService.get('/health').pipe(timeout(2000)));
+      return { status: 'ok' };
+    } catch (error) {
+      const message = (error as Error).message;
+      this.logger.warn(`Chequeo del servicio Python falló: ${message}`);
+      return { status: 'error', message };
     }
-    return { status: 'ok' };
   }
 }
