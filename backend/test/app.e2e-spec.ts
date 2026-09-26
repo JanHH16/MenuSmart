@@ -3,6 +3,7 @@ import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { App } from 'supertest/types';
 import { AppModule } from './../src/app.module';
+import { configureApp } from './../src/setup-app';
 
 describe('AppController (e2e)', () => {
   let app: INestApplication<App>;
@@ -13,14 +14,18 @@ describe('AppController (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    // Misma configuracion que main.ts (configureApp), para que este e2e test
+    // valide el comportamiento real sin poder desincronizarse con el tiempo.
+    configureApp(app);
     await app.init();
   });
 
-  it('/ (GET)', () => {
-    return request(app.getHttpServer())
-      .get('/')
-      .expect(200)
-      .expect('Hello World!');
+  it('/api (GET)', () => {
+    return request(app.getHttpServer()).get('/api').expect(200).expect('Hello World!');
+  });
+
+  it('/health (GET) queda fuera del prefijo', () => {
+    return request(app.getHttpServer()).get('/health').expect(200);
   });
 
   afterEach(async () => {
