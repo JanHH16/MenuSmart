@@ -19,6 +19,13 @@
   // blanca sobre el fondo beige de la app, no confundirse con el fondo.
   --ms-papel-hoja: #fffdf6;
   --ms-lineas-hoja: rgba(31, 58, 147, 0.1);
+  // Color de la cinta adhesiva decorativa (Figma: C.tape).
+  --ms-cinta: #f4ebc4;
+  // Renglones de las hojas rayadas (Figma: C.rule).
+  --ms-renglon: #c9d5ee;
+  // Sombras del prototipo: softShadow() (tarjetas, notas) y hardShadow(n)
+  // (botones/tarjetas "de boleta", offset sólido sin difuminar).
+  --ms-sombra-suave: 0 6px 16px rgba(89, 64, 26, 0.18);
 
   // Tipografia
   // Segun la guia de estilo: lo que el usuario "escribe a mano" (titulos,
