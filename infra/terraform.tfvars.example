@@ -1,0 +1,10 @@
+# Copiar a terraform.tfvars y completar con valores reales.
+# terraform.tfvars NUNCA debe commitearse (ya esta en .gitignore).
+
+render_api_key   = "rnd_xxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+render_owner_id  = "usr-xxxxxxxxxxxxxxxxxxxx"
+environment      = "staging"
+region           = "oregon"
+repo_url         = "https://github.com/JanHH16/MenuSmart"
+branch           = "develop"
+jwt_secret       = "changeme"

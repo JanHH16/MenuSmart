@@ -13,20 +13,31 @@ import { IngredientsModule } from './ingredients/ingredients.module';
     ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        type: 'postgres' as const,
-        host: config.get<string>('DATABASE_HOST'),
-        port: parseInt(config.get<string>('DATABASE_PORT', '5432'), 10),
-        username: config.get<string>('DATABASE_USER'),
-        password: config.get<string>('DATABASE_PASSWORD'),
-        database: config.get<string>('DATABASE_NAME'),
-        autoLoadEntities: true,
-        migrations: [__dirname + '/migrations/*{.ts,.js}'],
-        migrationsRun: true,
-        // En desarrollo, synchronize agiliza iterar sobre entidades nuevas;
-        // en producción la única fuente de verdad del esquema son las migraciones.
-        synchronize: config.get<string>('NODE_ENV') !== 'production',
-      }),
+      useFactory: (config: ConfigService) => {
+        // Algunos proveedores administrados (ej. Render) solo entregan una
+        // connection string completa, no host/usuario/password por separado.
+        const databaseUrl = config.get<string>('DATABASE_URL');
+        const connectionOptions = databaseUrl
+          ? { url: databaseUrl }
+          : {
+              host: config.get<string>('DATABASE_HOST'),
+              port: parseInt(config.get<string>('DATABASE_PORT', '5432'), 10),
+              username: config.get<string>('DATABASE_USER'),
+              password: config.get<string>('DATABASE_PASSWORD'),
+              database: config.get<string>('DATABASE_NAME'),
+            };
+
+        return {
+          type: 'postgres' as const,
+          ...connectionOptions,
+          autoLoadEntities: true,
+          migrations: [__dirname + '/migrations/*{.ts,.js}'],
+          migrationsRun: true,
+          // En desarrollo, synchronize agiliza iterar sobre entidades nuevas;
+          // en producción la única fuente de verdad del esquema son las migraciones.
+          synchronize: config.get<string>('NODE_ENV') !== 'production',
+        };
+      },
     }),
     HealthModule,
     UsersModule,
