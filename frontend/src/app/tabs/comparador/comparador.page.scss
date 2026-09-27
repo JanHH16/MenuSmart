@@ -58,3 +58,323 @@
   font-weight: 700;
   text-align: center;
 }
+
+// ---------------------------------------------------------------------------
+// Desktop (Figma "D6. Comparador de precios", buildComparatorDesktop).
+// Medidas en px del prototipo; las "y=" son relativas a la boleta.
+// ---------------------------------------------------------------------------
+// Título en y=28; boleta y resumen en y=140.
+.ms-comp-desktop-header {
+  min-height: 112px;
+}
+
+.ms-comp-desktop-columnas {
+  display: flex;
+  align-items: flex-start;
+  gap: 32px;
+}
+
+// La máscara del borde dentado recorta también box-shadow, así que la
+// sombra suave va como drop-shadow en un contenedor.
+.ms-comp-boleta-sombra {
+  flex: 0 0 720px;
+  filter: drop-shadow(0 6px 8px rgba(89, 64, 26, 0.18));
+}
+
+// receipt(720×720): papel térmico blanco con dientes de 10px (5px de
+// profundidad) arriba y abajo.
+.ms-comp-boleta {
+  height: 720px;
+  box-sizing: border-box;
+  padding: 26px 36px 0;
+  background: #ffffff;
+  color: #3a3a3a;
+  -webkit-mask:
+    conic-gradient(from 135deg at top, #0000, #000 1deg 89deg, #0000 90deg) top / 10px 51% repeat-x,
+    conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) bottom / 10px 51% repeat-x;
+  mask:
+    conic-gradient(from 135deg at top, #0000, #000 1deg 89deg, #0000 90deg) top / 10px 51% repeat-x,
+    conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) bottom / 10px 51% repeat-x;
+}
+
+.ms-comp-boleta-marca {
+  margin: 0;
+  text-align: center;
+  font-family: var(--ms-font-boleta);
+  font-weight: 700;
+  font-size: 18px;
+  line-height: 27px;
+  letter-spacing: 0.3em;
+}
+
+.ms-comp-boleta-sub {
+  margin: 1px 0 0;
+  text-align: center;
+  font-family: var(--ms-font-boleta);
+  font-size: 11px;
+  line-height: 16px;
+  text-transform: uppercase;
+  color: var(--ms-lapiz);
+}
+
+// dashed(): línea de 1px, trazo 4 / hueco 3, tinta térmica al 60%.
+.ms-comp-punteada {
+  height: 1px;
+  background-image: linear-gradient(to right, rgba(58, 58, 58, 0.6) 4px, transparent 4px);
+  background-size: 7px 1px;
+
+  &--84 {
+    margin-top: 14px;
+  }
+}
+
+// Columnas: Producto (0–220), Jumbo (termina en 320), Santa Isabel (termina
+// en 450), Diferencia (termina en 550), Más barato (desde 568).
+.ms-comp-fila {
+  display: grid;
+  grid-template-columns: 220px 120px 120px 108px minmax(0, 1fr);
+
+  > .ms-comp-num:nth-child(2) {
+    padding-right: 20px;
+  }
+
+  > .ms-comp-num:nth-child(3) {
+    padding-right: 10px;
+  }
+
+  > .ms-comp-num:nth-child(4) {
+    padding-right: 18px;
+  }
+
+  &--encabezado {
+    height: 22px;
+    margin: 9px 0 0;
+    font-family: var(--ms-font-boleta);
+    font-weight: 700;
+    font-size: 10px;
+    line-height: 15px;
+    text-transform: uppercase;
+  }
+
+  &--total {
+    grid-template-columns: 200px 120px 130px;
+    height: 36px;
+    margin-top: 14px;
+    align-items: center;
+    font-family: var(--ms-font-boleta);
+    font-weight: 700;
+    font-size: 14px;
+    text-transform: uppercase;
+
+    > .ms-comp-num:nth-child(2),
+    > .ms-comp-num:nth-child(3) {
+      padding-right: 0;
+    }
+
+    .ms-comp-precio {
+      font-size: 15px;
+    }
+  }
+}
+
+.ms-comp-num {
+  text-align: right;
+}
+
+// Filas de 44px desde y=126; texto en y+12, timbre en y+8.
+.ms-comp-filas {
+  margin: 9px 0 6px;
+
+  .ms-comp-fila {
+    height: 44px;
+    padding-top: 12px;
+    box-sizing: border-box;
+    align-items: start;
+  }
+}
+
+.ms-comp-producto {
+  font-family: var(--ms-font-boleta);
+  font-size: 13px;
+  line-height: 19px;
+  text-transform: uppercase;
+}
+
+// price(): el más barato en negrita con marcador amarillo detrás.
+.ms-comp-precio {
+  position: relative;
+  isolation: isolate;
+  display: inline-block;
+  font-family: var(--ms-font-boleta);
+  font-size: 13px;
+  line-height: 19px;
+  color: var(--ms-lapiz);
+
+  &--mejor {
+    font-weight: 700;
+    color: var(--ms-tinta-oscura);
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: -4px;
+      right: -4px;
+      top: 0.3em;
+      height: 0.85em;
+      border-radius: 2px;
+      background: var(--ms-marcador);
+      z-index: -1;
+    }
+  }
+}
+
+.ms-comp-diferencia {
+  font-family: var(--ms-font-boleta);
+  font-size: 12px;
+  line-height: 19px;
+  color: var(--ms-lapiz);
+}
+
+// stamp(80×26, rot ±3, size 9).
+.ms-comp-timbre-fila {
+  width: 80px;
+  height: 26px;
+  margin-top: -4px;
+  font-size: 9px;
+}
+
+.ms-comp-gracias {
+  margin: 11px 0 0;
+  text-align: center;
+  font-family: var(--ms-font-boleta);
+  font-size: 10px;
+  line-height: 15px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ms-lapiz);
+}
+
+// barcode(220×36) centrado en y=660.
+.ms-comp-barcode {
+  position: relative;
+  width: 220px;
+  height: 36px;
+  margin: 9px auto 0;
+
+  span {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    background: #3a3a3a;
+  }
+}
+
+// Columna derecha (pw = 340 en 1440): resumen (430 de alto) + nota "ojo".
+.ms-comp-derecha {
+  flex: 1;
+  min-width: 0;
+}
+
+.ms-comp-resumen {
+  height: 430px;
+  padding: 18px 24px 0;
+}
+
+.ms-comp-resumen-titulo {
+  margin: 0;
+  font-family: var(--ms-font-libreta);
+  font-weight: 700;
+  font-size: 38px;
+  line-height: 48px;
+  color: var(--ms-tinta-oscura);
+}
+
+// Filas en y=84 y y=160: tienda + total, barra de 14px en y+38.
+.ms-comp-resumen-fila {
+  margin-top: 18px;
+
+  & + & {
+    margin-top: 24px;
+  }
+}
+
+.ms-comp-resumen-fila-textos {
+  height: 38px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.ms-comp-resumen-tienda {
+  font-family: var(--ms-font-boleta);
+  font-weight: 700;
+  font-size: 11px;
+  line-height: 16px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ms-lapiz);
+}
+
+.ms-comp-resumen-valor {
+  margin-top: 2px;
+  font-family: var(--ms-font-boleta);
+  font-weight: 700;
+  font-size: 20px;
+  line-height: 26px;
+  color: var(--ms-lapiz);
+
+  &--mejor {
+    color: var(--ms-tinta-oscura);
+  }
+}
+
+.ms-comp-resumen-barra-fondo {
+  height: 14px;
+  border-radius: 7px;
+  background: var(--ms-papel);
+  overflow: hidden;
+}
+
+.ms-comp-resumen-barra {
+  height: 100%;
+  border-radius: 7px;
+  background: var(--ms-lapiz);
+
+  &--mejor {
+    background: var(--ms-tinta-azul);
+  }
+}
+
+// dashed(24, 238) en lápiz.
+.ms-comp-resumen-punteada {
+  height: 1px;
+  margin-top: 26px;
+  background-image: linear-gradient(to right, rgba(138, 143, 163, 0.6) 4px, transparent 4px);
+  background-size: 7px 1px;
+}
+
+// stamp('Conviene…', x=44, y=262, pw-88 × 76, rot -4, size 16).
+.ms-comp-timbre-conviene {
+  display: flex;
+  height: 76px;
+  margin: 23px 20px 0;
+  font-size: 16px;
+  transform: rotate(-4deg);
+}
+
+.ms-comp-resumen-ahorras {
+  margin: 24px 0 0;
+  text-align: center;
+  font-family: var(--ms-font-libreta);
+  font-weight: 700;
+  font-size: 28px;
+  line-height: 34px;
+  color: var(--ms-tinta-azul);
+}
+
+// note(x=px+20, y=610, pw-40 × 120, rot 2, size 24).
+.ms-comp-consejo {
+  height: 120px;
+  margin: 40px 20px 0;
+  transform: rotate(2deg);
+}

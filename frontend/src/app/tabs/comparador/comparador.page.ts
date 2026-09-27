@@ -1,4 +1,5 @@
 import { Component, inject } from '@angular/core';
+import { LayoutService } from '../../core/services/layout.service';
 import { ComparadorService, PrecioProducto } from '../../core/services/comparador.service';
 
 @Component({
@@ -9,7 +10,9 @@ import { ComparadorService, PrecioProducto } from '../../core/services/comparado
 })
 export class ComparadorPage {
   private readonly comparadorService = inject(ComparadorService);
+  private readonly layoutService = inject(LayoutService);
 
+  readonly esDesktop$ = this.layoutService.esDesktop$;
   readonly tiendas = this.comparadorService.tiendas;
   readonly productos: PrecioProducto[] = this.comparadorService.getProductos();
   readonly totales = this.comparadorService.getTotales();
@@ -21,5 +24,60 @@ export class ComparadorPage {
 
   formatPrecio(valor: number): string {
     return `$${valor.toLocaleString('es-CL')}`;
+  }
+
+  // Diferencia / "más barato" asumen exactamente 2 tiendas, como el diseño
+  // de Figma ("Jumbo vs. Santa Isabel").
+  diferencia(producto: PrecioProducto): number {
+    return Math.abs(producto.precios[0] - producto.precios[1]);
+  }
+
+  masBaratoNombre(producto: PrecioProducto): string {
+    const indice = producto.precios[0] < producto.precios[1] ? 0 : 1;
+    return this.abreviar(this.tiendas[indice]);
+  }
+
+  // En los timbres chicos Figma escribe "S. Isabel".
+  abreviar(tienda: string): string {
+    return tienda === 'Santa Isabel' ? 'S. Isabel' : tienda;
+  }
+
+  barraAncho(total: number): number {
+    const max = Math.max(...this.totales);
+    return max === 0 ? 0 : Math.round((total / max) * 100);
+  }
+
+  // Figma: nota "ojo: …" con el producto que conviene comprar en la OTRA
+  // tienda (la que no gana en el total), el de mayor diferencia. Si no hay
+  // ninguno, no se muestra la nota.
+  readonly consejo = this.calcularConsejo();
+
+  // Código de barras decorativo del pie de la boleta (Figma: barcode()).
+  readonly barras = this.calcularBarras(220);
+
+  private calcularConsejo(): { producto: string; ahorro: number; tienda: string } | null {
+    const ganadora = this.tiendaMasBarata.indice;
+    let mejor: { producto: string; ahorro: number; tienda: string } | null = null;
+    for (const producto of this.productos) {
+      const barata = producto.precios[0] < producto.precios[1] ? 0 : 1;
+      const ahorro = this.diferencia(producto);
+      if (barata !== ganadora && (!mejor || ahorro > mejor.ahorro)) {
+        mejor = { producto: producto.producto.toLowerCase(), ahorro, tienda: this.tiendas[barata] };
+      }
+    }
+    return mejor;
+  }
+
+  private calcularBarras(ancho: number): { x: number; w: number }[] {
+    const patron = [2, 1, 3, 1, 1, 2, 1, 3, 2, 1, 1, 1, 3, 2, 1, 2];
+    const barras: { x: number; w: number }[] = [];
+    for (let x = 0, i = 0; x < ancho; i++) {
+      const w = patron[i % patron.length];
+      if (i % 2 === 0) {
+        barras.push({ x, w });
+      }
+      x += w + 1.5;
+    }
+    return barras;
   }
 }
