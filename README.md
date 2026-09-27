@@ -10,8 +10,8 @@ GitHub Actions · Terraform
 
 | Integrante | Ámbitos principales |
 |---|---|
-| Jan H. ([@JanHH16](https://github.com/JanHH16)) | Backend (NestJS), servicio Python, persistencia, DevOps/CI-CD, infraestructura (Terraform), documentación técnica |
-| [@camitwrs](https://github.com/camitwrs) | Frontend (diseño de vistas), prototipo Figma, revisión de código (seguridad, calidad, cobertura de pruebas) |
+| Jan Houter. ([@JanHH16](https://github.com/JanHH16)) | Backend (NestJS), servicio Python, persistencia, DevOps/CI-CD, infraestructura (Terraform), documentación técnica |
+| Camila Torres. [@camitwrs](https://github.com/camitwrs) | Frontend (diseño de vistas), prototipo Figma, revisión de código (seguridad, calidad, cobertura de pruebas) |
 
 ## Problema y usuarios objetivo
 
