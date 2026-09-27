@@ -17,7 +17,7 @@ GitHub Actions · Terraform
 
 Planificar comidas y hacer las compras de supermercado consume tiempo y suele hacerse
 desorganizado: sin lista clara, repitiendo ingredientes innecesariamente, o sin comparar
-precios entre supermercados por falta de tiempo o de información centralizada — lo que
+precios entre supermercados por falta de tiempo o de información centralizada, lo que
 genera sobregasto y desperdicio de comida.
 
 MenuSmart está pensado para estudiantes, parejas o familias que cocinan regularmente y
@@ -59,8 +59,8 @@ combinará dos mecanismos:
 2. **Optimización de compra**: dado un plan semanal, decidir en qué supermercado
    (Jumbo o Santa Isabel) conviene comprar cada producto para minimizar el costo total.
 
-Lo ya implementado hoy — la normalización/consolidación de ingredientes duplicados en el
-servicio Python (`POST /ingredients/normalize`) — es la base de datos limpia sobre la que
+Lo ya implementado hoy, la normalización/consolidación de ingredientes duplicados en el
+servicio Python (`POST /ingredients/normalize`), es la base de datos limpia sobre la que
 se construirán ambos mecanismos.
 
 ## Arquitectura
@@ -74,7 +74,7 @@ datos. Decisiones clave documentadas como ADR en [`docs/adr/`](docs/adr/):
 
 ## Fuente de información web
 
-Jumbo y Santa Isabel (mismo grupo Cencosud) — ver [ADR-002](docs/adr/002-fuentes-datos-web.md)
+Jumbo y Santa Isabel (mismo grupo Cencosud). Ver [ADR-002](docs/adr/002-fuentes-datos-web.md)
 para el análisis completo de `robots.txt` y por qué se descartó Líder.
 
 ## Prototipo (Figma)
@@ -145,12 +145,12 @@ cd python-service && pytest
 ```
 
 Las mismas pruebas (más lint, análisis de seguridad y escaneo de imágenes Docker) corren
-automáticamente en cada push/PR — ver `.github/workflows/ci.yml`.
+automáticamente en cada push/PR. Ver `.github/workflows/ci.yml`.
 
 ## Infraestructura y despliegue
 
 La infraestructura de staging está definida como código en [`infra/`](infra/) (Terraform,
-proveedor Render) — ver [ADR-001](docs/adr/001-infraestructura-render.md) para el
+proveedor Render). Ver [ADR-001](docs/adr/001-infraestructura-render.md) para el
 detalle de la decisión.
 
 ```bash
@@ -161,7 +161,7 @@ terraform plan
 ```
 
 **Estado del despliegue:** `terraform apply` todavía no se ha ejecutado (requiere una
-cuenta real de Render). El ambiente de staging en vivo queda pendiente — ver
+cuenta real de Render). El ambiente de staging en vivo queda pendiente, ver
 [Limitaciones conocidas](#limitaciones-conocidas).
 
 ## Documentación de la API
@@ -180,15 +180,15 @@ disponibles son:
 
 ## Limitaciones conocidas
 
-- El scraping real de precios (Jumbo/Santa Isabel) todavía no está implementado — el
+- El scraping real de precios (Jumbo/Santa Isabel) todavía no está implementado: el
   servicio Python solo tiene el endpoint de normalización de ingredientes.
 - Las vistas de Plan semanal, Lista de compras y Comparador son placeholders funcionales
   (navegación y lógica real, diseño visual pendiente según Figma).
 - No hay persistencia todavía de Comidas, Ingredientes, Listas de compra ni Precios (solo
-  `users`) — ver [`docs/database.md`](docs/database.md).
+  `users`). Ver [`docs/database.md`](docs/database.md).
 - El despliegue en Render no se ha ejecutado; `frontend/nginx.conf` resuelve el backend
-  como `http://backend:3000` (nombre de Docker Compose), que no aplica igual en Render —
-  ver ADR-001.
+  como `http://backend:3000` (nombre de Docker Compose), que no aplica igual en Render.
+  Ver ADR-001.
 - No hay documentación OpenAPI/Swagger generada todavía.
 - La app Android (Capacitor) tiene la configuración inicial, pero no se ha generado el
   proyecto nativo ni probado en un dispositivo/emulador.

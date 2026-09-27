@@ -4,7 +4,7 @@
 
 Entidades y relaciones que el producto necesita para cumplir su propósito completo
 (planificación de comidas + comparación de precios). Algunas todavía no están
-implementadas — se marca explícitamente cuáles.
+implementadas. Se marca explícitamente cuáles.
 
 ```mermaid
 erDiagram
@@ -60,7 +60,7 @@ erDiagram
 |---|---|
 | `USUARIO` | ✅ Implementada (`users` table, entrega actual) |
 | `COMIDA` | ⏳ Planeada (Fase 6 / EP2) |
-| `INGREDIENTE` | ⏳ Planeada — hoy existe solo como estructura de datos *en tránsito* (DTO) que recibe el servicio Python para normalizar, no persiste todavía |
+| `INGREDIENTE` | ⏳ Planeada: hoy existe solo como estructura de datos *en tránsito* (DTO) que recibe el servicio Python para normalizar, no persiste todavía |
 | `PRODUCTO` | ⏳ Planeada (depende del scraping de precios, ver ADR-002) |
 | `PRECIO_SUPERMERCADO` | ⏳ Planeada (depende del scraping de precios, ver ADR-002) |
 | `LISTA_COMPRA` | ⏳ Planeada |
@@ -96,7 +96,7 @@ Definida en `backend/src/users/entities/user.entity.ts`.
 - Migraciones en `backend/src/migrations/`, versionadas en git.
 - En **desarrollo** (`NODE_ENV != production`) se usa además `synchronize: true` para
   iterar rápido sobre entidades nuevas sin escribir una migración por cada cambio chico.
-- En **producción** (`NODE_ENV=production`), `synchronize` se desactiva — el esquema real
+- En **producción** (`NODE_ENV=production`), `synchronize` se desactiva. El esquema real
   se rige únicamente por las migraciones, que corren automáticamente al arrancar el backend
   (`migrationsRun: true` en `backend/src/app.module.ts`).
 

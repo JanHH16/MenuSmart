@@ -58,10 +58,10 @@ flowchart TB
 
 Reglas de comunicación (ver sección 3 del enunciado del curso):
 
-- El frontend **nunca** llama directo al servicio Python ni a PostgreSQL — todo pasa por
+- El frontend **nunca** llama directo al servicio Python ni a PostgreSQL: todo pasa por
   NestJS.
 - El servicio Python **no modifica directamente** las tablas de NestJS; si necesita datos
-  persistidos, los pide vía un endpoint interno de NestJS (no implementado aún — no ha sido
+  persistidos, los pide vía un endpoint interno de NestJS (no implementado aún, no ha sido
   necesario porque el servicio Python todavía no persiste nada por sí mismo).
 
 ## 3. Diagrama de despliegue
