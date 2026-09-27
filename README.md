@@ -3,8 +3,8 @@ Planificador de comidas y comparador de precios de supermercado (Angular/Ionic +
 
 ## Prototipo (Figma)
 
-- **[Prototipo navegable](https://www.figma.com/proto/wypZX6IwEnJy4xjiUCOl5E/Sin-t%C3%ADtulo?page-id=10%3A1925&node-id=10-2153&p=f&viewport=40%2C471%2C0.18&t=e7RTlnrJyM8nR1wG-1&scaling=min-zoom&content-scaling=fixed&starting-point-node-id=10%3A2153&show-proto-sidebar=1)**: se abre directo en modo presentación.
-- **[Archivo de diseño](https://www.figma.com/design/wypZX6IwEnJy4xjiUCOl5E/Sin-t%C3%ADtulo?node-id=10-1925&t=Pys4SupOgEKHQ7cv-1)**: contiene las páginas *Prototipo* y *Guía de estilo*.
+- **[Prototipo navegable](https://www.figma.com/proto/wypZX6IwEnJy4xjiUCOl5E/MENUSMART---INGWEBAVANZADA?node-id=50-10692&p=f&viewport=-2178%2C207%2C0.74&t=fEgSVeStmNl4ZSWW-1&scaling=min-zoom&content-scaling=fixed&starting-point-node-id=50%3A10690&show-proto-sidebar=1&page-id=50%3A10462)**: se abre directo en modo presentación.
+- **[Archivo de diseño](https://www.figma.com/design/wypZX6IwEnJy4xjiUCOl5E/MENUSMART---INGWEBAVANZADA?node-id=50-10462&t=5fPKDI8QO3YoJub2-1)**: contiene las páginas *Prototipo* y *Guía de estilo*.
 
 ### Cómo recorrerlo
 - En el panel lateral izquierdo (**Flows**) se elige el flujo:
