@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular/lazy';
 
 import { AgregarIngredienteModalComponent } from './agregar-ingrediente-modal/agregar-ingrediente-modal.component';
+import { DoodleComponent } from './doodle/doodle.component';
 
 /**
  * Componentes reutilizables entre módulos de features (páginas creadas
@@ -13,7 +14,7 @@ import { AgregarIngredienteModalComponent } from './agregar-ingrediente-modal/ag
  */
 @NgModule({
   imports: [CommonModule, FormsModule, IonicModule],
-  declarations: [AgregarIngredienteModalComponent],
-  exports: [AgregarIngredienteModalComponent],
+  declarations: [AgregarIngredienteModalComponent, DoodleComponent],
+  exports: [AgregarIngredienteModalComponent, DoodleComponent],
 })
 export class SharedModule {}

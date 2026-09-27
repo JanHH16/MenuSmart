@@ -1,0 +1,56 @@
+<svg
+  [attr.width]="size"
+  [attr.height]="size"
+  viewBox="0 0 64 64"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2.6"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  xmlns="http://www.w3.org/2000/svg"
+  aria-hidden="true"
+>
+  @switch (key) {
+    @case ('pasta') {
+      <path d="M8 32h48c0 13-11 22-24 22S8 45 8 32z" />
+      <path d="M15 32c2-7 5-7 7 0s5 7 7 0 5-7 7 0 5 7 7 0 5-7 6-2" />
+      <path d="M24 8c-3 4 3 6 0 10M32 6c-3 4 3 6 0 10M40 8c-3 4 3 6 0 10" />
+    }
+    @case ('salad') {
+      <path d="M8 34h48c0 12-11 20-24 20S8 46 8 34z" />
+      <path d="M16 34c0-10 8-15 15-12-2 7-7 12-15 12z" />
+      <path d="M33 34c2-9 10-13 17-9-3 6-9 9-17 9z" />
+      <circle cx="41" cy="20" r="4" />
+      <path d="M26 18c2-5 7-8 11-7" />
+    }
+    @case ('chicken') {
+      <path d="M38 8c9 0 17 7 17 16 0 10-9 16-19 14L25 49c1 3-1 6-4 6s-5-2-5-4c-3 0-5-2-5-5s3-5 6-4l11-12c-3-9 2-22 14-22z" />
+      <path d="M41 15c5 0 8 3 8 8" />
+    }
+    @case ('pan') {
+      <circle cx="27" cy="36" r="17" />
+      <circle cx="27" cy="36" r="10" />
+      <path d="M44 36h16" />
+      <path d="M22 32l3 3M30 38l2 2" />
+    }
+    @case ('pizza') {
+      <path d="M8 14c15-7 33-7 48 0L32 58z" />
+      <path d="M11 21c14-6 28-6 42 0" />
+      <circle cx="26" cy="30" r="3.5" />
+      <circle cx="38" cy="32" r="3.5" />
+      <circle cx="32" cy="43" r="3" />
+    }
+    @case ('steak') {
+      <path d="M12 28c0-9 9-15 20-15 13 0 21 7 21 15s-8 13-17 13c-4 0-7 4-13 4-7 0-11-6-11-17z" />
+      <circle cx="24" cy="29" r="4" />
+      <path d="M34 22l8 8M40 20l8 8" />
+      <path d="M8 52h48M16 52v6M48 52v6" />
+    }
+    @default {
+      <path d="M11 26h42v18c0 6-5 10-10 10H21c-5 0-10-4-10-10z" />
+      <path d="M5 26h54M26 19h12" />
+      <path d="M24 6c-3 4 3 6 0 9M32 4c-3 4 3 6 0 9M40 6c-3 4 3 6 0 9" />
+      <path d="M20 38h24" />
+    }
+  }
+</svg>
