@@ -1,5 +1,19 @@
-.ms-lista-subtitulo {
-  margin: -8px 0 16px;
+.ms-lista-progreso-mobile {
+  margin: -4px 0 16px;
+}
+
+.ms-lista-progreso-mobile-textos {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.ms-lista-progreso-mobile-valor {
+  font-family: var(--ms-font-libreta);
+  font-weight: 700;
+  font-size: 1.35rem;
+  color: var(--ms-tinta-oscura);
 }
 
 // Una sola "hoja" continua (no una tarjeta por categoría), con líneas de
@@ -52,4 +66,160 @@
 
 .ms-item-cantidad {
   flex-shrink: 0;
+}
+
+// ---------------------------------------------------------------------------
+// Desktop (Figma "D5. Lista de compras", buildShoppingDesktop). Medidas en
+// px del prototipo; las "y=" de las tarjetas son relativas a la tarjeta.
+// ---------------------------------------------------------------------------
+// Título en y=28, botón Comparar (280×56) en y=44, tarjetas en y=164.
+.ms-lista-desktop-header {
+  min-height: 136px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.ms-lista-comparar {
+  width: 280px;
+  height: 56px;
+  margin-top: 16px;
+}
+
+.ms-lista-columnas {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.ms-lista-grupo-wrap {
+  position: relative;
+}
+
+// tape(x + colW/2 - 36, y - 12, 72, rot * 3).
+.ms-lista-grupo-cinta {
+  top: -12px;
+  left: calc(50% - 36px);
+  width: 72px;
+}
+
+// card(colW × 440, lines: 96, step: 40) — renglones desde y=96 cada 40px.
+.ms-lista-grupo {
+  height: 440px;
+  padding: 20px 20px 0;
+  overflow: hidden;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    var(--ms-renglon) 0,
+    var(--ms-renglon) 1px,
+    transparent 1px,
+    transparent 40px
+  );
+  background-size: 100% calc(100% - 96px);
+  background-position: 0 96px;
+  background-repeat: no-repeat;
+}
+
+// Nombre del grupo a mano 32 en y=20; "N productos" monoBold 10 rojo en y=64.
+.ms-lista-grupo-titulo {
+  margin: 0;
+  height: 44px;
+  font-family: var(--ms-font-libreta);
+  font-weight: 700;
+  font-size: 32px;
+  line-height: 40px;
+  color: var(--ms-tinta-oscura);
+}
+
+.ms-lista-grupo-cuenta {
+  display: block;
+  height: 32px;
+  font-family: var(--ms-font-boleta);
+  font-weight: 700;
+  font-size: 10px;
+  line-height: 15px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ms-margen-rojo);
+}
+
+// Filas de 40px desde y=96 (checkbox en x=20, nombre en x=50, cantidad
+// alineada a la derecha).
+.ms-lista-item {
+  height: 40px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.ms-lista-item-nombre {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--ms-font-libreta);
+  font-weight: 700;
+  font-size: 24px;
+  color: var(--ms-tinta-oscura);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  &--comprado {
+    color: var(--ms-lapiz);
+    text-decoration: line-through;
+  }
+}
+
+.ms-lista-item-cantidad {
+  flex-shrink: 0;
+  font-family: var(--ms-font-boleta);
+  font-size: 11px;
+  color: var(--ms-lapiz);
+}
+
+// Tarjeta de progreso (CW × 96, blanca) en y=660: barra en x=320.
+.ms-lista-progreso {
+  height: 96px;
+  margin-top: 56px;
+  padding: 22px 28px 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+  background: #ffffff;
+
+  > div:first-child {
+    width: 292px;
+    flex-shrink: 0;
+  }
+}
+
+.ms-lista-progreso-valor {
+  margin: 3px 0 0;
+  font-family: var(--ms-font-libreta);
+  font-weight: 700;
+  font-size: 32px;
+  line-height: 36px;
+  color: var(--ms-tinta-oscura);
+}
+
+.ms-lista-progreso-fondo {
+  flex: 1;
+  height: 14px;
+  margin: 20px 12px 0 0;
+  border-radius: 7px;
+  background: var(--ms-papel);
+  overflow: hidden;
+}
+
+.ms-lista-progreso-fondo--mobile {
+  height: 10px;
+  margin: 0;
+  background: var(--ms-papel-oscuro);
+}
+
+.ms-lista-progreso-barra {
+  height: 100%;
+  border-radius: 7px;
+  background: var(--ms-tinta-azul);
 }
