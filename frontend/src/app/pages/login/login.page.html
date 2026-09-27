@@ -1,31 +1,58 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-title>MenuSmart</ion-title>
-  </ion-toolbar>
-</ion-header>
+<ion-content class="ms-auth-content" [fullscreen]="true">
+  <div class="ms-auth-wrapper">
+    <div class="ms-auth-logo">
+      <svg viewBox="0 0 64 64" class="ms-logo-svg" xmlns="http://www.w3.org/2000/svg">
+        <path
+          d="M8 4H56V56L51.2 61L46.4 56L41.6 61L36.8 56L32 61L27.2 56L22.4 61L17.6 56L12.8 61L8 56Z"
+          fill="var(--ms-tinta-azul)"
+        />
+        <rect x="15" y="13" width="30" height="9" rx="2" fill="var(--ms-marcador)" transform="rotate(-4 30 17)" />
+        <rect x="16" y="30" width="32" height="3.5" rx="1.75" fill="var(--ms-papel-hoja)" />
+        <rect x="16" y="39" width="17" height="3.5" rx="1.75" fill="var(--ms-papel-hoja)" />
+        <path
+          d="M36 41l5 5 10-12"
+          fill="none"
+          stroke="var(--ms-marcador)"
+          stroke-width="4.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </svg>
+      <span class="ms-logo-text"><span class="ms-logo-menu">menu</span><span class="ms-logo-accent">smart</span></span>
+    </div>
 
-<ion-content class="ion-padding">
-  <form [formGroup]="form" (ngSubmit)="submit()">
-    <ion-item>
-      <ion-label position="floating">Email</ion-label>
-      <ion-input type="email" formControlName="email"></ion-input>
-    </ion-item>
+    <div class="ms-card-libreta ms-auth-card">
+      <h1 class="ms-heading-libreta">hola de nuevo</h1>
+      <p class="ms-text-secondary ms-auth-subtitle">Inicia sesión para ver tu semana</p>
 
-    <ion-item>
-      <ion-label position="floating">Contraseña</ion-label>
-      <ion-input type="password" formControlName="password"></ion-input>
-    </ion-item>
+      <form [formGroup]="form" (ngSubmit)="submit()">
+        <ion-item lines="full" class="ms-field">
+          <ion-label position="stacked">Email</ion-label>
+          <ion-input type="email" formControlName="email" placeholder="tu@correo.cl"></ion-input>
+        </ion-item>
 
-    <ion-text color="danger" *ngIf="errorMessage">
-      <p>{{ errorMessage }}</p>
-    </ion-text>
+        <ion-item lines="full" class="ms-field">
+          <ion-label position="stacked">Contraseña</ion-label>
+          <ion-input type="password" formControlName="password"></ion-input>
+        </ion-item>
 
-    <ion-button expand="block" type="submit" [disabled]="form.invalid || loading">
-      Iniciar sesión
-    </ion-button>
-  </form>
+        @if (errorMessage) {
+          <p class="ms-error">✕ {{ errorMessage }}</p>
+        }
 
-  <ion-button expand="block" fill="clear" routerLink="/register">
-    ¿No tienes cuenta? Regístrate
-  </ion-button>
+        <ion-button expand="block" type="submit" class="ms-btn-primary" [disabled]="form.invalid || loading">
+          @if (loading) {
+            <ion-spinner name="dots" slot="start"></ion-spinner>
+          }
+          <span>Iniciar sesión</span>
+        </ion-button>
+      </form>
+
+      <p class="ms-auth-footer">
+        ¿No tienes cuenta? <a routerLink="/register">Regístrate</a>
+      </p>
+    </div>
+
+    <p class="ms-tagline">planifica · anota · ahorra</p>
+  </div>
 </ion-content>

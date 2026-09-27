@@ -39,7 +39,7 @@ export class LoginPage {
       },
       error: () => {
         this.loading = false;
-        this.errorMessage = 'Credenciales incorrectas o servidor no disponible.';
+        this.errorMessage = 'ups, credenciales incorrectas';
       },
     });
   }
