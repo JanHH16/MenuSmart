@@ -32,6 +32,265 @@
  * https://ionicframework.com/docs/theming/dark-mode
  */
 
+/* El diseño de MenuSmart (Figma) es de tema único "libreta y boleta" sobre
+ * fondo papel claro; no está pensado para adaptarse al modo oscuro del
+ * sistema. Si se habilita dark.system, Ionic recalcula automáticamente los
+ * colores de labels/placeholders para un fondo oscuro (quedan en blanco)
+ * mientras el fondo sigue siendo el papel claro definido en variables.scss,
+ * y el contraste se rompe. Por eso queda desactivado a propósito. */
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
-@import "@ionic/angular/css/palettes/dark.system.css";
+/* @import "@ionic/angular/css/palettes/dark.system.css"; */
+
+/**
+ * Utilidades del sistema de diseño "libreta y boleta" (ver Figma).
+ * Se dejan como clases globales porque las usan varias paginas/pestañas.
+ */
+
+// Titulo estilo "escrito a mano", con el marcador amarillo detras del texto.
+.ms-heading-libreta {
+  font-family: var(--ms-font-libreta);
+  font-weight: 700;
+  font-size: 2rem;
+  color: var(--ms-tinta-oscura);
+  display: inline-block;
+  position: relative;
+  margin: 0;
+
+  &::after {
+    content: '';
+    position: absolute;
+    left: -0.15em;
+    right: -0.15em;
+    bottom: 0.05em;
+    height: 0.35em;
+    background: var(--ms-marcador);
+    z-index: -1;
+    border-radius: 2px;
+  }
+}
+
+// Tarjeta con look de "hoja de libreta": fondo papel, borde dentado (boleta)
+// y un margen rojo vertical del lado izquierdo.
+.ms-card-libreta {
+  position: relative;
+  background: var(--ms-papel-hoja);
+  border: 1px solid var(--ms-papel-oscuro);
+  border-radius: 12px;
+  padding: 24px 20px 24px 32px;
+  box-shadow: 0 6px 16px rgba(27, 31, 59, 0.08);
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 16px;
+    bottom: 16px;
+    left: 18px;
+    width: 1px;
+    background: var(--ms-margen-rojo);
+    opacity: 0.5;
+  }
+}
+
+// Texto/valores con look de boleta impresa (precios, cantidades, totales).
+.ms-mono {
+  font-family: var(--ms-font-boleta);
+}
+
+.ms-text-secondary {
+  color: var(--ms-lapiz);
+}
+
+// Etiqueta pequeña en mayúsculas (nombres de sección, "N items", etc.)
+.ms-label-secundario {
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  color: var(--ms-lapiz);
+}
+
+// Título de página chico puesto al lado (no como slot de ion-title) en
+// toolbars con botón "volver", ej. Detalle de comida.
+.ms-toolbar-label {
+  align-self: center;
+  margin-right: 12px;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  color: var(--ms-lapiz);
+}
+
+.ms-text-ahorro {
+  color: var(--ms-timbre-verde);
+  font-weight: 700;
+}
+
+// ---------------------------------------------------------------------------
+// Compartido entre Login y Registro (pantallas de autenticación)
+// ---------------------------------------------------------------------------
+// El fondo de estas pantallas en Figma es el kraft/papel claro de siempre
+// (--ms-papel, ya el default de --ion-background-color), NO azul — se deja
+// explícito acá solo para que quede documentado, no porque haga falta.
+.ms-auth-content {
+  --background: var(--ms-papel);
+}
+
+.ms-auth-wrapper {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  padding: 32px 20px;
+  box-sizing: border-box;
+}
+
+.ms-auth-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ms-logo-svg {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+}
+
+.ms-logo-text {
+  font-family: var(--ms-font-libreta);
+  font-weight: 700;
+  font-size: 1.6rem;
+}
+
+.ms-logo-menu {
+  color: var(--ms-tinta-oscura);
+}
+
+// El "marcador" amarillo detrás de "smart", como en la guía de estilo.
+.ms-logo-accent {
+  position: relative;
+  color: var(--ms-tinta-azul);
+
+  &::after {
+    content: '';
+    position: absolute;
+    left: -0.05em;
+    right: -0.1em;
+    bottom: 0.05em;
+    height: 0.3em;
+    background: var(--ms-marcador);
+    z-index: -1;
+    border-radius: 2px;
+  }
+}
+
+.ms-auth-card {
+  width: 100%;
+  max-width: 360px;
+}
+
+.ms-auth-subtitle {
+  margin: 4px 0 16px;
+}
+
+.ms-field {
+  --background: transparent;
+  --padding-start: 0;
+  margin-bottom: 4px;
+
+  // Lo que el usuario escribe se ve "a mano" (Caveat), como en el Figma.
+  ion-input,
+  ion-textarea {
+    --color: var(--ms-tinta-azul);
+    --placeholder-color: var(--ms-lapiz);
+    --placeholder-opacity: 1;
+    font-family: var(--ms-font-libreta);
+    font-size: 1.2rem;
+  }
+
+  ion-label {
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    color: var(--ms-lapiz);
+  }
+}
+
+.ms-error {
+  color: var(--ms-margen-rojo);
+  font-size: 0.9rem;
+  margin: 4px 0 12px;
+}
+
+// Botón "de boleta": relleno sólido, borde y sombra dura sin difuminar
+// (offset 3px, sin blur) — así se ve en el prototipo, no como una sombra
+// suave de Material Design.
+.ms-btn-primary {
+  --background: var(--ms-tinta-azul);
+  --background-hover: var(--ms-tinta-oscura);
+  --border-radius: 6px;
+  --border-width: 1.5px;
+  --border-style: solid;
+  --border-color: var(--ms-tinta-oscura);
+  --box-shadow: 3px 3px 0 0 var(--ms-tinta-oscura);
+  font-family: var(--ms-font-boleta);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-top: 12px;
+}
+
+.ms-auth-footer {
+  text-align: center;
+  margin-top: 20px;
+  color: var(--ms-tinta-oscura);
+
+  a {
+    color: var(--ms-tinta-azul);
+    font-weight: 700;
+    text-decoration: underline;
+  }
+}
+
+.ms-tagline {
+  font-family: var(--ms-font-libreta);
+  color: var(--ms-tinta-oscura);
+  opacity: 0.5;
+  font-size: 1.1rem;
+}
+
+.ms-back-link {
+  --color: var(--ms-tinta-azul);
+  --padding-start: 0;
+  font-family: var(--ms-font-boleta);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.8rem;
+}
+
+// Header transparente para el botón "Volver" de Registro: en Figma queda
+// fuera de la hoja de papel, flotando sobre el fondo kraft de la pantalla.
+.ms-auth-header {
+  ion-toolbar {
+    --background: var(--ms-papel);
+    --border-width: 0;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Modal "Agregar ingrediente" (tarjeta centrada, no sheet a pantalla completa)
+// y action sheet "Elegir foto".
+// ---------------------------------------------------------------------------
+.ms-modal-card {
+  --width: 320px;
+  --height: 320px;
+  --border-radius: 16px;
+  --box-shadow: 0 10px 30px rgba(27, 31, 59, 0.25);
+}
+
+.ms-action-sheet {
+  --background: var(--ms-papel-hoja);
+}
