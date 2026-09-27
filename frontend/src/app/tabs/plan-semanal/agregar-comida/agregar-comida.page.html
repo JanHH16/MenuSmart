@@ -121,6 +121,17 @@
       </ion-button>
     </div>
 
+    <div class="ms-notas-campo">
+      <span class="ms-label-secundario">Notas (opcional)</span>
+      <ion-textarea
+        class="ms-notas-input"
+        [(ngModel)]="notas"
+        [autoGrow]="true"
+        rows="2"
+        placeholder="Ej: para 3 personas · la salsa se puede congelar"
+      ></ion-textarea>
+    </div>
+
     <ion-button expand="block" class="ms-btn-primary" [disabled]="!puedeGuardar" (click)="guardar()">
       Guardar comida
     </ion-button>
@@ -134,13 +145,16 @@
         @for (guardada of comidasGuardadasFiltradas; track guardada.nombre) {
           <button type="button" class="ms-guardada-row" (click)="usarComidaGuardada(guardada)">
             <div class="ms-guardada-avatar">
-              <ion-icon name="fast-food-outline"></ion-icon>
+              <app-doodle [comida]="guardada.nombre" [size]="30"></app-doodle>
             </div>
             <div class="ms-guardada-info">
               <span class="ms-guardada-nombre">{{ guardada.nombre }}</span>
               <span class="ms-mono ms-text-secondary ms-guardada-meta"
                 >{{ guardada.ingredientes.length }} ingredientes</span
               >
+              @if (guardada.ingredientes.length > 0) {
+                <span class="ms-guardada-ingredientes">{{ nombresIngredientes(guardada) }}</span>
+              }
             </div>
             <ion-icon name="chevron-forward-outline" color="medium"></ion-icon>
           </button>

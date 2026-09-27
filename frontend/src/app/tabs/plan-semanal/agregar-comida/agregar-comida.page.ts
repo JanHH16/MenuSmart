@@ -32,6 +32,7 @@ export class AgregarComidaPage {
   diaSeleccionado = this.dias[4]?.nombre ?? this.dias[0].nombre; // Viernes por defecto, igual que el mock de Figma
   tipoSeleccionado = 'Almuerzo';
   foto?: string;
+  notas = '';
 
   // Los ingredientes se acumulan localmente: la comida recién se crea (con
   // id real) al presionar "Guardar comida".
@@ -90,11 +91,16 @@ export class AgregarComidaPage {
       dia: this.diaSeleccionado,
       tipo: this.tipoSeleccionado,
       foto: this.foto,
+      notas: this.notas.trim() || undefined,
     });
     for (const ingrediente of this.ingredientes) {
       this.planSemanalService.agregarIngrediente(comida.id, ingrediente);
     }
     this.volver();
+  }
+
+  nombresIngredientes(guardada: ComidaGuardada): string {
+    return guardada.ingredientes.map((ingrediente) => ingrediente.nombre).join(', ');
   }
 
   usarComidaGuardada(guardada: ComidaGuardada): void {

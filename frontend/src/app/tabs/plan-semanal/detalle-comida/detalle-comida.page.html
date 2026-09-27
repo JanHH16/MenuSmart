@@ -1,75 +1,205 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-buttons slot="start">
-      <ion-button (click)="volver()">
-        <ion-icon slot="start" name="chevron-back-outline"></ion-icon>
-        Volver
-      </ion-button>
-    </ion-buttons>
-    <div slot="end" class="ms-toolbar-label">Detalle de comida</div>
-  </ion-toolbar>
-</ion-header>
-
 @if (comida) {
-  <ion-content class="ion-padding">
-    <div class="ms-comida-header">
-      <div class="ms-polaroid ms-polaroid--clicable" (click)="cambiarFoto()">
-        @if (comida.foto) {
-          <img [src]="comida.foto" class="ms-polaroid-foto-img" alt="Foto de la comida" />
-        } @else {
-          <div class="ms-polaroid-foto">
-            <ion-icon name="restaurant-outline"></ion-icon>
-          </div>
-        }
-        <p class="ms-polaroid-caption">{{ comida.nombre | lowercase }}</p>
-        <button class="ms-polaroid-camara" type="button" (click)="cambiarFoto(); $event.stopPropagation()">
-          <ion-icon name="camera-outline"></ion-icon>
+  @if (esDesktop$ | async) {
+    <!-- Desktop (Figma "D4. Detalle de comida", buildDetailDesktop): "Volver
+         al plan", título y Guardar arriba; tarjeta receta (440px) + tarjeta
+         ingredientes lado a lado — NO la columna única de mobile. -->
+    <ion-content class="ms-desktop-content">
+      <div class="ms-desktop-page ms-detalle-desktop">
+        <button type="button" class="ms-volver-desktop ms-detalle-volver" (click)="volver()">
+          <ion-icon name="chevron-back-outline"></ion-icon>
+          Volver al plan
         </button>
-      </div>
 
-      <div class="ms-comida-info">
-        <span class="ms-label-secundario">Nombre de la comida</span>
-        <h1 class="ms-heading-libreta">{{ comida.nombre }}</h1>
-        <div class="ms-comida-tags">
-          <ion-chip color="primary" outline="true">{{ comida.dia | uppercase }}</ion-chip>
-          <ion-chip color="primary" outline="true">{{ comida.tipo | uppercase }}</ion-chip>
+        <header class="ms-detalle-desktop-header">
+          <h1 class="ms-titulo-desktop ms-detalle-titulo">editar comida</h1>
+          <button type="button" class="ms-btn-figma ms-btn-figma--primario ms-detalle-guardar" (click)="guardar()">
+            Guardar
+          </button>
+        </header>
+
+        <div class="ms-detalle-columnas">
+          <div class="ms-detalle-receta-wrap">
+            <span class="ms-cinta ms-detalle-receta-cinta"></span>
+            <div class="ms-card-desktop ms-detalle-receta">
+              <span class="ms-label-desktop">Nombre de la comida</span>
+              <h2 class="ms-detalle-nombre">{{ comida.nombre }}</h2>
+
+              <div class="ms-detalle-linea-roja"></div>
+
+              <span class="ms-label-desktop">Día</span>
+              <div class="ms-detalle-chips">
+                @for (dia of dias; track dia.corto) {
+                  <span
+                    class="ms-chip-figma ms-detalle-chip-dia"
+                    [class.ms-chip-figma--activo]="dia.nombre === comida.dia"
+                  >{{ dia.nombre.slice(0, 3) }}</span>
+                }
+              </div>
+
+              <span class="ms-label-desktop">Tipo de comida</span>
+              <div class="ms-detalle-chips">
+                @for (tipo of tipos; track tipo) {
+                  <span
+                    class="ms-chip-figma ms-detalle-chip-tipo"
+                    [class.ms-chip-figma--activo]="tipo === comida.tipo"
+                  >{{ tipo }}</span>
+                }
+              </div>
+
+              <span class="ms-label-desktop">Foto</span>
+              <div class="ms-detalle-foto-fila">
+                <div class="ms-detalle-polaroid-wrap">
+                  <span class="ms-cinta ms-detalle-polaroid-cinta"></span>
+                  <button type="button" class="ms-detalle-polaroid" (click)="cambiarFoto()">
+                    <span class="ms-detalle-polaroid-foto">
+                      @if (comida.foto) {
+                        <img [src]="comida.foto" alt="Foto de la comida" />
+                      } @else {
+                        <span class="ms-detalle-polaroid-mancha"></span>
+                        <app-doodle [comida]="comida.nombre" [size]="90"></app-doodle>
+                      }
+                    </span>
+                    <span class="ms-detalle-polaroid-caption">{{ comida.nombre | lowercase }}</span>
+                  </button>
+                </div>
+
+                <button type="button" class="ms-detalle-subir-foto" (click)="cambiarFoto()">
+                  <ion-icon name="camera-outline"></ion-icon>
+                  <span class="ms-detalle-subir-foto-titulo">+ subir foto</span>
+                  <span class="ms-detalle-subir-foto-sub">arrastra una imagen o toma una foto</span>
+                </button>
+              </div>
+
+              <label class="ms-label-desktop" for="notas-desktop">Notas</label>
+              <textarea
+                id="notas-desktop"
+                class="ms-detalle-notas"
+                rows="2"
+                [(ngModel)]="comida.notas"
+                placeholder="sin notas · escribe una aquí"
+              ></textarea>
+            </div>
+          </div>
+
+          <div class="ms-card-desktop ms-detalle-ingredientes">
+            <div class="ms-detalle-ingredientes-header">
+              <h2 class="ms-detalle-ingredientes-titulo">ingredientes</h2>
+              <span class="ms-tag-pildora">{{ comida.ingredientes.length }} items</span>
+            </div>
+            <div class="ms-detalle-ingredientes-linea"></div>
+
+            <div class="ms-detalle-tabla-fila ms-detalle-tabla-encabezado">
+              <span class="ms-label-desktop">Ingrediente</span>
+              <span class="ms-label-desktop">Cantidad</span>
+              <span class="ms-label-desktop">Quitar</span>
+            </div>
+
+            @for (ingrediente of comida.ingredientes; track ingrediente.id) {
+              <div class="ms-detalle-tabla-fila">
+                <span class="ms-detalle-ingrediente-nombre">{{ ingrediente.nombre }}</span>
+                <span class="ms-detalle-ingrediente-cantidad">{{ ingrediente.cantidad }}</span>
+                <button
+                  type="button"
+                  class="ms-detalle-quitar"
+                  aria-label="Quitar ingrediente"
+                  (click)="eliminarIngrediente(ingrediente.id)"
+                >
+                  <ion-icon name="close-outline"></ion-icon>
+                </button>
+              </div>
+            }
+
+            <button type="button" class="ms-btn-punteado ms-detalle-agregar" (click)="agregarIngrediente()">
+              + Agregar ingrediente
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+    </ion-content>
+  } @else {
+    <ion-header>
+      <ion-toolbar>
+        <ion-buttons slot="start">
+          <ion-button (click)="volver()">
+            <ion-icon slot="start" name="chevron-back-outline"></ion-icon>
+            Volver
+          </ion-button>
+        </ion-buttons>
+        <div slot="end" class="ms-toolbar-label">Detalle de comida</div>
+      </ion-toolbar>
+    </ion-header>
 
-    <div class="ms-card-libreta">
-      <div class="ms-ingredientes-header">
-        <span class="ms-label-secundario">Ingredientes</span>
-        <span class="ms-text-secondary ms-mono ms-label-secundario">
-          {{ comida.ingredientes.length }} items
-        </span>
+    <ion-content class="ion-padding">
+      <div class="ms-comida-header">
+        <div class="ms-polaroid ms-polaroid--clicable" (click)="cambiarFoto()">
+          @if (comida.foto) {
+            <img [src]="comida.foto" class="ms-polaroid-foto-img" alt="Foto de la comida" />
+          } @else {
+            <div class="ms-polaroid-foto">
+              <ion-icon name="restaurant-outline"></ion-icon>
+            </div>
+          }
+          <p class="ms-polaroid-caption">{{ comida.nombre | lowercase }}</p>
+          <button class="ms-polaroid-camara" type="button" (click)="cambiarFoto(); $event.stopPropagation()">
+            <ion-icon name="camera-outline"></ion-icon>
+          </button>
+        </div>
+
+        <div class="ms-comida-info">
+          <span class="ms-label-secundario">Nombre de la comida</span>
+          <h1 class="ms-heading-libreta">{{ comida.nombre }}</h1>
+          <div class="ms-comida-tags">
+            <ion-chip color="primary" outline="true">{{ comida.dia | uppercase }}</ion-chip>
+            <ion-chip color="primary" outline="true">{{ comida.tipo | uppercase }}</ion-chip>
+          </div>
+        </div>
       </div>
 
-      <ion-list lines="full">
-        @for (ingrediente of comida.ingredientes; track ingrediente.id) {
-          <ion-item>
-            <ion-label class="ms-ingrediente-nombre">{{ ingrediente.nombre }}</ion-label>
-            <span class="ms-mono ms-text-secondary" slot="end">{{ ingrediente.cantidad }}</span>
-            <ion-button
-              fill="clear"
-              color="danger"
-              slot="end"
-              (click)="eliminarIngrediente(ingrediente.id)"
-            >
-              <ion-icon slot="icon-only" name="close-circle-outline"></ion-icon>
-            </ion-button>
-          </ion-item>
-        }
-      </ion-list>
+      <div class="ms-card-libreta">
+        <div class="ms-ingredientes-header">
+          <span class="ms-label-secundario">Ingredientes</span>
+          <span class="ms-text-secondary ms-mono ms-label-secundario">
+            {{ comida.ingredientes.length }} items
+          </span>
+        </div>
 
-      <ion-button expand="block" fill="outline" class="ms-agregar-ingrediente" (click)="agregarIngrediente()">
-        <ion-icon slot="start" name="add-outline"></ion-icon>
-        Agregar ingrediente
-      </ion-button>
-    </div>
+        <ion-list lines="full">
+          @for (ingrediente of comida.ingredientes; track ingrediente.id) {
+            <ion-item>
+              <ion-label class="ms-ingrediente-nombre">{{ ingrediente.nombre }}</ion-label>
+              <span class="ms-mono ms-text-secondary" slot="end">{{ ingrediente.cantidad }}</span>
+              <ion-button
+                fill="clear"
+                color="danger"
+                slot="end"
+                (click)="eliminarIngrediente(ingrediente.id)"
+              >
+                <ion-icon slot="icon-only" name="close-circle-outline"></ion-icon>
+              </ion-button>
+            </ion-item>
+          }
+        </ion-list>
 
-    <ion-button expand="block" class="ms-btn-primary" (click)="guardar()">Guardar</ion-button>
-  </ion-content>
+        <ion-button expand="block" fill="outline" class="ms-agregar-ingrediente" (click)="agregarIngrediente()">
+          <ion-icon slot="start" name="add-outline"></ion-icon>
+          Agregar ingrediente
+        </ion-button>
+      </div>
+
+      <div class="ms-notas-campo">
+        <span class="ms-label-secundario">Notas</span>
+        <ion-textarea
+          class="ms-notas-input"
+          [(ngModel)]="comida.notas"
+          [autoGrow]="true"
+          rows="2"
+          placeholder="sin notas · escribe una aquí"
+        ></ion-textarea>
+      </div>
+
+      <ion-button expand="block" class="ms-btn-primary" (click)="guardar()">Guardar</ion-button>
+    </ion-content>
+  }
 } @else {
   <ion-content class="ion-padding">
     <p class="ms-text-secondary">No encontramos esta comida.</p>

@@ -14,10 +14,12 @@ export interface Comida {
   ingredientes: Ingrediente[];
   /** webPath (Capacitor Camera) o data URL de la foto elegida por el usuario. */
   foto?: string;
+  notas?: string;
 }
 
 export interface DiaPlan {
   diaCorto: string;
+  nombre: string;
   numero: number;
   esHoy: boolean;
   comidas: Comida[];
@@ -28,6 +30,7 @@ export interface NuevaComida {
   dia: string;
   tipo: string;
   foto?: string;
+  notas?: string;
 }
 
 export interface ComidaGuardada {
@@ -35,6 +38,7 @@ export interface ComidaGuardada {
   tipoOriginal: string;
   ingredientes: Ingrediente[];
   foto?: string;
+  notas?: string;
 }
 
 export const TIPOS_COMIDA = ['Desayuno', 'Almuerzo', 'Cena'];
@@ -64,6 +68,7 @@ export class PlanSemanalService {
       nombre: 'Tallarines con salsa',
       tipo: 'Almuerzo',
       dia: 'Lunes',
+      notas: 'para 3 personas · la salsa se puede congelar',
       ingredientes: [
         { id: '1', nombre: 'Tallarines', cantidad: '400 g' },
         { id: '2', nombre: 'Tomate', cantidad: '4 unid.' },
@@ -132,6 +137,7 @@ export class PlanSemanalService {
     const hoy = 'Martes';
     return this.dias.map((dia) => ({
       diaCorto: dia.diaCorto,
+      nombre: dia.nombre,
       numero: dia.numero,
       esHoy: dia.nombre === hoy,
       comidas: this.comidas.filter((comida) => comida.dia === dia.nombre),
@@ -154,6 +160,7 @@ export class PlanSemanalService {
       dia: datos.dia,
       tipo: datos.tipo,
       foto: datos.foto,
+      notas: datos.notas,
       ingredientes: [],
     };
     this.comidas.push(comida);
@@ -202,6 +209,7 @@ export class PlanSemanalService {
         tipoOriginal: comida.tipo,
         ingredientes: comida.ingredientes,
         foto: comida.foto,
+        notas: comida.notas,
       });
     }
     return guardadas;
@@ -209,7 +217,7 @@ export class PlanSemanalService {
 
   /** Clona una comida guardada en un día/tipo distinto (reutilizar receta). */
   reutilizarComida(guardada: ComidaGuardada, dia: string, tipo: string): Comida {
-    const comida = this.crearComida({ nombre: guardada.nombre, dia, tipo, foto: guardada.foto });
+    const comida = this.crearComida({ nombre: guardada.nombre, dia, tipo, foto: guardada.foto, notas: guardada.notas });
     for (const ingrediente of guardada.ingredientes) {
       this.agregarIngrediente(comida.id, { nombre: ingrediente.nombre, cantidad: ingrediente.cantidad });
     }

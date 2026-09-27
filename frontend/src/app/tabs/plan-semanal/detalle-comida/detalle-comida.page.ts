@@ -6,7 +6,8 @@ import {
   IngredienteFormValue,
 } from '../../../shared/agregar-ingrediente-modal/agregar-ingrediente-modal.component';
 import { PhotoService } from '../../../core/services/photo.service';
-import { Comida, PlanSemanalService } from '../../../core/services/plan-semanal.service';
+import { LayoutService } from '../../../core/services/layout.service';
+import { Comida, PlanSemanalService, TIPOS_COMIDA } from '../../../core/services/plan-semanal.service';
 
 @Component({
   selector: 'app-detalle-comida',
@@ -21,6 +22,11 @@ export class DetalleComidaPage implements OnInit {
   private readonly photoService = inject(PhotoService);
   private readonly planSemanalService = inject(PlanSemanalService);
   private readonly cdr = inject(ChangeDetectorRef);
+  private readonly layoutService = inject(LayoutService);
+
+  readonly esDesktop$ = this.layoutService.esDesktop$;
+  readonly dias = this.planSemanalService.getDiasSemana();
+  readonly tipos = TIPOS_COMIDA;
 
   comida?: Comida;
 

@@ -1,81 +1,394 @@
-.ms-semana-nav {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  margin-bottom: 12px;
-  font-size: 1rem;
+// ---------------------------------------------------------------------------
+// Mobile (Figma "3. Plan semanal", buildPlanMobile). Medidas en px del
+// prototipo de 375×812: renglones desde y=168 cada 26px, margen rojo en x=60,
+// cada día ocupa 78px (3 renglones) empezando en y = 168 + i * 78.
+// ---------------------------------------------------------------------------
+.ms-plan-mobile-content {
+  --background: var(--ms-papel-hoja);
 }
 
-.ms-dia-row {
-  display: flex;
-  gap: 12px;
-  padding: 10px 0;
-  border-bottom: 1px solid var(--ms-papel-oscuro);
-
-  &--hoy {
-    .ms-dia-numero {
-      background: var(--ms-marcador);
-      border-radius: 50%;
-    }
-  }
+.ms-plan-mobile {
+  position: relative;
+  min-height: 100%;
+  box-sizing: border-box;
+  padding: 40px 0 100px;
+  background-color: var(--ms-papel-hoja);
+  background-image:
+    linear-gradient(
+      to right,
+      transparent 60px,
+      rgba(224, 98, 79, 0.6) 60px,
+      rgba(224, 98, 79, 0.6) 61.5px,
+      transparent 61.5px
+    ),
+    repeating-linear-gradient(
+      to bottom,
+      var(--ms-renglon) 0,
+      var(--ms-renglon) 1px,
+      transparent 1px,
+      transparent 26px
+    );
+  background-size:
+    100% 100%,
+    100% calc(100% - 168px);
+  background-position:
+    0 0,
+    0 168px;
+  background-repeat: no-repeat;
 }
 
-.ms-dia-fecha {
+// markerTitle('tu semana', 20, 40, 46) + logoMark(MW-54, 50, 34).
+.ms-plan-mobile-header {
+  height: 72px;
+  padding: 0 20px;
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 40px;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.ms-plan-mobile-logo {
+  width: 34px;
+  height: 34px;
+  margin-top: 10px;
   flex-shrink: 0;
-  color: var(--ms-lapiz);
+}
+
+// weekSel(20, 112, MW-40); los días empiezan en y=168.
+.ms-plan-mobile-semana {
+  width: auto;
+  margin: 0 20px 20px;
+}
+
+.ms-plan-dia {
+  display: flex;
+  height: 78px;
+  box-sizing: border-box;
+  border-bottom: 1px solid rgba(31, 58, 147, 0.2);
+}
+
+.ms-plan-dia-fecha {
+  position: relative;
+  width: 60px;
+  flex-shrink: 0;
+}
+
+.ms-plan-dia-corto {
+  position: absolute;
+  top: 8px;
+  left: 0;
+  right: 0;
+  text-align: center;
   font-family: var(--ms-font-boleta);
-  font-size: 0.75rem;
-}
-
-.ms-dia-numero {
-  width: 28px;
-  height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--ms-tinta-oscura);
   font-weight: 700;
+  font-size: 10px;
+  line-height: 15px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ms-lapiz);
 }
 
-.ms-dia-comidas {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.ms-comida-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: none;
-  border: none;
-  padding: 6px 0;
-  text-align: left;
-  font: inherit;
+.ms-plan-dia-numero {
+  position: absolute;
+  top: 24px;
+  left: 0;
+  right: 0;
+  isolation: isolate;
+  text-align: center;
+  font-family: var(--ms-font-libreta);
+  font-weight: 700;
+  font-size: 28px;
+  line-height: 35px;
   color: var(--ms-tinta-oscura);
+}
 
-  ion-icon {
-    color: var(--ms-tinta-azul);
+// rect(10, by+30, 40×24, rot -3) de marcador detrás del número de hoy.
+.ms-plan-dia--hoy .ms-plan-dia-numero::before {
+  content: '';
+  position: absolute;
+  top: 6px;
+  left: 10px;
+  width: 40px;
+  height: 24px;
+  border-radius: 3px;
+  background: var(--ms-marcador);
+  transform: rotate(-3deg);
+  z-index: -1;
+}
+
+.ms-plan-dia-hoy {
+  position: absolute;
+  top: 58px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-family: var(--ms-font-boleta);
+  font-weight: 700;
+  font-size: 8px;
+  line-height: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ms-tinta-azul);
+}
+
+// Comidas en x=74, una por renglón (26px).
+.ms-plan-dia-comidas {
+  flex: 1;
+  min-width: 0;
+  margin-left: 14px;
+  padding-right: 16px;
+}
+
+// mealLine(): doodle 22 + nombre a mano 23 + tipo monoBold 8 a continuación.
+.ms-plan-comida {
+  display: flex;
+  align-items: flex-start;
+  max-width: 100%;
+  height: 26px;
+  padding: 0;
+  border: none;
+  background: none;
+  text-align: left;
+
+  app-doodle {
+    margin-top: 3px;
+    flex-shrink: 0;
   }
 }
 
-.ms-comida-tipo {
-  margin-left: auto;
-  font-size: 0.8rem;
+.ms-plan-comida-nombre {
+  min-width: 0;
+  margin-left: 6px;
+  font-family: var(--ms-font-libreta);
+  font-weight: 700;
+  font-size: 23px;
+  line-height: 26px;
+  color: var(--ms-tinta-azul);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.ms-dia-vacio {
-  margin: 6px 0;
-  font-style: italic;
+.ms-plan-comida-tipo {
+  flex-shrink: 0;
+  margin: 10px 0 0 8px;
+  font-family: var(--ms-font-boleta);
+  font-weight: 700;
+  font-size: 8px;
+  line-height: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ms-lapiz);
 }
 
-.ms-fab-agregar {
-  --background: var(--ms-marcador);
-  --color: var(--ms-tinta-oscura);
+.ms-plan-dia-vacio {
+  margin: 1px 0 0;
+  font-family: var(--ms-font-libreta);
+  font-weight: 700;
+  font-size: 22px;
+  line-height: 26px;
+  color: var(--ms-lapiz);
+}
+
+// note('+ agregar comida', MW-160, 654, 144×60, rot -4): 16px del borde
+// derecho y 22px sobre la barra de tabs.
+.ms-plan-mobile-agregar {
+  position: absolute;
+  right: 16px;
+  bottom: 22px;
+  width: 144px;
+  height: 60px;
+  transform: rotate(-4deg);
+}
+
+// ---------------------------------------------------------------------------
+// Desktop (Figma "D3. Plan semanal", buildPlanDesktop): columnas por día.
+// Medidas en px del prototipo de 1440×900.
+// ---------------------------------------------------------------------------
+.ms-plan-desktop-header {
+  // Título en y=28 y columnas en y=150 → 122px de encabezado.
+  min-height: 122px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.ms-plan-desktop-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+}
+
+// Figma: weekSel(w=300) — dos iconBtn de 36px y el rango a mano (26px).
+.ms-semana-selector {
+  width: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ms-semana-selector-rango {
+  font-family: var(--ms-font-libreta);
+  font-weight: 700;
+  font-size: 26px;
+  color: var(--ms-tinta-oscura);
+}
+
+// Figma: note(210×72, rot 3).
+.ms-plan-nota-agregar {
+  width: 210px;
+  height: 72px;
+  transform: rotate(3deg);
+}
+
+.ms-plan-columnas {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 14px;
+}
+
+// Figma: card(144×710, lines: 110, step: 28) — hoja con renglones desde
+// y=110 cada 28px, sin borde, con sombra suave.
+.ms-dia-columna {
+  position: relative;
+  min-height: calc(100vh - 190px);
+  padding: 110px 10px 20px;
+  box-sizing: border-box;
+  border-radius: 8px;
+  background-color: var(--ms-papel-hoja);
+  background-image: repeating-linear-gradient(
+    to bottom,
+    var(--ms-renglon) 0,
+    var(--ms-renglon) 1px,
+    transparent 1px,
+    transparent 28px
+  );
+  background-size: 100% calc(100% - 110px);
+  background-position: 0 110px;
+  background-repeat: no-repeat;
+  box-shadow: var(--ms-sombra-suave);
+}
+
+.ms-dia-columna-nombre {
+  position: absolute;
+  top: 18px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-family: var(--ms-font-boleta);
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ms-lapiz);
+}
+
+.ms-dia-columna-numero {
+  position: absolute;
+  top: 32px;
+  left: 0;
+  right: 0;
+  isolation: isolate;
+  text-align: center;
+  font-family: var(--ms-font-libreta);
+  font-weight: 700;
+  font-size: 46px;
+  line-height: 58px;
+  color: var(--ms-tinta-oscura);
+}
+
+// Figma: rect(56×22 en y=58, rot -2) de marcador detrás del número de hoy —
+// un subrayado de destacador, no un círculo.
+.ms-dia-columna--hoy .ms-dia-columna-numero::before {
+  content: '';
+  position: absolute;
+  top: 26px;
+  left: 50%;
+  width: 56px;
+  height: 22px;
+  border-radius: 3px;
+  background: var(--ms-marcador);
+  transform: translateX(-50%) rotate(-2deg);
+  z-index: -1;
+}
+
+// Figma: tag('Hoy') en la esquina superior derecha de la columna.
+.ms-dia-columna-hoy {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  background: var(--ms-marcador);
+  border-color: var(--ms-tinta-oscura);
+  color: var(--ms-tinta-oscura);
+}
+
+.ms-dia-columna-comidas {
+  display: flex;
+  flex-direction: column;
+  // Tarjetas de 80px cada 92px (Figma: y = 110 + j * 92).
+  gap: 12px;
+}
+
+// Figma: mealCard(80px de alto) — boleta blanca, borde 1.2, sombra dura de
+// 2px y franja azul de 4px a la izquierda.
+.ms-comida-card-desktop {
+  position: relative;
+  width: 100%;
+  height: 80px;
+  padding: 0;
+  text-align: left;
+  border-radius: 4px;
+  border: 1.2px solid var(--ms-tinta-oscura);
+  background: #ffffff;
+  box-shadow:
+    inset 4px 0 0 0 var(--ms-tinta-azul),
+    2px 2px 0 0 var(--ms-tinta-oscura);
+  overflow: hidden;
+}
+
+.ms-comida-card-desktop-tipo {
+  position: absolute;
+  top: 10px;
+  left: 14px;
+  font-family: var(--ms-font-boleta);
+  font-weight: 700;
+  font-size: 8px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ms-lapiz);
+}
+
+.ms-comida-card-desktop-doodle {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+}
+
+.ms-comida-card-desktop-nombre {
+  position: absolute;
+  top: 24px;
+  left: 14px;
+  right: 8px;
+  font-family: var(--ms-font-libreta);
+  font-weight: 700;
+  font-size: 22px;
+  line-height: 22px;
+  color: var(--ms-tinta-azul);
+}
+
+.ms-dia-columna-vacio {
+  margin: 6px 0 0;
+  text-align: center;
+  font-family: var(--ms-font-libreta);
+  font-weight: 700;
+  font-size: 22px;
+  line-height: 28px;
+  color: var(--ms-lapiz);
+}
+
+// Figma: button('+ anotar', 16, 156, colW-32, 40, 'dashed', size 11).
+.ms-dia-columna-anotar {
+  height: 40px;
+  margin: 0 6px;
+  font-size: 11px;
 }
