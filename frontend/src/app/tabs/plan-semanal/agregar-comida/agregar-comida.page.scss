@@ -1,0 +1,259 @@
+.ms-segmented {
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  margin-bottom: 20px;
+  background: var(--ms-papel-oscuro);
+  border-radius: 8px;
+}
+
+.ms-segmented-btn {
+  flex: 1;
+  padding: 9px 4px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ms-lapiz);
+  font-family: var(--ms-font-boleta);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+
+  &--activo {
+    background: var(--ms-tinta-azul);
+    color: #ffffff;
+    box-shadow: 2px 2px 0 0 var(--ms-tinta-oscura);
+  }
+}
+
+.ms-buscar-item {
+  --background: var(--ms-papel-oscuro);
+  --border-color: transparent;
+  border-radius: 8px;
+  margin-bottom: 20px;
+
+  ion-input {
+    font-family: var(--ms-font-libreta);
+    font-size: 1.05rem;
+  }
+}
+
+.ms-guardada-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 8px 0 16px;
+}
+
+.ms-guardada-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1.5px solid var(--ms-tinta-oscura);
+  border-radius: 8px;
+  background: var(--ms-papel-hoja);
+  text-align: left;
+
+  ion-icon {
+    font-size: 1.1rem;
+  }
+}
+
+.ms-guardada-avatar {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--ms-papel-oscuro);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  ion-icon {
+    font-size: 1.3rem;
+    color: var(--ms-tinta-azul);
+  }
+}
+
+.ms-guardada-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.ms-guardada-nombre {
+  font-family: var(--ms-font-libreta);
+  font-size: 1.2rem;
+  color: var(--ms-tinta-oscura);
+}
+
+.ms-guardada-meta {
+  font-size: 0.65rem;
+}
+
+.ms-comida-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.ms-polaroid {
+  position: relative;
+  width: 128px;
+  flex-shrink: 0;
+  background: #ffffff;
+  padding: 8px 8px 22px;
+  border-radius: 4px;
+  box-shadow: 0 6px 14px rgba(27, 31, 59, 0.18);
+
+  &--clicable {
+    cursor: pointer;
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    width: 46px;
+    height: 16px;
+    background: rgba(255, 228, 92, 0.7);
+    transform: translateX(-50%) rotate(-3deg);
+  }
+}
+
+.ms-polaroid-foto,
+.ms-polaroid-foto-img {
+  aspect-ratio: 1 / 1;
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ms-polaroid-foto {
+  background: var(--ms-papel-oscuro);
+
+  ion-icon {
+    font-size: 2rem;
+    color: var(--ms-tinta-azul);
+  }
+}
+
+.ms-polaroid-foto-img {
+  width: 100%;
+  object-fit: cover;
+}
+
+.ms-polaroid-caption {
+  margin: 6px 0 0;
+  padding-right: 22px;
+  text-align: center;
+  font-family: var(--ms-font-libreta);
+  font-size: 0.95rem;
+  color: var(--ms-tinta-oscura);
+  line-height: 1.15;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.ms-polaroid-camara {
+  position: absolute;
+  bottom: 6px;
+  right: 6px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 2px solid var(--ms-tinta-azul);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+
+  ion-icon {
+    font-size: 0.9rem;
+    color: var(--ms-tinta-azul);
+  }
+}
+
+.ms-comida-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ms-nombre-input {
+  font-family: var(--ms-font-libreta);
+  font-size: 1.3rem;
+  --color: var(--ms-tinta-azul);
+  --placeholder-color: var(--ms-lapiz);
+  --placeholder-opacity: 1;
+  border-bottom: 1.5px solid var(--ms-tinta-oscura);
+}
+
+.ms-chips-row {
+  display: flex;
+  gap: 6px;
+  margin: 8px 0 16px;
+}
+
+.ms-chip {
+  flex: 1;
+  padding: 8px 4px;
+  border-radius: 6px;
+  border: 1.2px solid var(--ms-lapiz);
+  background: transparent;
+  color: var(--ms-tinta-oscura);
+  font-family: var(--ms-font-boleta);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+
+  &--activo {
+    background: var(--ms-tinta-azul);
+    border-color: var(--ms-tinta-oscura);
+    color: #ffffff;
+  }
+
+  &--tipo {
+    font-size: 0.65rem;
+  }
+}
+
+.ms-ingredientes-card {
+  margin-bottom: 16px;
+}
+
+.ms-ingredientes-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.ms-ingredientes-vacio {
+  font-family: var(--ms-font-libreta);
+  font-size: 1.05rem;
+  margin: 4px 0 12px;
+}
+
+.ms-ingrediente-nombre {
+  font-family: var(--ms-font-libreta) !important;
+  font-size: 1.25rem !important;
+  color: var(--ms-tinta-oscura);
+}
+
+.ms-agregar-ingrediente {
+  margin-top: 12px;
+  --border-style: dashed;
+}

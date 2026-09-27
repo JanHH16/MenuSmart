@@ -1,13 +1,46 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>Plan semanal</ion-title>
-    <ion-buttons slot="end">
-      <ion-button (click)="logout()">Salir</ion-button>
-    </ion-buttons>
+    <ion-title class="ms-heading-libreta">tu semana</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding">
-  <!-- TODO: diseño real según Figma -->
-  <p>Aquí va el plan de comidas de la semana.</p>
+  <div class="ms-semana-nav">
+    <ion-button fill="clear" size="small">
+      <ion-icon slot="icon-only" name="chevron-back-outline"></ion-icon>
+    </ion-button>
+    <span class="ms-mono">{{ rangoSemana }}</span>
+    <ion-button fill="clear" size="small">
+      <ion-icon slot="icon-only" name="chevron-forward-outline"></ion-icon>
+    </ion-button>
+  </div>
+
+  @for (dia of semana; track dia.numero) {
+    <div class="ms-dia-row" [class.ms-dia-row--hoy]="dia.esHoy">
+      <div class="ms-dia-fecha">
+        <span class="ms-dia-corto">{{ dia.diaCorto }}</span>
+        <span class="ms-dia-numero">{{ dia.numero }}</span>
+      </div>
+
+      <div class="ms-dia-comidas">
+        @for (comida of dia.comidas; track comida.id) {
+          <button class="ms-comida-item" (click)="abrirComida(comida.id)">
+            <ion-icon name="restaurant-outline"></ion-icon>
+            <span>{{ comida.nombre }}</span>
+            <span class="ms-text-secondary ms-comida-tipo">{{ comida.tipo }}</span>
+          </button>
+        }
+
+        @if (dia.comidas.length === 0) {
+          <p class="ms-text-secondary ms-dia-vacio">nada planeado</p>
+        }
+      </div>
+    </div>
+  }
+
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab-button class="ms-fab-agregar" (click)="agregarComida()">
+      <ion-icon name="add-outline"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
 </ion-content>

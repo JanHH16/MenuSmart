@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { AuthService } from '../../core/services/auth.service';
+import { DiaPlan, PlanSemanalService } from '../../core/services/plan-semanal.service';
 
 @Component({
   selector: 'app-plan-semanal',
@@ -9,13 +9,17 @@ import { AuthService } from '../../core/services/auth.service';
   standalone: false,
 })
 export class PlanSemanalPage {
-  constructor(
-    private readonly authService: AuthService,
-    private readonly router: Router,
-  ) {}
+  private readonly planSemanalService = inject(PlanSemanalService);
+  private readonly router = inject(Router);
 
-  logout(): void {
-    this.authService.logout();
-    this.router.navigateByUrl('/login');
+  readonly semana: DiaPlan[] = this.planSemanalService.getSemana();
+  readonly rangoSemana = `${this.semana[0].numero} – ${this.semana[this.semana.length - 1].numero} sep`;
+
+  abrirComida(comidaId: string): void {
+    this.router.navigateByUrl(`/tabs/plan-semanal/comida/${comidaId}`);
+  }
+
+  agregarComida(): void {
+    this.router.navigateByUrl('/tabs/plan-semanal/nueva');
   }
 }
