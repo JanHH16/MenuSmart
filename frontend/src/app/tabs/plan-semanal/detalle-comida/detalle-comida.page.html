@@ -1,0 +1,77 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="volver()">
+        <ion-icon slot="start" name="chevron-back-outline"></ion-icon>
+        Volver
+      </ion-button>
+    </ion-buttons>
+    <div slot="end" class="ms-toolbar-label">Detalle de comida</div>
+  </ion-toolbar>
+</ion-header>
+
+@if (comida) {
+  <ion-content class="ion-padding">
+    <div class="ms-comida-header">
+      <div class="ms-polaroid ms-polaroid--clicable" (click)="cambiarFoto()">
+        @if (comida.foto) {
+          <img [src]="comida.foto" class="ms-polaroid-foto-img" alt="Foto de la comida" />
+        } @else {
+          <div class="ms-polaroid-foto">
+            <ion-icon name="restaurant-outline"></ion-icon>
+          </div>
+        }
+        <p class="ms-polaroid-caption">{{ comida.nombre | lowercase }}</p>
+        <button class="ms-polaroid-camara" type="button" (click)="cambiarFoto(); $event.stopPropagation()">
+          <ion-icon name="camera-outline"></ion-icon>
+        </button>
+      </div>
+
+      <div class="ms-comida-info">
+        <span class="ms-label-secundario">Nombre de la comida</span>
+        <h1 class="ms-heading-libreta">{{ comida.nombre }}</h1>
+        <div class="ms-comida-tags">
+          <ion-chip color="primary" outline="true">{{ comida.dia | uppercase }}</ion-chip>
+          <ion-chip color="primary" outline="true">{{ comida.tipo | uppercase }}</ion-chip>
+        </div>
+      </div>
+    </div>
+
+    <div class="ms-card-libreta">
+      <div class="ms-ingredientes-header">
+        <span class="ms-label-secundario">Ingredientes</span>
+        <span class="ms-text-secondary ms-mono ms-label-secundario">
+          {{ comida.ingredientes.length }} items
+        </span>
+      </div>
+
+      <ion-list lines="full">
+        @for (ingrediente of comida.ingredientes; track ingrediente.id) {
+          <ion-item>
+            <ion-label class="ms-ingrediente-nombre">{{ ingrediente.nombre }}</ion-label>
+            <span class="ms-mono ms-text-secondary" slot="end">{{ ingrediente.cantidad }}</span>
+            <ion-button
+              fill="clear"
+              color="danger"
+              slot="end"
+              (click)="eliminarIngrediente(ingrediente.id)"
+            >
+              <ion-icon slot="icon-only" name="close-circle-outline"></ion-icon>
+            </ion-button>
+          </ion-item>
+        }
+      </ion-list>
+
+      <ion-button expand="block" fill="outline" class="ms-agregar-ingrediente" (click)="agregarIngrediente()">
+        <ion-icon slot="start" name="add-outline"></ion-icon>
+        Agregar ingrediente
+      </ion-button>
+    </div>
+
+    <ion-button expand="block" class="ms-btn-primary" (click)="guardar()">Guardar</ion-button>
+  </ion-content>
+} @else {
+  <ion-content class="ion-padding">
+    <p class="ms-text-secondary">No encontramos esta comida.</p>
+  </ion-content>
+}

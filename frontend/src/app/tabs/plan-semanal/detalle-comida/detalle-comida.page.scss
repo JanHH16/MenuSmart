@@ -1,0 +1,124 @@
+.ms-comida-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+// Foto tipo "polaroid": marco blanco, cinta arriba, botón de cámara flotante.
+.ms-polaroid {
+  position: relative;
+  width: 128px;
+  flex-shrink: 0;
+  background: #ffffff;
+  padding: 8px 8px 22px;
+  border-radius: 4px;
+  box-shadow: 0 6px 14px rgba(27, 31, 59, 0.18);
+
+  &--clicable {
+    cursor: pointer;
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    width: 46px;
+    height: 16px;
+    background: rgba(255, 228, 92, 0.7);
+    transform: translateX(-50%) rotate(-3deg);
+  }
+}
+
+.ms-polaroid-foto,
+.ms-polaroid-foto-img {
+  aspect-ratio: 1 / 1;
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ms-polaroid-foto {
+  background: var(--ms-papel-oscuro);
+
+  ion-icon {
+    font-size: 2rem;
+    color: var(--ms-tinta-azul);
+  }
+}
+
+.ms-polaroid-foto-img {
+  width: 100%;
+  object-fit: cover;
+}
+
+.ms-polaroid-caption {
+  margin: 6px 0 0;
+  // Reserva espacio a la derecha para que el botón de cámara nunca tape el
+  // texto, y trunca con "…" a las 2 líneas si el nombre es muy largo.
+  padding-right: 22px;
+  text-align: center;
+  font-family: var(--ms-font-libreta);
+  font-size: 0.95rem;
+  color: var(--ms-tinta-oscura);
+  line-height: 1.15;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.ms-polaroid-camara {
+  position: absolute;
+  bottom: 6px;
+  right: 6px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 2px solid var(--ms-tinta-azul);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+
+  ion-icon {
+    font-size: 0.9rem;
+    color: var(--ms-tinta-azul);
+  }
+}
+
+.ms-comida-info {
+  flex: 1;
+  min-width: 0;
+
+  h1 {
+    margin: 2px 0 8px;
+  }
+}
+
+.ms-comida-tags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.ms-ingredientes-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.ms-ingrediente-nombre {
+  font-family: var(--ms-font-libreta) !important;
+  font-size: 1.25rem !important;
+  color: var(--ms-tinta-oscura);
+}
+
+.ms-agregar-ingrediente {
+  margin-top: 12px;
+  --border-style: dashed;
+}
