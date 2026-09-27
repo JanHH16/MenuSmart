@@ -1,10 +1,32 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>Lista de compras</ion-title>
+    <ion-title class="ms-heading-libreta">lista de esta semana</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding">
-  <!-- TODO: diseño real según Figma -->
-  <p>Aquí va la lista de compras generada de la semana.</p>
+  <p class="ms-text-secondary ms-mono ms-lista-subtitulo">
+    {{ totalComidas }} comidas · {{ totalItems }} productos · sin duplicados
+  </p>
+
+  <div class="ms-card-libreta ms-lista-hoja">
+    @for (categoria of categorias; track categoria.nombre) {
+      <h2 class="ms-categoria-titulo">{{ categoria.nombre | uppercase }}</h2>
+
+      @for (item of categoria.items; track item.id) {
+        <label class="ms-item-row">
+          <ion-checkbox [(ngModel)]="item.comprado"></ion-checkbox>
+          <span class="ms-item-nombre" [class.ms-item-comprado]="item.comprado">
+            {{ item.nombre }}
+          </span>
+          <span class="ms-mono ms-text-secondary ms-item-cantidad">{{ item.cantidad }}</span>
+        </label>
+      }
+    }
+
+    <ion-button expand="block" class="ms-btn-primary" (click)="irAComparador()">
+      Comparar precios
+      <ion-icon slot="end" name="arrow-forward-outline"></ion-icon>
+    </ion-button>
+  </div>
 </ion-content>

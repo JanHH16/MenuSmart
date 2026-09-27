@@ -1,10 +1,56 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>Comparador de precios</ion-title>
+    <ion-title class="ms-heading-libreta">comparador</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding">
-  <!-- TODO: diseño real según Figma -->
-  <p>Aquí va la comparación de precios entre Jumbo y Santa Isabel.</p>
+  <p class="ms-text-secondary ms-comparador-subtitulo">
+    {{ tiendas.join(' vs. ') }}
+  </p>
+
+  <div class="ms-boleta">
+    <div class="ms-boleta-header">
+      <span class="ms-boleta-marca">MENUSMART</span>
+      <span>BOLETA COMPARATIVA</span>
+    </div>
+
+    <table class="ms-boleta-tabla">
+      <thead>
+        <tr>
+          <th>Producto</th>
+          @for (tienda of tiendas; track tienda) {
+            <th>{{ tienda }}</th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        @for (producto of productos; track producto.producto) {
+          <tr>
+            <td>{{ producto.producto }}</td>
+            @for (precio of producto.precios; track $index) {
+              <td [class.ms-text-ahorro]="esMasBarato(producto, $index)">
+                {{ formatPrecio(precio) }}
+              </td>
+            }
+          </tr>
+        }
+      </tbody>
+      <tfoot>
+        @for (total of totales; track $index) {
+          <tr>
+            <td>TOTAL {{ tiendas[$index] | uppercase }}</td>
+            <td [attr.colspan]="tiendas.length" [class.ms-text-ahorro]="$index === tiendaMasBarata.indice">
+              {{ formatPrecio(total) }}
+            </td>
+          </tr>
+        }
+      </tfoot>
+    </table>
+
+    <div class="ms-boleta-ahorro">
+      Conviene {{ tiendas[tiendaMasBarata.indice] }} · Ahorras
+      {{ formatPrecio(tiendaMasBarata.ahorro) }}
+    </div>
+  </div>
 </ion-content>

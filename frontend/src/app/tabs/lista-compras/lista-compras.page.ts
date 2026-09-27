@@ -1,4 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { Router } from '@angular/router';
+import { CategoriaCompra, ListaComprasService } from '../../core/services/lista-compras.service';
 
 @Component({
   selector: 'app-lista-compras',
@@ -6,11 +8,25 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./lista-compras.page.scss'],
   standalone: false,
 })
-export class ListaComprasPage implements OnInit {
+export class ListaComprasPage {
+  private readonly listaComprasService = inject(ListaComprasService);
+  private readonly router = inject(Router);
 
-  constructor() { }
+  readonly categorias: CategoriaCompra[] = this.listaComprasService.getLista();
 
-  ngOnInit() {
+  get totalItems(): number {
+    return this.listaComprasService.totalItems();
   }
 
+  get itemsComprados(): number {
+    return this.listaComprasService.itemsComprados();
+  }
+
+  get totalComidas(): number {
+    return this.listaComprasService.getTotalComidas();
+  }
+
+  irAComparador(): void {
+    this.router.navigateByUrl('/tabs/comparador');
+  }
 }

@@ -1,0 +1,60 @@
+.ms-comparador-subtitulo {
+  margin: -8px 0 16px;
+}
+
+.ms-boleta {
+  background: #ffffff;
+  border: 1px dashed var(--ms-lapiz);
+  border-radius: 8px;
+  padding: 16px;
+  font-family: var(--ms-font-boleta);
+}
+
+.ms-boleta-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 12px;
+  font-size: 0.85rem;
+}
+
+.ms-boleta-marca {
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.ms-boleta-tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+
+  th,
+  td {
+    padding: 6px 4px;
+    text-align: right;
+    border-bottom: 1px dashed var(--ms-papel-oscuro);
+  }
+
+  th:first-child,
+  td:first-child {
+    text-align: left;
+  }
+
+  tfoot td,
+  tfoot th {
+    font-weight: 700;
+    border-top: 2px solid var(--ms-tinta-oscura);
+    border-bottom: none;
+  }
+}
+
+.ms-boleta-ahorro {
+  margin-top: 16px;
+  padding: 10px;
+  border: 1px solid var(--ms-timbre-verde);
+  border-radius: 8px;
+  color: var(--ms-timbre-verde);
+  font-weight: 700;
+  text-align: center;
+}

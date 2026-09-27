@@ -1,0 +1,55 @@
+.ms-lista-subtitulo {
+  margin: -8px 0 16px;
+}
+
+// Una sola "hoja" continua (no una tarjeta por categoría), con líneas de
+// cuaderno de fondo para reforzar el concepto "libreta".
+.ms-lista-hoja {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent,
+    transparent 39px,
+    var(--ms-lineas-hoja) 40px
+  );
+  background-position: 0 8px;
+}
+
+.ms-categoria-titulo {
+  margin: 20px 0 6px;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  color: var(--ms-margen-rojo);
+
+  &:first-child {
+    margin-top: 0;
+  }
+}
+
+.ms-item-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 0;
+  cursor: pointer;
+
+  ion-checkbox {
+    --size: 20px;
+    flex-shrink: 0;
+  }
+}
+
+.ms-item-nombre {
+  flex: 1;
+  font-family: var(--ms-font-libreta);
+  font-size: 1.3rem;
+  color: var(--ms-tinta-oscura);
+}
+
+.ms-item-comprado {
+  text-decoration: line-through;
+  color: var(--ms-lapiz);
+}
+
+.ms-item-cantidad {
+  flex-shrink: 0;
+}
