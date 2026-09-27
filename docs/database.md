@@ -10,10 +10,11 @@ implementadas. Se marca explícitamente cuáles.
 erDiagram
     USUARIO ||--o{ COMIDA : "planifica"
     COMIDA ||--o{ INGREDIENTE : "requiere"
-    INGREDIENTE }o--|| PRODUCTO : "corresponde a"
+    INGREDIENTE }o--o| PRODUCTO : "corresponde a (opcional)"
     PRODUCTO ||--o{ PRECIO_SUPERMERCADO : "tiene"
     USUARIO ||--o{ LISTA_COMPRA : "genera"
-    LISTA_COMPRA ||--o{ INGREDIENTE : "consolida"
+    LISTA_COMPRA ||--o{ LISTA_COMPRA_ITEM : "contiene"
+    LISTA_COMPRA_ITEM }o--o| PRODUCTO : "corresponde a (opcional)"
 
     USUARIO {
         uuid id PK
@@ -26,18 +27,19 @@ erDiagram
         uuid id PK
         uuid usuarioId FK
         string nombre
-        string dia_semana
+        string diaSemana
     }
     INGREDIENTE {
         uuid id PK
         uuid comidaId FK
+        uuid productoId FK "nullable"
         string nombre
         float cantidad
         string unidad
     }
     PRODUCTO {
         uuid id PK
-        string nombre_normalizado
+        string nombreNormalizado
         string categoria
     }
     PRECIO_SUPERMERCADO {
@@ -45,30 +47,55 @@ erDiagram
         uuid productoId FK
         string supermercado
         float precio
-        timestamp fecha_obtencion
+        timestamp fechaObtencion
     }
     LISTA_COMPRA {
         uuid id PK
         uuid usuarioId FK
         date semana
     }
+    LISTA_COMPRA_ITEM {
+        uuid id PK
+        uuid listaCompraId FK
+        uuid productoId FK "nullable"
+        string nombreNormalizado
+        float cantidadTotal
+        string unidad
+    }
 ```
+
+**Por qué `LISTA_COMPRA_ITEM` y no una relación directa `LISTA_COMPRA`↔`INGREDIENTE`:** una lista de
+compras semanal debe consolidar ingredientes repetidos entre varias comidas (por ejemplo, "tomate"
+usado en 3 comidas distintas debe aparecer una sola vez, con la cantidad sumada). Un `Ingrediente` no
+puede pertenecer a la vez a una `Comida` y a una `ListaCompra`, así que `ListaCompraItem` es una
+entidad propia, generada por un proceso de consolidación que recorre las comidas de la semana del
+usuario y agrupa por ingrediente/producto. Esto es lo que sostiene la capacidad "adaptativa" de
+optimización de compra exigida por el curso.
 
 **Estado de implementación:**
 
 | Entidad | Estado |
 |---|---|
-| `USUARIO` | ✅ Implementada (`users` table, entrega actual) |
-| `COMIDA` | ⏳ Planeada (Fase 6 / EP2) |
-| `INGREDIENTE` | ⏳ Planeada: hoy existe solo como estructura de datos *en tránsito* (DTO) que recibe el servicio Python para normalizar, no persiste todavía |
-| `PRODUCTO` | ⏳ Planeada (depende del scraping de precios, ver ADR-002) |
-| `PRECIO_SUPERMERCADO` | ⏳ Planeada (depende del scraping de precios, ver ADR-002) |
-| `LISTA_COMPRA` | ⏳ Planeada |
+| `USUARIO` | ✅ Implementada (`users` table) |
+| `COMIDA` | ✅ Esquema implementado (`comidas` table). Endpoints CRUD: Fase 6 |
+| `INGREDIENTE` | ✅ Esquema implementado (`ingredientes` table), con FK opcional a `PRODUCTO`. Endpoints CRUD: Fase 6 |
+| `PRODUCTO` | ✅ Esquema implementado (`productos` table). Se llena manualmente hasta que exista el scraper (ver ADR-002, EP2) |
+| `PRECIO_SUPERMERCADO` | ✅ Esquema implementado (`precios_supermercado` table). Queda vacía hasta que exista el scraper (ver ADR-002, EP2) |
+| `LISTA_COMPRA` | ✅ Esquema implementado (`listas_compra` table). Lógica de consolidación: Fase 6 |
+| `LISTA_COMPRA_ITEM` | ✅ Esquema implementado (`lista_compra_items` table). Lógica de consolidación: Fase 6 |
 
 ## 2. Modelo lógico (implementado hoy)
 
 ```mermaid
 erDiagram
+    USERS ||--o{ COMIDAS : "usuarioId"
+    COMIDAS ||--o{ INGREDIENTES : "comidaId"
+    INGREDIENTES }o--o| PRODUCTOS : "productoId"
+    PRODUCTOS ||--o{ PRECIOS_SUPERMERCADO : "productoId"
+    USERS ||--o{ LISTAS_COMPRA : "usuarioId"
+    LISTAS_COMPRA ||--o{ LISTA_COMPRA_ITEMS : "listaCompraId"
+    LISTA_COMPRA_ITEMS }o--o| PRODUCTOS : "productoId"
+
     USERS {
         uuid id PK
         varchar email UK
@@ -76,19 +103,63 @@ erDiagram
         varchar name
         timestamp createdAt
     }
+    COMIDAS {
+        uuid id PK
+        uuid usuarioId FK
+        varchar nombre
+        varchar diaSemana
+        timestamp createdAt
+    }
+    INGREDIENTES {
+        uuid id PK
+        uuid comidaId FK
+        uuid productoId FK "nullable"
+        varchar nombre
+        float cantidad
+        varchar unidad
+    }
+    PRODUCTOS {
+        uuid id PK
+        varchar nombreNormalizado UK
+        varchar categoria
+    }
+    PRECIOS_SUPERMERCADO {
+        uuid id PK
+        uuid productoId FK
+        varchar supermercado
+        float precio
+        timestamp fechaObtencion
+    }
+    LISTAS_COMPRA {
+        uuid id PK
+        uuid usuarioId FK
+        date semana
+        timestamp createdAt
+    }
+    LISTA_COMPRA_ITEMS {
+        uuid id PK
+        uuid listaCompraId FK
+        uuid productoId FK "nullable"
+        varchar nombreNormalizado
+        float cantidadTotal
+        varchar unidad
+    }
 ```
 
-### Descripción de la tabla `users`
+### Descripción de las tablas
 
-| Columna | Tipo | Restricciones |
+| Tabla | Columnas clave | Notas |
 |---|---|---|
-| `id` | `uuid` | PK, `uuid_generate_v4()` |
-| `email` | `varchar` | `UNIQUE`, `NOT NULL` |
-| `passwordHash` | `varchar` | `NOT NULL` (hash bcrypt, nunca la contraseña en texto plano) |
-| `name` | `varchar` | `NOT NULL` |
-| `createdAt` | `timestamp` | `NOT NULL`, default `now()` |
+| `users` | `id` PK, `email` UK, `passwordHash`, `name`, `createdAt` | Hash bcrypt, nunca contraseña en texto plano |
+| `comidas` | `id` PK, `usuarioId` FK → `users`, `nombre`, `diaSemana` | `onDelete: CASCADE` con `users` |
+| `ingredientes` | `id` PK, `comidaId` FK → `comidas`, `productoId` FK → `productos` (nullable), `cantidad`, `unidad` | `productoId` es nulo hasta que el ingrediente se normaliza contra el catálogo |
+| `productos` | `id` PK, `nombreNormalizado` UK, `categoria` | Catálogo normalizado; hoy se llena manualmente, el scraper (ADR-002, EP2) lo llenará automáticamente |
+| `precios_supermercado` | `id` PK, `productoId` FK → `productos`, `supermercado`, `precio`, `fechaObtencion` | Vacía hasta que exista el scraper (EP2) |
+| `listas_compra` | `id` PK, `usuarioId` FK → `users`, `semana` | Una fila por semana planificada por usuario |
+| `lista_compra_items` | `id` PK, `listaCompraId` FK → `listas_compra`, `productoId` FK → `productos` (nullable), `cantidadTotal`, `unidad` | Resultado de consolidar ingredientes repetidos entre comidas de la semana (lógica de consolidación: Fase 6) |
 
-Definida en `backend/src/users/entities/user.entity.ts`.
+Entidades definidas en `backend/src/users/entities/`, `backend/src/meals/entities/`,
+`backend/src/products/entities/` y `backend/src/shopping-lists/entities/`.
 
 ## 3. Estrategia de migraciones
 

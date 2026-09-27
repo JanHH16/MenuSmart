@@ -7,6 +7,9 @@ import { HealthModule } from './health/health.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { IngredientsModule } from './ingredients/ingredients.module';
+import { MealsModule } from './meals/meals.module';
+import { ProductsModule } from './products/products.module';
+import { ShoppingListsModule } from './shopping-lists/shopping-lists.module';
 
 @Module({
   imports: [
@@ -43,6 +46,9 @@ import { IngredientsModule } from './ingredients/ingredients.module';
     UsersModule,
     AuthModule,
     IngredientsModule,
+    MealsModule,
+    ProductsModule,
+    ShoppingListsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
