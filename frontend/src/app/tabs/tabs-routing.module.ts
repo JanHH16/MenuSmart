@@ -23,6 +23,10 @@ const routes: Routes = [
           import('./comparador/comparador.module').then((m) => m.ComparadorPageModule),
       },
       {
+        path: 'perfil',
+        loadChildren: () => import('./perfil/perfil.module').then((m) => m.PerfilPageModule),
+      },
+      {
         path: '',
         redirectTo: '/tabs/plan-semanal',
         pathMatch: 'full',

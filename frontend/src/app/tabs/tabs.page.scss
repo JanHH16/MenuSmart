@@ -1,1 +1,6 @@
-
+.ms-tab-bar {
+  --background: var(--ms-papel);
+  --color: var(--ms-lapiz);
+  --color-selected: var(--ms-tinta-azul);
+  border-top: 1px solid var(--ms-papel-oscuro);
+}

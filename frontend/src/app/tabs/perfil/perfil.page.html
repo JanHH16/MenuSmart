@@ -1,0 +1,34 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title class="ms-heading-libreta">mi libreta</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div class="ms-card-libreta ms-perfil-card">
+    <div class="ms-perfil-avatar">U</div>
+    <div>
+      <h2>Usuario Demo</h2>
+      <p class="ms-text-secondary">usuario@correo.cl</p>
+    </div>
+  </div>
+
+  <div class="ms-card-libreta ms-perfil-stat">
+    <span class="ms-mono ms-perfil-stat-value">{{ semanasPlaneadas }}</span>
+    <span class="ms-text-secondary">semanas planeadas</span>
+  </div>
+
+  <ion-list class="ms-perfil-lista" lines="full">
+    @for (opcion of opciones; track opcion.label) {
+      <ion-item button detail="false" (click)="proximamente()">
+        <ion-icon [name]="opcion.icon" slot="start" color="primary"></ion-icon>
+        <ion-label>{{ opcion.label }}</ion-label>
+        <span class="ms-label-secundario" slot="end">Pronto</span>
+      </ion-item>
+    }
+  </ion-list>
+
+  <ion-button expand="block" fill="outline" color="danger" (click)="logout()">
+    Cerrar sesión
+  </ion-button>
+</ion-content>

@@ -1,0 +1,45 @@
+.ms-perfil-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+
+  h2 {
+    margin: 0;
+  }
+}
+
+.ms-perfil-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--ms-marcador);
+  color: var(--ms-tinta-oscura);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--ms-font-libreta);
+  font-size: 1.5rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.ms-perfil-stat {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.ms-perfil-stat-value {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--ms-tinta-azul);
+}
+
+.ms-perfil-lista {
+  background: transparent;
+  margin-bottom: 24px;
+  border-radius: 12px;
+  overflow: hidden;
+}
