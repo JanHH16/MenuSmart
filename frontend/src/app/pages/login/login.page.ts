@@ -1,7 +1,9 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { Observable } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
+import { LayoutService } from '../../core/services/layout.service';
 
 @Component({
   selector: 'app-login',
@@ -14,11 +16,15 @@ export class LoginPage {
   errorMessage: string | null = null;
   loading = false;
 
+  readonly esDesktop$: Observable<boolean>;
+
   constructor(
     private readonly fb: FormBuilder,
     private readonly authService: AuthService,
     private readonly router: Router,
+    layoutService: LayoutService,
   ) {
+    this.esDesktop$ = layoutService.esDesktop$;
     this.form = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required]],

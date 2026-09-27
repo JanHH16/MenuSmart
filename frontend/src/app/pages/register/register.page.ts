@@ -1,7 +1,9 @@
 import { Component } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { Observable } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
+import { LayoutService } from '../../core/services/layout.service';
 
 @Component({
   selector: 'app-register',
@@ -14,11 +16,15 @@ export class RegisterPage {
   errorMessage: string | null = null;
   loading = false;
 
+  readonly esDesktop$: Observable<boolean>;
+
   constructor(
     private readonly fb: FormBuilder,
     private readonly authService: AuthService,
     private readonly router: Router,
+    layoutService: LayoutService,
   ) {
+    this.esDesktop$ = layoutService.esDesktop$;
     this.form = this.fb.group(
       {
         name: ['', [Validators.required, Validators.minLength(2)]],
