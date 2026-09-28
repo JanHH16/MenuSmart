@@ -10,8 +10,8 @@ GitHub Actions · Terraform
 
 | Integrante | Ámbitos principales |
 |---|---|
-| Jan Houter. ([@JanHH16](https://github.com/JanHH16)) | Backend (NestJS), servicio Python (FastAPI), persistencia (PostgreSQL/TypeORM), DevOps/CI-CD (GitHub Actions), infraestructura como código (Terraform), documentación técnica |
-| Camila Torres. [@camitwrs](https://github.com/camitwrs) | Frontend (Angular/Ionic): arquitectura de layout adaptativo mobile/desktop, implementación de todas las vistas y su lógica de negocio, diseño del prototipo Figma, revisión de código (seguridad, calidad, cobertura de pruebas) |
+| Jan Houter. ([@JanHH16](https://github.com/JanHH16)) | Backend (NestJS), persistencia de datos (PostgreSQL/TypeORM), recuperación de información web (servicio Python/FastAPI, scraping), DevOps e infraestructura (GitHub Actions, Docker, Terraform), documentación técnica |
+| Camila Torres. [@camitwrs](https://github.com/camitwrs) | Frontend (Angular/Ionic), experiencia de usuario (arquitectura de layout adaptativo mobile/desktop, prototipo Figma), capacidad adaptativa o inteligente (diseño de la interacción y presentación al usuario), pruebas (cobertura del frontend), seguridad y calidad de código (revisión) |
 
 ## Problema y usuarios objetivo
 
