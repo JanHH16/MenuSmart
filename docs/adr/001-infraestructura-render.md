@@ -30,13 +30,13 @@ staging:
 
 - `terraform fmt`, `terraform init` y `terraform validate` corren limpio localmente.
 - `terraform plan` (creación desde cero) también corre limpio **sin necesitar credenciales
-  reales de Render** — Terraform no necesita autenticarse contra la API para planificar
+  reales de Render**. Terraform no necesita autenticarse contra la API para planificar
   recursos que aún no existen, solo para leer/aplicar contra recursos reales.
 - **Pendiente (no bloqueante para EP1):** `frontend/nginx.conf` resuelve el backend como
   `http://backend:3000`, nombre de servicio válido en Docker Compose pero no en la red de
   Render. Antes de un despliegue real hay que verificar con una cuenta de Render cómo
   resolver el backend desde el frontend (URL pública vs. red privada equivalente) y
   parametrizar `nginx.conf` en lugar de dejarlo hardcodeado.
-- `terraform apply` no se ha ejecutado — requiere una cuenta real de Render con API key,
+- `terraform apply` no se ha ejecutado. Requiere una cuenta real de Render con API key,
   y aplicar cambios de infraestructura debe hacerse de forma controlada (sección 9 del
   enunciado), no como parte de esta entrega preliminar.
