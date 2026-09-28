@@ -1,5 +1,4 @@
-import { Component } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Component, inject } from '@angular/core';
 import { LayoutService } from '../core/services/layout.service';
 
 @Component({
@@ -9,10 +8,7 @@ import { LayoutService } from '../core/services/layout.service';
   standalone: false,
 })
 export class TabsPage {
-  readonly esDesktop$: Observable<boolean>;
+  private readonly layoutService = inject(LayoutService);
 
-  constructor(layoutService: LayoutService) {
-    this.esDesktop$ = layoutService.esDesktop$;
-  }
-
+  readonly esDesktop$ = this.layoutService.esDesktop$;
 }
