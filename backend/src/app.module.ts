@@ -13,19 +13,28 @@ import { IngredientsModule } from './ingredients/ingredients.module';
     ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        type: 'postgres' as const,
-        host: config.get<string>('DATABASE_HOST'),
-        port: parseInt(config.get<string>('DATABASE_PORT', '5432'), 10),
-        username: config.get<string>('DATABASE_USER'),
-        password: config.get<string>('DATABASE_PASSWORD'),
-        database: config.get<string>('DATABASE_NAME'),
-        autoLoadEntities: true,
-        // TODO: pasar a migraciones formales antes de cerrar la EP1 (sección 5 del
-        // enunciado exige "estrategia de migraciones"); synchronize=true es solo
-        // para acelerar el desarrollo inicial.
-        synchronize: config.get<string>('NODE_ENV') !== 'production',
-      }),
+      useFactory: (config: ConfigService) => {
+        const esProduccion = config.get<string>('NODE_ENV') === 'production';
+
+        return {
+          type: 'postgres' as const,
+          host: config.get<string>('DATABASE_HOST', 'localhost'),
+          port: parseInt(config.get<string>('DATABASE_PORT', '5432'), 10),
+          username: config.get<string>('DATABASE_USER'),
+          password: config.get<string>('DATABASE_PASSWORD'),
+          database: config.get<string>('DATABASE_NAME'),
+          autoLoadEntities: true,
+          migrations: [__dirname + '/migrations/*{.ts,.js}'],
+          // synchronize y migrationsRun no pueden convivir: TypeORM corre
+          // synchronize() antes que las migraciones, así que si ambos están
+          // activos, la migración inicial choca con "la tabla ya existe".
+          // En desarrollo, synchronize agiliza iterar sobre entidades nuevas;
+          // en producción la única fuente de verdad del esquema son las
+          // migraciones.
+          migrationsRun: esProduccion,
+          synchronize: !esProduccion,
+        };
+      },
     }),
     HealthModule,
     UsersModule,
