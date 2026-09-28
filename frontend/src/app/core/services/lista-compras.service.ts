@@ -1,4 +1,5 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
+import { PlanSemanalService } from './plan-semanal.service';
 
 export interface ItemCompra {
   id: string;
@@ -19,9 +20,7 @@ export interface CategoriaCompra {
  */
 @Injectable({ providedIn: 'root' })
 export class ListaComprasService {
-  // TODO: este número debería salir de contar las comidas del plan semanal
-  // (ver PlanSemanalService) una vez que ambos consuman la misma API real.
-  private readonly totalComidas = 8;
+  private readonly planSemanalService = inject(PlanSemanalService);
 
   private readonly categorias: CategoriaCompra[] = [
     {
@@ -61,7 +60,7 @@ export class ListaComprasService {
   }
 
   getTotalComidas(): number {
-    return this.totalComidas;
+    return this.planSemanalService.getTotalComidas();
   }
 
   totalItems(): number {

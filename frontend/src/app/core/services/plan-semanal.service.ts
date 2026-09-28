@@ -148,6 +148,11 @@ export class PlanSemanalService {
     return this.comidas.find((comida) => comida.id === id);
   }
 
+  /** Total de comidas planeadas en la semana (lo usa ListaComprasService). */
+  getTotalComidas(): number {
+    return this.comidas.length;
+  }
+
   /** Días de la semana (nombre corto para chips + nombre completo para guardar). */
   getDiasSemana(): { corto: string; nombre: string }[] {
     return this.dias.map((dia) => ({ corto: dia.diaCorto, nombre: dia.nombre }));

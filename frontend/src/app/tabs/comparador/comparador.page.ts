@@ -32,9 +32,28 @@ export class ComparadorPage {
     return Math.abs(producto.precios[0] - producto.precios[1]);
   }
 
+  // Misma regla que esMasBarato() (Math.min), en vez de comparar
+  // precios[0] < precios[1] por separado: antes, con precios iguales,
+  // esMasBarato() marcaba las DOS celdas como "más baratas" pero este método
+  // igual elegía Santa Isabel (el índice 1 gana empates en "< "), mostrando
+  // un sello contradictorio con la tabla.
   masBaratoNombre(producto: PrecioProducto): string {
-    const indice = producto.precios[0] < producto.precios[1] ? 0 : 1;
+    const indice = this.indiceMasBarato(producto);
+    if (indice === null) {
+      return 'Empate';
+    }
     return this.abreviar(this.tiendas[indice]);
+  }
+
+  private indiceMasBarato(producto: PrecioProducto): number | null {
+    const minimo = Math.min(...producto.precios);
+    const indices = producto.precios.reduce<number[]>((acc, precio, i) => {
+      if (precio === minimo) {
+        acc.push(i);
+      }
+      return acc;
+    }, []);
+    return indices.length === 1 ? indices[0] : null;
   }
 
   // En los timbres chicos Figma escribe "S. Isabel".
@@ -59,9 +78,9 @@ export class ComparadorPage {
     const ganadora = this.tiendaMasBarata.indice;
     let mejor: { producto: string; ahorro: number; tienda: string } | null = null;
     for (const producto of this.productos) {
-      const barata = producto.precios[0] < producto.precios[1] ? 0 : 1;
+      const barata = this.indiceMasBarato(producto);
       const ahorro = this.diferencia(producto);
-      if (barata !== ganadora && (!mejor || ahorro > mejor.ahorro)) {
+      if (barata !== null && barata !== ganadora && (!mejor || ahorro > mejor.ahorro)) {
         mejor = { producto: producto.producto.toLowerCase(), ahorro, tienda: this.tiendas[barata] };
       }
     }

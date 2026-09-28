@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
@@ -43,9 +44,15 @@ export class LoginPage {
         this.loading = false;
         this.router.navigateByUrl('/tabs/plan-semanal');
       },
-      error: () => {
+      error: (error: HttpErrorResponse) => {
         this.loading = false;
-        this.errorMessage = 'ups, credenciales incorrectas';
+        // status 0 (sin conexión/CORS) o 5xx (error del servidor) no son
+        // culpa del usuario; solo un 4xx significa que el email/contraseña
+        // están mal.
+        this.errorMessage =
+          error.status === 0 || error.status >= 500
+            ? 'no pudimos conectar con el servidor, intenta más tarde'
+            : 'ups, credenciales incorrectas';
       },
     });
   }

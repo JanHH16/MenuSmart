@@ -5,6 +5,7 @@ import {
   AgregarIngredienteModalComponent,
   IngredienteFormValue,
 } from '../../../shared/agregar-ingrediente-modal/agregar-ingrediente-modal.component';
+import { LayoutService } from '../../../core/services/layout.service';
 import { PhotoService } from '../../../core/services/photo.service';
 import { ComidaGuardada, PlanSemanalService, TIPOS_COMIDA } from '../../../core/services/plan-semanal.service';
 
@@ -19,8 +20,10 @@ export class AgregarComidaPage {
   private readonly modalCtrl = inject(ModalController);
   private readonly photoService = inject(PhotoService);
   private readonly planSemanalService = inject(PlanSemanalService);
+  private readonly layoutService = inject(LayoutService);
   private readonly cdr = inject(ChangeDetectorRef);
 
+  readonly esDesktop$ = this.layoutService.esDesktop$;
   readonly dias = this.planSemanalService.getDiasSemana();
   readonly tipos = TIPOS_COMIDA;
 

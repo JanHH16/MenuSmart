@@ -1,165 +1,396 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-buttons slot="start">
-      <ion-button (click)="volver()">
-        <ion-icon slot="start" name="chevron-back-outline"></ion-icon>
-        Volver
-      </ion-button>
-    </ion-buttons>
-    <div slot="end" class="ms-toolbar-label">Nueva comida</div>
-  </ion-toolbar>
-</ion-header>
-
-<ion-content class="ion-padding">
-  <div class="ms-segmented">
-    <button
-      type="button"
-      class="ms-segmented-btn"
-      [class.ms-segmented-btn--activo]="modo === 'nueva'"
-      (click)="modo = 'nueva'"
-    >
-      Nueva
-    </button>
-    <button
-      type="button"
-      class="ms-segmented-btn"
-      [class.ms-segmented-btn--activo]="modo === 'guardadas'"
-      (click)="modo = 'guardadas'"
-    >
-      Guardadas
-    </button>
-  </div>
-
-  @if (modo === 'nueva') {
-    <div class="ms-comida-header">
-      <div class="ms-polaroid ms-polaroid--clicable" (click)="elegirFoto()">
-        @if (foto) {
-          <img [src]="foto" class="ms-polaroid-foto-img" alt="Foto de la comida" />
-        } @else {
-          <div class="ms-polaroid-foto">
-            <ion-icon name="camera-outline"></ion-icon>
-          </div>
-        }
-        <p class="ms-polaroid-caption">{{ foto ? 'cambiar foto' : 'agregar foto' }}</p>
-        <button class="ms-polaroid-camara" type="button" (click)="elegirFoto(); $event.stopPropagation()">
-          <ion-icon name="camera-outline"></ion-icon>
-        </button>
-      </div>
-
-      <div class="ms-comida-info">
-        <span class="ms-label-secundario">Nombre de la comida</span>
-        <ion-input
-          class="ms-nombre-input"
-          [(ngModel)]="nombre"
-          placeholder="Ej: Lasaña de verduras"
-        ></ion-input>
-      </div>
-    </div>
-  } @else {
-    <ion-item lines="full" class="ms-buscar-item">
-      <ion-icon slot="start" name="search-outline" color="medium"></ion-icon>
-      <ion-input [(ngModel)]="busqueda" placeholder="Ej: arroz con pollo"></ion-input>
-    </ion-item>
-  }
-
-  <span class="ms-label-secundario">Día</span>
-  <div class="ms-chips-row">
-    @for (dia of dias; track dia.corto) {
-      <button
-        class="ms-chip"
-        [class.ms-chip--activo]="diaSeleccionado === dia.nombre"
-        type="button"
-        (click)="diaSeleccionado = dia.nombre"
-      >
-        {{ dia.corto }}
+@if (esDesktop$ | async) {
+  <!-- Desktop (Figma "D8. Agregar comida" / "D9. …Guardadas",
+       buildAddMealDesktop/buildAddMealGuardadasDesktop): mismo esqueleto de
+       dos tarjetas que "D4. Detalle de comida" (esta pantalla no existía en
+       desktop — el botón "+ agregar comida" del plan enlazaba por error a
+       "editar comida"; ver plugin de Figma). -->
+  <ion-content class="ms-desktop-content">
+    <div class="ms-desktop-page ms-agregar-desktop">
+      <button type="button" class="ms-volver-desktop ms-agregar-volver" (click)="volver()">
+        <ion-icon name="chevron-back-outline"></ion-icon>
+        Volver al plan
       </button>
-    }
-  </div>
 
-  <span class="ms-label-secundario">Tipo de comida</span>
-  <div class="ms-chips-row ms-chips-row--tipos">
-    @for (tipo of tipos; track tipo) {
-      <button
-        class="ms-chip ms-chip--tipo"
-        [class.ms-chip--activo]="tipoSeleccionado === tipo"
-        type="button"
-        (click)="tipoSeleccionado = tipo"
-      >
-        {{ tipo | uppercase }}
-      </button>
-    }
-  </div>
-
-  @if (modo === 'nueva') {
-    <div class="ms-card-libreta ms-ingredientes-card">
-      <div class="ms-ingredientes-header">
-        <span class="ms-label-secundario">Ingredientes</span>
-        <span class="ms-text-secondary ms-mono ms-label-secundario">{{ ingredientes.length }} items</span>
-      </div>
-
-      @if (ingredientes.length === 0) {
-        <p class="ms-text-secondary ms-ingredientes-vacio">
-          Agrega los ingredientes antes de guardar la comida.
-        </p>
-      } @else {
-        <ion-list lines="full">
-          @for (ingrediente of ingredientes; track $index) {
-            <ion-item>
-              <ion-label class="ms-ingrediente-nombre">{{ ingrediente.nombre }}</ion-label>
-              <span class="ms-mono ms-text-secondary" slot="end">{{ ingrediente.cantidad }}</span>
-              <ion-button fill="clear" color="danger" slot="end" (click)="eliminarIngrediente($index)">
-                <ion-icon slot="icon-only" name="close-circle-outline"></ion-icon>
-              </ion-button>
-            </ion-item>
-          }
-        </ion-list>
-      }
-
-      <ion-button expand="block" fill="outline" class="ms-agregar-ingrediente" (click)="agregarIngrediente()">
-        <ion-icon slot="start" name="add-outline"></ion-icon>
-        Agregar ingrediente
-      </ion-button>
-    </div>
-
-    <div class="ms-notas-campo">
-      <span class="ms-label-secundario">Notas (opcional)</span>
-      <ion-textarea
-        class="ms-notas-input"
-        [(ngModel)]="notas"
-        [autoGrow]="true"
-        rows="2"
-        placeholder="Ej: para 3 personas · la salsa se puede congelar"
-      ></ion-textarea>
-    </div>
-
-    <ion-button expand="block" class="ms-btn-primary" [disabled]="!puedeGuardar" (click)="guardar()">
-      Guardar comida
-    </ion-button>
-  } @else {
-    <span class="ms-label-secundario">Tus comidas guardadas</span>
-
-    @if (comidasGuardadasFiltradas.length === 0) {
-      <p class="ms-text-secondary ms-ingredientes-vacio">No encontramos comidas guardadas con ese nombre.</p>
-    } @else {
-      <div class="ms-guardada-lista">
-        @for (guardada of comidasGuardadasFiltradas; track guardada.nombre) {
-          <button type="button" class="ms-guardada-row" (click)="usarComidaGuardada(guardada)">
-            <div class="ms-guardada-avatar">
-              <app-doodle [comida]="guardada.nombre" [size]="30"></app-doodle>
-            </div>
-            <div class="ms-guardada-info">
-              <span class="ms-guardada-nombre">{{ guardada.nombre }}</span>
-              <span class="ms-mono ms-text-secondary ms-guardada-meta"
-                >{{ guardada.ingredientes.length }} ingredientes</span
-              >
-              @if (guardada.ingredientes.length > 0) {
-                <span class="ms-guardada-ingredientes">{{ nombresIngredientes(guardada) }}</span>
-              }
-            </div>
-            <ion-icon name="chevron-forward-outline" color="medium"></ion-icon>
+      <header class="ms-agregar-desktop-header">
+        <h1 class="ms-titulo-desktop ms-agregar-titulo">
+          {{ modo === 'nueva' ? 'nueva comida' : 'comidas guardadas' }}
+        </h1>
+        @if (modo === 'nueva') {
+          <button
+            type="button"
+            class="ms-btn-figma ms-btn-figma--primario ms-agregar-guardar"
+            [disabled]="!puedeGuardar"
+            (click)="guardar()"
+          >
+            Guardar comida
           </button>
         }
+      </header>
+
+      <div class="ms-agregar-desktop-segmento">
+        <div class="ms-segmented">
+          <button
+            type="button"
+            class="ms-segmented-btn"
+            [class.ms-segmented-btn--activo]="modo === 'nueva'"
+            (click)="modo = 'nueva'"
+          >
+            Nueva
+          </button>
+          <button
+            type="button"
+            class="ms-segmented-btn"
+            [class.ms-segmented-btn--activo]="modo === 'guardadas'"
+            (click)="modo = 'guardadas'"
+          >
+            Guardadas
+          </button>
+        </div>
       </div>
+
+      <div class="ms-agregar-columnas">
+        @if (modo === 'nueva') {
+          <div class="ms-agregar-receta-wrap">
+            <span class="ms-cinta ms-agregar-receta-cinta"></span>
+            <div class="ms-card-desktop ms-agregar-receta">
+              <span class="ms-label-desktop">Nombre de la comida</span>
+              <input
+                class="ms-agregar-nombre-input"
+                type="text"
+                [(ngModel)]="nombre"
+                placeholder="Ej: Lasaña de verduras"
+              />
+
+              <div class="ms-agregar-linea-roja"></div>
+
+              <span class="ms-label-desktop">Día</span>
+              <div class="ms-agregar-chips">
+                @for (dia of dias; track dia.corto) {
+                  <button
+                    type="button"
+                    class="ms-chip-figma ms-agregar-chip-dia"
+                    [class.ms-chip-figma--activo]="diaSeleccionado === dia.nombre"
+                    (click)="diaSeleccionado = dia.nombre"
+                  >{{ dia.corto }}</button>
+                }
+              </div>
+
+              <span class="ms-label-desktop">Tipo de comida</span>
+              <div class="ms-agregar-chips">
+                @for (tipo of tipos; track tipo) {
+                  <button
+                    type="button"
+                    class="ms-chip-figma ms-agregar-chip-tipo"
+                    [class.ms-chip-figma--activo]="tipoSeleccionado === tipo"
+                    (click)="tipoSeleccionado = tipo"
+                  >{{ tipo }}</button>
+                }
+              </div>
+
+              <span class="ms-label-desktop">Foto</span>
+              <div class="ms-agregar-foto-fila">
+                <div class="ms-agregar-polaroid-wrap">
+                  <span class="ms-cinta ms-agregar-polaroid-cinta"></span>
+                  <button type="button" class="ms-agregar-polaroid" (click)="elegirFoto()">
+                    <span class="ms-agregar-polaroid-foto">
+                      @if (foto) {
+                        <img [src]="foto" alt="Foto de la comida" />
+                      } @else {
+                        <ion-icon name="camera-outline"></ion-icon>
+                      }
+                    </span>
+                    <span class="ms-agregar-polaroid-caption">{{ foto ? 'cambiar foto' : 'agregar foto' }}</span>
+                  </button>
+                </div>
+
+                <button type="button" class="ms-agregar-subir-foto" (click)="elegirFoto()">
+                  <ion-icon name="camera-outline"></ion-icon>
+                  <span class="ms-agregar-subir-foto-titulo">+ subir foto</span>
+                  <span class="ms-agregar-subir-foto-sub">arrastra una imagen o toma una foto</span>
+                </button>
+              </div>
+
+              <label class="ms-label-desktop" for="notas-agregar-desktop">Notas (opcional)</label>
+              <textarea
+                id="notas-agregar-desktop"
+                class="ms-agregar-notas"
+                rows="2"
+                [(ngModel)]="notas"
+                placeholder="Ej: para 3 personas · la salsa se puede congelar"
+              ></textarea>
+            </div>
+          </div>
+
+          <div class="ms-card-desktop ms-agregar-ingredientes">
+            <div class="ms-agregar-ingredientes-header">
+              <h2 class="ms-agregar-ingredientes-titulo">ingredientes</h2>
+              <span class="ms-tag-pildora">{{ ingredientes.length }} items</span>
+            </div>
+            <div class="ms-agregar-ingredientes-linea"></div>
+
+            @if (ingredientes.length === 0) {
+              <p class="ms-agregar-ingredientes-vacio">Agrega los ingredientes antes de guardar la comida.</p>
+            } @else {
+              <div class="ms-agregar-tabla-fila ms-agregar-tabla-encabezado">
+                <span class="ms-label-desktop">Ingrediente</span>
+                <span class="ms-label-desktop">Cantidad</span>
+                <span class="ms-label-desktop">Quitar</span>
+              </div>
+
+              @for (ingrediente of ingredientes; track $index) {
+                <div class="ms-agregar-tabla-fila">
+                  <span class="ms-agregar-ingrediente-nombre">{{ ingrediente.nombre }}</span>
+                  <span class="ms-agregar-ingrediente-cantidad">{{ ingrediente.cantidad }}</span>
+                  <button
+                    type="button"
+                    class="ms-agregar-quitar"
+                    aria-label="Quitar ingrediente"
+                    (click)="eliminarIngrediente($index)"
+                  >
+                    <ion-icon name="close-outline"></ion-icon>
+                  </button>
+                </div>
+              }
+            }
+
+            <button type="button" class="ms-btn-punteado ms-agregar-agregar-ingrediente" (click)="agregarIngrediente()">
+              + Agregar ingrediente
+            </button>
+          </div>
+        } @else {
+          <div class="ms-card-desktop ms-agregar-buscar">
+            <span class="ms-label-desktop">Buscar</span>
+            <input
+              class="ms-agregar-nombre-input"
+              type="text"
+              [(ngModel)]="busqueda"
+              placeholder="Ej: arroz con pollo"
+            />
+
+            <span class="ms-label-desktop ms-agregar-buscar-label">Día</span>
+            <div class="ms-agregar-chips">
+              @for (dia of dias; track dia.corto) {
+                <button
+                  type="button"
+                  class="ms-chip-figma ms-agregar-chip-dia"
+                  [class.ms-chip-figma--activo]="diaSeleccionado === dia.nombre"
+                  (click)="diaSeleccionado = dia.nombre"
+                >{{ dia.corto }}</button>
+              }
+            </div>
+
+            <span class="ms-label-desktop">Tipo de comida</span>
+            <div class="ms-agregar-chips">
+              @for (tipo of tipos; track tipo) {
+                <button
+                  type="button"
+                  class="ms-chip-figma ms-agregar-chip-tipo"
+                  [class.ms-chip-figma--activo]="tipoSeleccionado === tipo"
+                  (click)="tipoSeleccionado = tipo"
+                >{{ tipo }}</button>
+              }
+            </div>
+          </div>
+
+          <div class="ms-card-desktop ms-agregar-ingredientes">
+            <div class="ms-agregar-ingredientes-header">
+              <h2 class="ms-agregar-ingredientes-titulo">tus comidas guardadas</h2>
+              <span class="ms-tag-pildora">{{ comidasGuardadasFiltradas.length }} comidas</span>
+            </div>
+            <div class="ms-agregar-ingredientes-linea"></div>
+
+            @if (comidasGuardadasFiltradas.length === 0) {
+              <p class="ms-agregar-ingredientes-vacio">No encontramos comidas guardadas con ese nombre.</p>
+            } @else {
+              <div class="ms-guardada-lista ms-agregar-guardada-lista-desktop">
+                @for (guardada of comidasGuardadasFiltradas; track guardada.nombre) {
+                  <button type="button" class="ms-guardada-row" (click)="usarComidaGuardada(guardada)">
+                    <div class="ms-guardada-avatar">
+                      <app-doodle [comida]="guardada.nombre" [size]="34"></app-doodle>
+                    </div>
+                    <div class="ms-guardada-info">
+                      <span class="ms-guardada-nombre ms-guardada-nombre--desktop">{{ guardada.nombre }}</span>
+                      <span class="ms-mono ms-text-secondary ms-guardada-meta"
+                        >{{ guardada.ingredientes.length }} ingredientes</span
+                      >
+                      @if (guardada.ingredientes.length > 0) {
+                        <span class="ms-guardada-ingredientes">{{ nombresIngredientes(guardada) }}</span>
+                      }
+                    </div>
+                    <ion-icon name="chevron-forward-outline" color="medium"></ion-icon>
+                  </button>
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  </ion-content>
+} @else {
+  <ion-header>
+    <ion-toolbar>
+      <ion-buttons slot="start">
+        <ion-button (click)="volver()">
+          <ion-icon slot="start" name="chevron-back-outline"></ion-icon>
+          Volver
+        </ion-button>
+      </ion-buttons>
+      <div slot="end" class="ms-toolbar-label">Nueva comida</div>
+    </ion-toolbar>
+  </ion-header>
+
+  <ion-content class="ion-padding">
+    <div class="ms-segmented">
+      <button
+        type="button"
+        class="ms-segmented-btn"
+        [class.ms-segmented-btn--activo]="modo === 'nueva'"
+        (click)="modo = 'nueva'"
+      >
+        Nueva
+      </button>
+      <button
+        type="button"
+        class="ms-segmented-btn"
+        [class.ms-segmented-btn--activo]="modo === 'guardadas'"
+        (click)="modo = 'guardadas'"
+      >
+        Guardadas
+      </button>
+    </div>
+
+    @if (modo === 'nueva') {
+      <div class="ms-comida-header">
+        <div class="ms-polaroid ms-polaroid--clicable" (click)="elegirFoto()">
+          @if (foto) {
+            <img [src]="foto" class="ms-polaroid-foto-img" alt="Foto de la comida" />
+          } @else {
+            <div class="ms-polaroid-foto">
+              <ion-icon name="camera-outline"></ion-icon>
+            </div>
+          }
+          <p class="ms-polaroid-caption">{{ foto ? 'cambiar foto' : 'agregar foto' }}</p>
+          <button class="ms-polaroid-camara" type="button" (click)="elegirFoto(); $event.stopPropagation()">
+            <ion-icon name="camera-outline"></ion-icon>
+          </button>
+        </div>
+
+        <div class="ms-comida-info">
+          <span class="ms-label-secundario">Nombre de la comida</span>
+          <ion-input
+            class="ms-nombre-input"
+            [(ngModel)]="nombre"
+            placeholder="Ej: Lasaña de verduras"
+          ></ion-input>
+        </div>
+      </div>
+    } @else {
+      <ion-item lines="full" class="ms-buscar-item">
+        <ion-icon slot="start" name="search-outline" color="medium"></ion-icon>
+        <ion-input [(ngModel)]="busqueda" placeholder="Ej: arroz con pollo"></ion-input>
+      </ion-item>
     }
-  }
-</ion-content>
+
+    <span class="ms-label-secundario">Día</span>
+    <div class="ms-chips-row">
+      @for (dia of dias; track dia.corto) {
+        <button
+          class="ms-chip"
+          [class.ms-chip--activo]="diaSeleccionado === dia.nombre"
+          type="button"
+          (click)="diaSeleccionado = dia.nombre"
+        >
+          {{ dia.corto }}
+        </button>
+      }
+    </div>
+
+    <span class="ms-label-secundario">Tipo de comida</span>
+    <div class="ms-chips-row ms-chips-row--tipos">
+      @for (tipo of tipos; track tipo) {
+        <button
+          class="ms-chip ms-chip--tipo"
+          [class.ms-chip--activo]="tipoSeleccionado === tipo"
+          type="button"
+          (click)="tipoSeleccionado = tipo"
+        >
+          {{ tipo | uppercase }}
+        </button>
+      }
+    </div>
+
+    @if (modo === 'nueva') {
+      <div class="ms-card-libreta ms-ingredientes-card">
+        <div class="ms-ingredientes-header">
+          <span class="ms-label-secundario">Ingredientes</span>
+          <span class="ms-text-secondary ms-mono ms-label-secundario">{{ ingredientes.length }} items</span>
+        </div>
+
+        @if (ingredientes.length === 0) {
+          <p class="ms-text-secondary ms-ingredientes-vacio">
+            Agrega los ingredientes antes de guardar la comida.
+          </p>
+        } @else {
+          <ion-list lines="full">
+            @for (ingrediente of ingredientes; track $index) {
+              <ion-item>
+                <ion-label class="ms-ingrediente-nombre">{{ ingrediente.nombre }}</ion-label>
+                <span class="ms-mono ms-text-secondary" slot="end">{{ ingrediente.cantidad }}</span>
+                <ion-button fill="clear" color="danger" slot="end" (click)="eliminarIngrediente($index)">
+                  <ion-icon slot="icon-only" name="close-circle-outline"></ion-icon>
+                </ion-button>
+              </ion-item>
+            }
+          </ion-list>
+        }
+
+        <ion-button expand="block" fill="outline" class="ms-agregar-ingrediente" (click)="agregarIngrediente()">
+          <ion-icon slot="start" name="add-outline"></ion-icon>
+          Agregar ingrediente
+        </ion-button>
+      </div>
+
+      <div class="ms-notas-campo">
+        <span class="ms-label-secundario">Notas (opcional)</span>
+        <ion-textarea
+          class="ms-notas-input"
+          [(ngModel)]="notas"
+          [autoGrow]="true"
+          rows="2"
+          placeholder="Ej: para 3 personas · la salsa se puede congelar"
+        ></ion-textarea>
+      </div>
+
+      <ion-button expand="block" class="ms-btn-primary" [disabled]="!puedeGuardar" (click)="guardar()">
+        Guardar comida
+      </ion-button>
+    } @else {
+      <span class="ms-label-secundario">Tus comidas guardadas</span>
+
+      @if (comidasGuardadasFiltradas.length === 0) {
+        <p class="ms-text-secondary ms-ingredientes-vacio">No encontramos comidas guardadas con ese nombre.</p>
+      } @else {
+        <div class="ms-guardada-lista">
+          @for (guardada of comidasGuardadasFiltradas; track guardada.nombre) {
+            <button type="button" class="ms-guardada-row" (click)="usarComidaGuardada(guardada)">
+              <div class="ms-guardada-avatar">
+                <app-doodle [comida]="guardada.nombre" [size]="30"></app-doodle>
+              </div>
+              <div class="ms-guardada-info">
+                <span class="ms-guardada-nombre">{{ guardada.nombre }}</span>
+                <span class="ms-mono ms-text-secondary ms-guardada-meta"
+                  >{{ guardada.ingredientes.length }} ingredientes</span
+                >
+                @if (guardada.ingredientes.length > 0) {
+                  <span class="ms-guardada-ingredientes">{{ nombresIngredientes(guardada) }}</span>
+                }
+              </div>
+              <ion-icon name="chevron-forward-outline" color="medium"></ion-icon>
+            </button>
+          }
+        </div>
+      }
+    }
+  </ion-content>
+}

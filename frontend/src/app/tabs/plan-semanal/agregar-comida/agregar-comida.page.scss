@@ -271,3 +271,356 @@
   margin-top: 12px;
   --border-style: dashed;
 }
+
+
+// ---------------------------------------------------------------------------
+// Desktop (Figma "D8. Agregar comida" / "D9. …Guardadas",
+// buildAddMealDesktop/buildAddMealGuardadasDesktop) — mismo esqueleto que
+// "D4. Detalle de comida" (dos tarjetas de 440px + resto), esta vez para
+// CREAR una comida en vez de editarla. Medidas en px del prototipo de
+// 1440×900; las "y=" son relativas a cada tarjeta.
+// ---------------------------------------------------------------------------
+.ms-agregar-desktop {
+  padding-top: 24px;
+}
+
+.ms-agregar-volver {
+  height: 32px;
+}
+
+// Título (size 50) en y=58; segmentado (340px) en y=130; tarjetas en y=190.
+.ms-agregar-desktop-header {
+  height: 92px;
+  margin-top: 2px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.ms-agregar-titulo {
+  font-size: 50px;
+  line-height: 63px;
+}
+
+.ms-agregar-guardar {
+  width: 220px;
+  height: 56px;
+}
+
+.ms-agregar-desktop-segmento {
+  width: 340px;
+  height: 40px;
+  margin-bottom: 20px;
+
+  .ms-segmented {
+    height: 100%;
+  }
+}
+
+.ms-agregar-columnas {
+  display: grid;
+  grid-template-columns: 440px minmax(0, 1fr);
+  gap: 32px;
+  align-items: start;
+}
+
+.ms-agregar-receta-wrap {
+  position: relative;
+}
+
+.ms-agregar-receta-cinta {
+  top: -12px;
+  left: calc(50% - 44px);
+  width: 88px;
+  transform: rotate(-3deg);
+}
+
+.ms-agregar-receta,
+.ms-agregar-buscar {
+  padding: 28px 28px 28px;
+}
+
+.ms-agregar-receta {
+  min-height: 640px;
+}
+
+// Input "a mano" para el nombre (Figma: campo editable estilo input()).
+.ms-agregar-nombre-input {
+  display: block;
+  width: 100%;
+  margin: 1px 0 0;
+  padding: 0 0 6px;
+  border: none;
+  border-bottom: 1.5px solid var(--ms-tinta-oscura);
+  outline: none;
+  background: transparent;
+  font-family: var(--ms-font-libreta);
+  font-weight: 700;
+  font-size: 32px;
+  color: var(--ms-tinta-azul);
+
+  &::placeholder {
+    color: var(--ms-lapiz);
+    opacity: 1;
+  }
+}
+
+.ms-agregar-linea-roja {
+  height: 1.5px;
+  margin: 20px 0 24px;
+  background: var(--ms-margen-rojo);
+  opacity: 0.7;
+}
+
+.ms-agregar-buscar-label {
+  margin-top: 20px;
+}
+
+.ms-agregar-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 5px 0 24px;
+}
+
+.ms-agregar-chip-dia {
+  width: 50px;
+  height: 36px;
+}
+
+.ms-agregar-chip-tipo {
+  width: 120px;
+  height: 36px;
+}
+
+.ms-agregar-foto-fila {
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+  height: 196px;
+  margin: 15px 0 22px 4px;
+}
+
+.ms-agregar-polaroid-wrap {
+  position: relative;
+  transform: rotate(-2deg);
+}
+
+.ms-agregar-polaroid-cinta {
+  top: -10px;
+  left: calc(50% - 30px);
+  width: 60px;
+  transform: rotate(3deg);
+}
+
+.ms-agregar-polaroid {
+  position: relative;
+  display: block;
+  width: 170px;
+  height: 196px;
+  padding: 0;
+  border: none;
+  border-radius: 2px;
+  background: #ffffff;
+  box-shadow: var(--ms-sombra-suave);
+}
+
+.ms-agregar-polaroid-foto {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  width: 150px;
+  height: 146px;
+  overflow: hidden;
+  background: var(--ms-papel-oscuro);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  ion-icon {
+    font-size: 32px;
+    color: var(--ms-tinta-azul);
+  }
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.ms-agregar-polaroid-caption {
+  position: absolute;
+  top: 158px;
+  left: 6px;
+  right: 6px;
+  text-align: center;
+  font-family: var(--ms-font-libreta);
+  font-weight: 700;
+  font-size: 18px;
+  line-height: 20px;
+  color: var(--ms-tinta-oscura);
+}
+
+.ms-agregar-subir-foto {
+  width: 186px;
+  height: 190px;
+  box-sizing: border-box;
+  padding: 44px 16px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: 1.5px dashed var(--ms-tinta-azul);
+  border-radius: 8px;
+  background: transparent;
+
+  ion-icon {
+    font-size: 40px;
+    color: var(--ms-tinta-azul);
+  }
+}
+
+.ms-agregar-subir-foto-titulo {
+  margin-top: 12px;
+  font-family: var(--ms-font-boleta);
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ms-tinta-azul);
+}
+
+.ms-agregar-subir-foto-sub {
+  margin-top: 6px;
+  font-family: var(--ms-font-libreta);
+  font-weight: 700;
+  font-size: 20px;
+  line-height: 22px;
+  color: var(--ms-lapiz);
+  text-align: center;
+}
+
+.ms-agregar-notas {
+  display: block;
+  width: 100%;
+  margin: 1px 0 0;
+  padding: 0;
+  border: none;
+  outline: none;
+  resize: none;
+  background: transparent;
+  font-family: var(--ms-font-libreta);
+  font-weight: 700;
+  font-size: 22px;
+  line-height: 28px;
+  color: var(--ms-tinta-azul);
+
+  &::placeholder {
+    color: var(--ms-lapiz);
+    opacity: 1;
+  }
+
+  &:focus {
+    box-shadow: 0 1.5px 0 0 var(--ms-tinta-oscura);
+  }
+}
+
+.ms-agregar-ingredientes {
+  min-height: 640px;
+  padding: 20px 28px 28px;
+}
+
+.ms-agregar-ingredientes-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 48px;
+}
+
+.ms-agregar-ingredientes-titulo {
+  margin: 0;
+  font-family: var(--ms-font-libreta);
+  font-weight: 700;
+  font-size: 38px;
+  line-height: 48px;
+  color: var(--ms-tinta-oscura);
+}
+
+.ms-agregar-ingredientes-linea {
+  height: 1.5px;
+  margin-top: 16px;
+  background: var(--ms-tinta-oscura);
+}
+
+.ms-agregar-ingredientes-vacio {
+  margin: 24px 0 0;
+  font-family: var(--ms-font-libreta);
+  font-size: 22px;
+  color: var(--ms-lapiz);
+}
+
+.ms-agregar-tabla-fila {
+  display: grid;
+  grid-template-columns: 312px minmax(0, 1fr) 72px;
+  align-items: center;
+  height: 60px;
+  box-sizing: border-box;
+  border-bottom: 1px solid var(--ms-renglon);
+}
+
+.ms-agregar-tabla-encabezado {
+  height: auto;
+  margin: 8.5px 0 3px;
+  padding-bottom: 9px;
+}
+
+.ms-agregar-ingrediente-nombre {
+  font-family: var(--ms-font-libreta);
+  font-weight: 700;
+  font-size: 28px;
+  color: var(--ms-tinta-oscura);
+}
+
+.ms-agregar-ingrediente-cantidad {
+  font-family: var(--ms-font-boleta);
+  font-size: 14px;
+  color: var(--ms-lapiz);
+}
+
+.ms-agregar-quitar {
+  width: 34px;
+  height: 34px;
+  margin-left: 8px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1.5px solid var(--ms-margen-rojo);
+  background: var(--ms-papel-hoja);
+  color: var(--ms-margen-rojo);
+
+  ion-icon {
+    font-size: 19px;
+  }
+}
+
+.ms-agregar-agregar-ingrediente {
+  width: 300px;
+  height: 50px;
+  margin-top: 20px;
+}
+
+// Lista de comidas guardadas a escala desktop (filas más grandes que en
+// mobile, para aprovechar el ancho de la tarjeta derecha).
+.ms-agregar-guardada-lista-desktop {
+  margin-top: 4px;
+
+  .ms-guardada-row {
+    padding: 14px;
+  }
+}
+
+.ms-guardada-nombre--desktop {
+  font-size: 1.4rem;
+}
