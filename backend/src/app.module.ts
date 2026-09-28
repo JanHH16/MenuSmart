@@ -14,13 +14,15 @@ import { IngredientsModule } from './ingredients/ingredients.module';
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => {
+        const esProduccion = config.get<string>('NODE_ENV') === 'production';
+
         // Algunos proveedores administrados (ej. Render) solo entregan una
         // connection string completa, no host/usuario/password por separado.
         const databaseUrl = config.get<string>('DATABASE_URL');
         const connectionOptions = databaseUrl
           ? { url: databaseUrl }
           : {
-              host: config.get<string>('DATABASE_HOST'),
+              host: config.get<string>('DATABASE_HOST', 'localhost'),
               port: parseInt(config.get<string>('DATABASE_PORT', '5432'), 10),
               username: config.get<string>('DATABASE_USER'),
               password: config.get<string>('DATABASE_PASSWORD'),
@@ -32,10 +34,14 @@ import { IngredientsModule } from './ingredients/ingredients.module';
           ...connectionOptions,
           autoLoadEntities: true,
           migrations: [__dirname + '/migrations/*{.ts,.js}'],
-          migrationsRun: true,
+          // synchronize y migrationsRun no pueden convivir: TypeORM corre
+          // synchronize() antes que las migraciones, así que si ambos están
+          // activos, la migración inicial choca con "la tabla ya existe".
           // En desarrollo, synchronize agiliza iterar sobre entidades nuevas;
-          // en producción la única fuente de verdad del esquema son las migraciones.
-          synchronize: config.get<string>('NODE_ENV') !== 'production',
+          // en producción la única fuente de verdad del esquema son las
+          // migraciones.
+          migrationsRun: esProduccion,
+          synchronize: !esProduccion,
         };
       },
     }),
