@@ -16,13 +16,22 @@ import { IngredientsModule } from './ingredients/ingredients.module';
       useFactory: (config: ConfigService) => {
         const esProduccion = config.get<string>('NODE_ENV') === 'production';
 
+        // Algunos proveedores administrados (ej. Render) solo entregan una
+        // connection string completa, no host/usuario/password por separado.
+        const databaseUrl = config.get<string>('DATABASE_URL');
+        const connectionOptions = databaseUrl
+          ? { url: databaseUrl }
+          : {
+              host: config.get<string>('DATABASE_HOST', 'localhost'),
+              port: parseInt(config.get<string>('DATABASE_PORT', '5432'), 10),
+              username: config.get<string>('DATABASE_USER'),
+              password: config.get<string>('DATABASE_PASSWORD'),
+              database: config.get<string>('DATABASE_NAME'),
+            };
+
         return {
           type: 'postgres' as const,
-          host: config.get<string>('DATABASE_HOST', 'localhost'),
-          port: parseInt(config.get<string>('DATABASE_PORT', '5432'), 10),
-          username: config.get<string>('DATABASE_USER'),
-          password: config.get<string>('DATABASE_PASSWORD'),
-          database: config.get<string>('DATABASE_NAME'),
+          ...connectionOptions,
           autoLoadEntities: true,
           migrations: [__dirname + '/migrations/*{.ts,.js}'],
           // synchronize y migrationsRun no pueden convivir: TypeORM corre
