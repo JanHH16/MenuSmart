@@ -1,33 +1,135 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-title>MenuSmart</ion-title>
-  </ion-toolbar>
-</ion-header>
+<!-- Variante clara (Figma: logoMark(onDark=false)): sobre fondo papel, cuerpo
+     de la boleta en tinta azul y líneas internas blancas. -->
+<ng-template #logoSvg>
+  <svg viewBox="0 0 64 64" class="ms-logo-svg" xmlns="http://www.w3.org/2000/svg">
+    <path
+      d="M8 4H56V56L51.2 61L46.4 56L41.6 61L36.8 56L32 61L27.2 56L22.4 61L17.6 56L12.8 61L8 56Z"
+      fill="var(--ms-tinta-azul)"
+    />
+    <rect x="15" y="13" width="30" height="9" rx="2" fill="var(--ms-marcador)" transform="rotate(-4 30 17)" />
+    <rect x="16" y="30" width="32" height="3.5" rx="1.75" fill="var(--ms-papel-hoja)" />
+    <rect x="16" y="39" width="17" height="3.5" rx="1.75" fill="var(--ms-papel-hoja)" />
+    <path
+      d="M36 41l5 5 10-12"
+      fill="none"
+      stroke="var(--ms-marcador)"
+      stroke-width="4.5"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+  </svg>
+</ng-template>
 
-<ion-content class="ion-padding">
+<!-- Variante oscura (Figma: logoMark(onDark=true)): sobre fondo tinta,
+     cuerpo de la boleta en papel y líneas internas en tinta azul — NO es la
+     variante clara de arriba, los colores se invierten. -->
+<ng-template #logoSvgDark>
+  <svg viewBox="0 0 64 64" class="ms-logo-svg" xmlns="http://www.w3.org/2000/svg">
+    <path
+      d="M8 4H56V56L51.2 61L46.4 56L41.6 61L36.8 56L32 61L27.2 56L22.4 61L17.6 56L12.8 61L8 56Z"
+      fill="var(--ms-papel-hoja)"
+    />
+    <rect x="15" y="13" width="30" height="9" rx="2" fill="var(--ms-marcador)" transform="rotate(-4 30 17)" />
+    <rect x="16" y="30" width="32" height="3.5" rx="1.75" fill="var(--ms-tinta-azul)" />
+    <rect x="16" y="39" width="17" height="3.5" rx="1.75" fill="var(--ms-tinta-azul)" />
+    <path
+      d="M36 41l5 5 10-12"
+      fill="none"
+      stroke="var(--ms-marcador)"
+      stroke-width="4.5"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+  </svg>
+</ng-template>
+
+<ng-template #loginForm>
   <form [formGroup]="form" (ngSubmit)="submit()">
-    <ion-item>
-      <ion-label position="floating">Email</ion-label>
-      <ion-input type="email" formControlName="email"></ion-input>
+    <ion-item lines="full" class="ms-field">
+      <ion-label position="stacked">Email</ion-label>
+      <ion-input type="email" formControlName="email" placeholder="tu@correo.cl"></ion-input>
     </ion-item>
 
-    <ion-item>
-      <ion-label position="floating">Contraseña</ion-label>
+    <ion-item lines="full" class="ms-field">
+      <ion-label position="stacked">Contraseña</ion-label>
       <ion-input type="password" formControlName="password"></ion-input>
     </ion-item>
 
     @if (errorMessage) {
-      <ion-text color="danger">
-        <p>{{ errorMessage }}</p>
-      </ion-text>
+      <p class="ms-error">✕ {{ errorMessage }}</p>
     }
 
-    <ion-button expand="block" type="submit" [disabled]="form.invalid || loading">
-      Iniciar sesión
+    <ion-button expand="block" type="submit" class="ms-btn-primary" [disabled]="form.invalid || loading">
+      @if (loading) {
+        <ion-spinner name="dots" slot="start"></ion-spinner>
+      }
+      <span>Iniciar sesión</span>
     </ion-button>
   </form>
 
-  <ion-button expand="block" fill="clear" routerLink="/register">
-    ¿No tienes cuenta? Regístrate
-  </ion-button>
+  <p class="ms-auth-footer">
+    ¿No tienes cuenta? <a routerLink="/register">Regístrate</a>
+  </p>
+</ng-template>
+
+<ion-content class="ms-auth-content" [fullscreen]="true">
+  @if (esDesktop$ | async) {
+    <!-- Desktop (Figma "D1. Login"): panel de marca a la izquierda, tarjeta
+         de libreta a la derecha — NO es la tarjeta mobile centrada estirada,
+         es otra estructura (dos columnas fijas de altura completa). -->
+    <div class="ms-auth-desktop">
+      <div class="ms-auth-brand">
+        <div class="ms-auth-brand-inner">
+          <div class="ms-auth-brand-top">
+            <div class="ms-auth-brand-icon">
+              <ng-container [ngTemplateOutlet]="logoSvgDark"></ng-container>
+            </div>
+            <span class="ms-logo-text ms-logo-text--brand">
+              <span class="ms-logo-menu ms-logo-menu--brand">menu</span><span class="ms-logo-accent">smart</span>
+            </span>
+          </div>
+          <p class="ms-auth-brand-tagline">planifica tu semana,<br />anota tu lista,<br />ahorra en el súper.</p>
+
+          <!-- align-self:flex-end la manda al borde derecho de ESTA columna,
+               que ahora ocupa el 100% del panel (ver .ms-auth-brand-inner) —
+               así queda pegada al borde derecho real y agrupada con el
+               logo/tagline como un solo bloque, igual que en Figma. -->
+          <div class="ms-auth-brand-receipt">
+            <span class="ms-auth-brand-receipt-linea" style="width: 78%"></span>
+            <span class="ms-auth-brand-receipt-linea" style="width: 55%"></span>
+            <span class="ms-auth-brand-receipt-linea" style="width: 78%"></span>
+            <span class="ms-auth-brand-receipt-linea" style="width: 66%"></span>
+            <span class="ms-auth-brand-receipt-linea" style="width: 50%"></span>
+            <span class="ms-stamp-ahorro">Ahorro<br />$15.000</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="ms-auth-desktop-panel">
+        <div class="ms-card-libreta ms-auth-card ms-auth-card--desktop">
+          <span class="ms-auth-card-cinta"></span>
+          <h1 class="ms-heading-libreta">hola de nuevo</h1>
+          <p class="ms-text-secondary ms-auth-subtitle">Inicia sesión para ver tu semana</p>
+          <ng-container [ngTemplateOutlet]="loginForm"></ng-container>
+        </div>
+      </div>
+    </div>
+  } @else {
+    <div class="ms-auth-wrapper">
+      <div class="ms-auth-logo">
+        <ng-container [ngTemplateOutlet]="logoSvg"></ng-container>
+        <span class="ms-logo-text"><span class="ms-logo-menu">menu</span><span class="ms-logo-accent">smart</span></span>
+      </div>
+
+      <div class="ms-card-libreta ms-auth-card">
+        <span class="ms-auth-card-cinta ms-auth-card-cinta--izq"></span>
+        <span class="ms-auth-card-cinta ms-auth-card-cinta--der"></span>
+        <h1 class="ms-heading-libreta">hola de nuevo</h1>
+        <p class="ms-text-secondary ms-auth-subtitle">Inicia sesión para ver tu semana</p>
+        <ng-container [ngTemplateOutlet]="loginForm"></ng-container>
+      </div>
+
+      <p class="ms-tagline">planifica · anota · ahorra</p>
+    </div>
+  }
 </ion-content>

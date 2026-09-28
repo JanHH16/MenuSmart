@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { LayoutService } from '../core/services/layout.service';
 
 @Component({
   selector: 'app-tabs',
@@ -7,7 +8,7 @@ import { Component } from '@angular/core';
   standalone: false,
 })
 export class TabsPage {
+  private readonly layoutService = inject(LayoutService);
 
-  constructor() {}
-
+  readonly esDesktop$ = this.layoutService.esDesktop$;
 }

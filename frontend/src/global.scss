@@ -32,6 +32,826 @@
  * https://ionicframework.com/docs/theming/dark-mode
  */
 
+/* El diseño de MenuSmart (Figma) es de tema único "libreta y boleta" sobre
+ * fondo papel claro; no está pensado para adaptarse al modo oscuro del
+ * sistema. Si se habilita dark.system, Ionic recalcula automáticamente los
+ * colores de labels/placeholders para un fondo oscuro (quedan en blanco)
+ * mientras el fondo sigue siendo el papel claro definido en variables.scss,
+ * y el contraste se rompe. Por eso queda desactivado a propósito. */
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
-@import "@ionic/angular/css/palettes/dark.system.css";
+/* @import "@ionic/angular/css/palettes/dark.system.css"; */
+
+/**
+ * Utilidades del sistema de diseño "libreta y boleta" (ver Figma).
+ * Se dejan como clases globales porque las usan varias paginas/pestañas.
+ */
+
+// Titulo estilo "escrito a mano", con el marcador amarillo detras del texto.
+.ms-heading-libreta {
+  font-family: var(--ms-font-libreta);
+  font-weight: 700;
+  font-size: 2rem;
+  color: var(--ms-tinta-oscura);
+  display: inline-block;
+  position: relative;
+  margin: 0;
+
+  &::after {
+    content: '';
+    position: absolute;
+    left: -0.15em;
+    right: -0.15em;
+    bottom: 0.05em;
+    height: 0.35em;
+    background: var(--ms-marcador);
+    z-index: -1;
+    border-radius: 2px;
+  }
+}
+
+// Tarjeta con look de "hoja de libreta": fondo papel, borde dentado (boleta)
+// y un margen rojo vertical del lado izquierdo.
+.ms-card-libreta {
+  position: relative;
+  background: var(--ms-papel-hoja);
+  border: 1px solid var(--ms-papel-oscuro);
+  border-radius: 12px;
+  padding: 24px 20px 24px 32px;
+  box-shadow: 0 6px 16px rgba(27, 31, 59, 0.08);
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 16px;
+    bottom: 16px;
+    left: 18px;
+    width: 1px;
+    background: var(--ms-margen-rojo);
+    opacity: 0.5;
+  }
+}
+
+// Texto/valores con look de boleta impresa (precios, cantidades, totales).
+.ms-mono {
+  font-family: var(--ms-font-boleta);
+}
+
+.ms-text-secondary {
+  color: var(--ms-lapiz);
+}
+
+// Etiqueta pequeña en mayúsculas (nombres de sección, "N items", etc.)
+.ms-label-secundario {
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  color: var(--ms-lapiz);
+}
+
+// Título de página chico puesto al lado (no como slot de ion-title) en
+// toolbars con botón "volver", ej. Detalle de comida.
+.ms-toolbar-label {
+  align-self: center;
+  margin-right: 12px;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  color: var(--ms-lapiz);
+}
+
+.ms-text-ahorro {
+  color: var(--ms-timbre-verde);
+  font-weight: 700;
+}
+
+// ---------------------------------------------------------------------------
+// Compartido entre Login y Registro (pantallas de autenticación)
+// ---------------------------------------------------------------------------
+// El fondo de estas pantallas en Figma es el kraft/papel claro de siempre
+// (--ms-papel, ya el default de --ion-background-color), NO azul — se deja
+// explícito acá solo para que quede documentado, no porque haga falta.
+.ms-auth-content {
+  --background: var(--ms-papel);
+}
+
+.ms-auth-wrapper {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  padding: 32px 20px;
+  box-sizing: border-box;
+}
+
+.ms-auth-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ms-logo-svg {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+}
+
+.ms-logo-text {
+  font-family: var(--ms-font-libreta);
+  font-weight: 700;
+  font-size: 1.6rem;
+}
+
+.ms-logo-menu {
+  color: var(--ms-tinta-oscura);
+}
+
+// El "marcador" amarillo detrás de "smart", como en la guía de estilo.
+.ms-logo-accent {
+  position: relative;
+  color: var(--ms-tinta-azul);
+
+  &::after {
+    content: '';
+    position: absolute;
+    left: -0.05em;
+    right: -0.1em;
+    bottom: 0.05em;
+    height: 0.3em;
+    background: var(--ms-marcador);
+    z-index: -1;
+    border-radius: 2px;
+  }
+}
+
+.ms-auth-card {
+  width: 100%;
+  max-width: 360px;
+  // Píxeles EXACTOS del archivo fuente (mobile: loginForm/registerForm
+  // llamado con x=56, y=40) — bastante más adentro que el padding:24px/32px
+  // genérico de .ms-card-libreta (pensado para tarjetas sin el perforado de
+  // libreta). Sin esto el título queda pegado arriba y a la izquierda, en
+  // vez de con el mismo aire que en el prototipo.
+  padding-top: 40px;
+  padding-left: 56px;
+
+  // Figma dibuja "hola de nuevo"/"crea tu libreta" a tamaño 40 (hand),
+  // más grande que el genérico de .ms-heading-libreta (32px) que usan el
+  // resto de las pantallas.
+  .ms-heading-libreta {
+    font-size: 2.5rem;
+  }
+}
+
+.ms-auth-subtitle {
+  margin: 4px 0 16px;
+  font-size: 0.75rem;
+}
+
+.ms-field {
+  --background: transparent;
+  --padding-start: 0;
+  margin-bottom: 4px;
+
+  // Lo que el usuario escribe se ve "a mano" (Caveat), como en el Figma.
+  ion-input,
+  ion-textarea {
+    --color: var(--ms-tinta-azul);
+    --placeholder-color: var(--ms-lapiz);
+    --placeholder-opacity: 1;
+    font-family: var(--ms-font-libreta);
+    font-size: 1.2rem;
+  }
+
+  ion-label {
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    color: var(--ms-lapiz);
+  }
+}
+
+.ms-error {
+  color: var(--ms-margen-rojo);
+  font-size: 0.9rem;
+  margin: 4px 0 12px;
+}
+
+// Botón "de boleta": relleno sólido, borde y sombra dura sin difuminar
+// (offset 3px, sin blur) — así se ve en el prototipo, no como una sombra
+// suave de Material Design.
+.ms-btn-primary {
+  --background: var(--ms-tinta-azul);
+  --background-hover: var(--ms-tinta-oscura);
+  --border-radius: 6px;
+  --border-width: 1.5px;
+  --border-style: solid;
+  --border-color: var(--ms-tinta-oscura);
+  --box-shadow: 3px 3px 0 0 var(--ms-tinta-oscura);
+  font-family: var(--ms-font-boleta);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-top: 12px;
+}
+
+.ms-auth-footer {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 0.75rem;
+  color: var(--ms-tinta-oscura);
+
+  a {
+    color: var(--ms-tinta-azul);
+    font-weight: 700;
+    text-decoration: underline;
+  }
+}
+
+.ms-tagline {
+  font-family: var(--ms-font-libreta);
+  color: var(--ms-tinta-oscura);
+  opacity: 0.5;
+  font-size: 1.1rem;
+}
+
+.ms-back-link {
+  --color: var(--ms-tinta-azul);
+  --padding-start: 0;
+  font-family: var(--ms-font-boleta);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.8rem;
+}
+
+// Header transparente para el botón "Volver" de Registro: en Figma queda
+// fuera de la hoja de papel, flotando sobre el fondo kraft de la pantalla.
+.ms-auth-header {
+  ion-toolbar {
+    --background: var(--ms-papel);
+    --border-width: 0;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Desktop adaptativo de Login/Registro (Figma "D1/D2"): panel de marca a la
+// izquierda + tarjeta a la derecha. Es una ESTRUCTURA distinta a la tarjeta
+// mobile centrada (ver LayoutService / *ngIf en login.page.html), no el
+// mismo layout reacomodado con media queries.
+// ---------------------------------------------------------------------------
+.ms-auth-desktop {
+  min-height: 100%;
+  display: flex;
+}
+
+.ms-auth-brand {
+  position: relative;
+  flex: 0 0 50%;
+  background: var(--ms-tinta-azul);
+  // Rayado sutil (Figma: helper ruled(), opacity 0.1) sobre el panel de
+  // marca — líneas horizontales blancas cada 36px, no un fondo liso.
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 35px,
+    rgba(255, 255, 255, 0.14) 35px,
+    rgba(255, 255, 255, 0.14) 36px
+  );
+  background-position: 0 24px;
+  color: var(--ms-papel-hoja);
+  display: flex;
+  flex-direction: column;
+  // flex-start (NO center): Figma fija el logo a una distancia constante del
+  // borde izquierdo del panel (x=120 sobre un panel de 720px). Si esta
+  // columna se centrara en el panel completo, en un monitor 2K/4K (panel
+  // de 1000px+) el bloque quedaría flotando lejos del borde con un espacio
+  // vacío enorme a los costados en vez de pegado a la izquierda como en el
+  // prototipo — centrar solo funciona para el ancho exacto de Figma (1440px).
+  align-items: flex-start;
+  justify-content: center;
+  padding: 64px;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+// Columna de contenido con ancho tope: sin esto, en una ventana más ancha
+// que 1440px la boleta (self-end dentro de esta columna) quedaría demasiado
+// lejos del logo. Con el tope, boleta y logo se mantienen agrupados sin
+// importar el ancho real de la ventana; lo que cambia con el ancho es solo
+// cuánto rayado azul liso queda a la derecha, igual que crecería el margen
+// derecho de una hoja impresa en un pliego más grande.
+.ms-auth-brand-inner {
+  // 100% (no max-width chico): la boleta vive adentro con align-self:
+  // flex-end, así que esta columna necesita todo el ancho disponible del
+  // panel para que la boleta llegue al borde derecho real — el texto
+  // (logo/wordmark/tagline) igual queda a la izquierda porque son
+  // elementos de bloque que no se estiran solos.
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+// Ícono (logoMark) apilado ARRIBA del wordmark "menusmart" — no en fila,
+// como en el lockup chico del header — así se ve en el panel de marca.
+.ms-auth-brand-top {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 20px;
+  margin-bottom: 36px;
+}
+
+.ms-auth-brand-icon .ms-logo-svg {
+  width: 76px;
+  height: 76px;
+}
+
+.ms-logo-text--brand {
+  font-size: 3.6rem;
+}
+
+.ms-logo-menu--brand {
+  color: var(--ms-papel-hoja);
+}
+
+// Sobre el panel de marca (fondo tinta azul) "smart" es amarillo marcador
+// SIN el resaltado detrás (Figma: wordmark(..., onDark=true) usa
+// `color: C.marker` a secas) — el resaltado con `::after` solo existe en la
+// variante clara (texto azul + marcador detrás).
+.ms-logo-text--brand .ms-logo-accent {
+  color: var(--ms-marcador);
+
+  &::after {
+    content: none;
+  }
+}
+
+.ms-auth-brand-tagline {
+  font-family: var(--ms-font-libreta);
+  font-size: 2.2rem;
+  line-height: 1.3;
+  opacity: 0.9;
+  margin: 0;
+}
+
+// Boleta decorativa con el timbre "Ahorro 15.000" (Figma: helpers receipt() +
+// stamp()), anclada al borde INFERIOR DERECHO del panel completo (posición
+// absoluta e independiente del bloque de texto de la izquierda) — no
+// flex/align-self dentro de esa columna, porque entonces quedaría pegada al
+// borde derecho de la columna angosta de texto en vez del panel entero.
+.ms-auth-brand-receipt {
+  align-self: flex-end;
+  margin-top: 40px;
+  width: 180px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  padding: 28px 18px 56px;
+  background: var(--ms-papel-hoja);
+  color: var(--ms-tinta-oscura);
+  transform: rotate(8deg);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.3);
+  clip-path: polygon(
+    0% 4%, 8% 0%, 17% 4%, 25% 0%, 33% 4%, 42% 0%, 50% 4%, 58% 0%, 67% 4%, 75% 0%, 83% 4%, 92% 0%, 100% 4%,
+    100% 96%, 92% 100%, 83% 96%, 75% 100%, 67% 96%, 58% 100%, 50% 96%, 42% 100%, 33% 96%, 25% 100%, 17% 96%, 8% 100%, 0% 96%
+  );
+}
+
+.ms-auth-brand-receipt-linea {
+  display: block;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--ms-papel-oscuro);
+}
+
+.ms-stamp-ahorro {
+  align-self: center;
+  margin-top: 4px;
+  border: 2px solid var(--ms-timbre-verde);
+  border-radius: 4px;
+  padding: 8px 14px;
+  color: var(--ms-timbre-verde);
+  font-family: var(--ms-font-boleta);
+  font-weight: 700;
+  font-size: 0.7rem;
+  line-height: 1.35;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transform: rotate(-8deg);
+}
+
+.ms-auth-desktop-panel {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  box-sizing: border-box;
+}
+
+.ms-auth-back-desktop {
+  position: absolute;
+  top: 32px;
+  left: 48px;
+}
+
+.ms-auth-card--desktop {
+  width: 100%;
+  // Píxeles EXACTOS del archivo fuente: notebookCard(x=DW/2+150, w=420,
+  // h=430) y loginForm/registerForm llamados con x=64, w=420-64-40, y=44 —
+  // distintos de los de mobile (56/40), por eso van en un selector aparte.
+  max-width: 420px;
+  padding-top: 44px;
+  padding-left: 64px;
+  padding-right: 40px;
+}
+
+// Cinta adhesiva sobre el borde superior de la tarjeta (Figma: helper
+// tape()). Mobile trae dos (izq/der o una centrada); desktop trae una sola
+// cerca de la esquina superior derecha.
+.ms-auth-card-cinta {
+  position: absolute;
+  top: -10px;
+  right: 40px;
+  width: 90px;
+  height: 22px;
+  background: var(--ms-cinta);
+  opacity: 0.85;
+  transform: rotate(6deg);
+  pointer-events: none;
+
+  &--izq {
+    left: 14px;
+    right: auto;
+    top: -10px;
+    transform: rotate(-7deg);
+  }
+
+  &--der {
+    right: 12px;
+    top: -8px;
+    transform: rotate(6deg);
+  }
+
+  &--centro {
+    left: 50%;
+    right: auto;
+    top: -10px;
+    transform: translateX(-50%) rotate(-3deg);
+  }
+}
+
+// Perforado "anillado" de libreta (Figma: helper notebookCard(), círculos
+// del color del fondo detrás de la tarjeta). En desktop va en el borde
+// IZQUIERDO (columna vertical); en mobile va en el borde SUPERIOR (fila
+// horizontal) — son las dos variantes que usa Figma para "D1/D2" vs "1/2".
+.ms-auth-card--desktop::after {
+  content: '';
+  position: absolute;
+  top: 20px;
+  bottom: 20px;
+  left: 4px;
+  width: 10px;
+  background-image: radial-gradient(circle, var(--ms-papel) 4px, transparent 4.3px);
+  background-repeat: repeat-y;
+  background-size: 100% 28px;
+  background-position: center 4px;
+}
+
+.ms-auth-card:not(.ms-auth-card--desktop)::after {
+  content: '';
+  position: absolute;
+  top: 4px;
+  left: 20px;
+  right: 20px;
+  height: 10px;
+  background-image: radial-gradient(circle, var(--ms-papel) 4px, transparent 4.3px);
+  background-repeat: repeat-x;
+  background-size: 28px 100%;
+  background-position: 4px center;
+}
+
+// Contraseña + confirmar contraseña lado a lado (solo en el registro
+// desktop; en mobile van apiladas, una ion-item por fila).
+.ms-field-row {
+  display: flex;
+  gap: 10px;
+
+  .ms-field {
+    flex: 1;
+    min-width: 0;
+
+    // "Confirmar contraseña" no entra en 1 línea en esta columna angosta
+    // (420px de tarjeta, medida exacta de Figma) y "Contraseña" sí — sin
+    // esto, cuando una envuelve a 2 líneas y la otra no, sus inputs quedan
+    // desalineados. En vez de achicar la fuente (ya probamos eso, se veía
+    // distinto al resto de los labels), se reserva altura fija para 2
+    // líneas en AMBAS columnas, así el input siempre arranca en el mismo
+    // lugar sin importar si su label envuelve o no.
+    ion-label {
+      min-height: 48px;
+      display: inline-block;
+    }
+  }
+}
+
+.ms-modal-card {
+  --width: 320px;
+  --height: 320px;
+  --border-radius: 16px;
+  --box-shadow: 0 10px 30px rgba(27, 31, 59, 0.25);
+}
+
+.ms-action-sheet {
+  --background: var(--ms-papel-hoja);
+}
+
+// Campo "Notas" de una comida (mobile: Agregar comida y Detalle) — se
+// escribe a mano sobre una línea, como el resto de los campos de libreta.
+.ms-notas-campo {
+  margin-bottom: 16px;
+}
+
+.ms-notas-input {
+  margin-top: 4px;
+  --color: var(--ms-tinta-azul);
+  --placeholder-color: var(--ms-lapiz);
+  --placeholder-opacity: 1;
+  --padding-start: 0;
+  font-family: var(--ms-font-libreta);
+  font-size: 1.15rem;
+  border-bottom: 1.5px solid var(--ms-tinta-oscura);
+}
+
+// ---------------------------------------------------------------------------
+// Pantallas desktop con sidebar (Figma "D3"–"D7"). Medidas del prototipo de
+// 1440×900: el contenido arranca en x=CX(300) → 40px a la derecha del menú
+// lateral de 260px, con 48px de margen derecho; el título va en y=28.
+// ---------------------------------------------------------------------------
+.ms-desktop-content {
+  --background: var(--ms-papel);
+}
+
+.ms-desktop-page {
+  padding: 28px 48px 40px 40px;
+}
+
+// Figma: pageTitle() → markerTitle(size 54) + subtítulo mono 12 en y=100. El
+// marcador va detrás del 52%–82% inferior del texto y sobresale 6px por lado.
+// La variante mobile usa el mismo markerTitle a tamaño 46.
+.ms-titulo-desktop,
+.ms-titulo-mobile {
+  position: relative;
+  isolation: isolate;
+  display: inline-block;
+  margin: 0;
+  font-family: var(--ms-font-libreta);
+  font-weight: 700;
+  font-size: 54px;
+  line-height: 68px;
+  color: var(--ms-tinta-oscura);
+
+  &::after {
+    content: '';
+    position: absolute;
+    left: -6px;
+    right: -6px;
+    top: 52%;
+    height: 30%;
+    background: var(--ms-marcador);
+    border-radius: 3px;
+    z-index: -1;
+  }
+}
+
+.ms-titulo-mobile {
+  font-size: 46px;
+  line-height: 58px;
+}
+
+.ms-subtitulo-desktop {
+  margin: 4px 0 0;
+  font-family: var(--ms-font-boleta);
+  font-size: 12px;
+  color: var(--ms-lapiz);
+}
+
+// Botón circular con ícono (Figma: iconBtn) — papel con borde de tinta.
+.ms-icon-btn {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border-radius: 50%;
+  border: 1.5px solid var(--ms-tinta-oscura);
+  background: var(--ms-papel-hoja);
+  color: var(--ms-tinta-oscura);
+
+  ion-icon {
+    font-size: 20px;
+  }
+}
+
+// Etiqueta tipo píldora (Figma: tag) — monoBold 9, mayúsculas, borde 1.2.
+.ms-tag-pildora {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 20px;
+  border: 1.2px solid var(--ms-tinta-azul);
+  font-family: var(--ms-font-boleta);
+  font-weight: 700;
+  font-size: 9px;
+  line-height: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ms-tinta-azul);
+  white-space: nowrap;
+}
+
+// Botón punteado (Figma: button(..., 'dashed')).
+.ms-btn-punteado {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  border: 1.5px dashed var(--ms-tinta-azul);
+  background: transparent;
+  color: var(--ms-tinta-azul);
+  font-family: var(--ms-font-boleta);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+// Tarjeta (Figma: card) — papel, radio 8, sombra suave, recorta contenido.
+.ms-card-desktop {
+  position: relative;
+  box-sizing: border-box;
+  border-radius: 8px;
+  background: var(--ms-papel-hoja);
+  box-shadow: var(--ms-sombra-suave);
+}
+
+// Etiqueta de campo/sección (Figma: label = monoBold 10, lápiz, mayúsculas).
+.ms-label-desktop {
+  display: block;
+  font-family: var(--ms-font-boleta);
+  font-weight: 700;
+  font-size: 10px;
+  line-height: 15px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ms-lapiz);
+}
+
+// Opción seleccionable (Figma: chip) — mono 11 en mayúsculas.
+.ms-chip-figma {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  border-radius: 6px;
+  border: 1.2px solid var(--ms-lapiz);
+  background: transparent;
+  font-family: var(--ms-font-boleta);
+  font-size: 11px;
+  text-transform: uppercase;
+  color: var(--ms-tinta-oscura);
+
+  &--activo {
+    background: var(--ms-tinta-azul);
+    border-color: var(--ms-tinta-oscura);
+    color: var(--ms-papel-hoja);
+    font-weight: 700;
+  }
+}
+
+// Botones de boleta (Figma: button primary/secondary) — borde 1.5 y sombra
+// dura de 3px.
+.ms-btn-figma {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  border-radius: 6px;
+  border: 1.5px solid var(--ms-tinta-oscura);
+  box-shadow: 3px 3px 0 0 var(--ms-tinta-oscura);
+  font-family: var(--ms-font-boleta);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: none;
+
+  &--primario {
+    background: var(--ms-tinta-azul);
+    color: var(--ms-papel-hoja);
+  }
+
+  &--secundario {
+    background: var(--ms-papel-hoja);
+    color: var(--ms-tinta-azul);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+  }
+}
+
+// "← Volver" (Figma: backLink) — ícono de 24 + monoBold 12 en tinta azul.
+.ms-volver-desktop {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 0;
+  border: none;
+  background: none;
+  font-family: var(--ms-font-boleta);
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ms-tinta-azul);
+
+  ion-icon {
+    font-size: 24px;
+  }
+}
+
+// Checkbox de libreta (Figma: checkbox) — 18px, borde de tinta 1.5, radio 3;
+// marcado: relleno tinta azul con check blanco.
+.ms-checkbox-figma {
+  appearance: none;
+  -webkit-appearance: none;
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  border-radius: 3px;
+  border: 1.5px solid var(--ms-tinta-oscura);
+  background: var(--ms-papel-hoja) center / 16px 16px no-repeat;
+  cursor: pointer;
+
+  &:checked {
+    background-color: var(--ms-tinta-azul);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23FBF7EE' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7'/%3E%3C/svg%3E");
+  }
+}
+
+// Timbre de goma verde (Figma: stamp) — doble borde (2.5px + línea interior
+// de 1px a 4px del borde), monoBold en mayúsculas, opacidad 0.9.
+.ms-timbre {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  border: 2.5px solid var(--ms-timbre-verde);
+  border-radius: 4px;
+  outline: 1px solid var(--ms-timbre-verde);
+  outline-offset: -5px;
+  opacity: 0.9;
+  font-family: var(--ms-font-boleta);
+  font-weight: 700;
+  line-height: 1.35;
+  letter-spacing: 0.06em;
+  text-align: center;
+  text-transform: uppercase;
+  color: var(--ms-timbre-verde);
+}
+
+// Cinta adhesiva suelta (Figma: tape, 22px de alto, opacidad 0.85).
+.ms-cinta {
+  position: absolute;
+  height: 22px;
+  background: var(--ms-cinta);
+  opacity: 0.85;
+  pointer-events: none;
+  z-index: 1;
+}
+
+// Nota adhesiva (Figma: note) — post-it amarillo, texto a mano, sombra suave.
+.ms-nota-adhesiva {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 14px;
+  border: none;
+  border-radius: 2px;
+  background: var(--ms-marcador);
+  box-shadow: var(--ms-sombra-suave);
+  font-family: var(--ms-font-libreta);
+  font-weight: 700;
+  font-size: 24px;
+  line-height: 1.1;
+  color: var(--ms-tinta-oscura);
+  text-align: center;
+}

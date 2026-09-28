@@ -1,13 +1,128 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-title>Plan semanal</ion-title>
-    <ion-buttons slot="end">
-      <ion-button (click)="logout()">Salir</ion-button>
-    </ion-buttons>
-  </ion-toolbar>
-</ion-header>
+@if (esDesktop$ | async) {
+  <!-- Desktop (Figma "D3. Plan semanal"): 7 columnas lado a lado (una por
+       día), con "+ agregar comida" y el selector de semana arriba — NO la
+       lista vertical de mobile estirada, es otra estructura. -->
+  <ion-content class="ms-desktop-content">
+    <div class="ms-desktop-page ms-plan-desktop">
+      <header class="ms-plan-desktop-header">
+        <div>
+          <h1 class="ms-titulo-desktop">tu semana</h1>
+          <p class="ms-subtitulo-desktop">Toca una comida para editarla</p>
+        </div>
 
-<ion-content class="ion-padding">
-  <!-- TODO: diseño real según Figma -->
-  <p>Aquí va el plan de comidas de la semana.</p>
-</ion-content>
+        <div class="ms-plan-desktop-header-actions">
+          <div class="ms-semana-selector">
+            <button type="button" class="ms-icon-btn" aria-label="Semana anterior">
+              <ion-icon name="chevron-back-outline"></ion-icon>
+            </button>
+            <span class="ms-semana-selector-rango">{{ rangoSemana }}</span>
+            <button type="button" class="ms-icon-btn" aria-label="Semana siguiente">
+              <ion-icon name="chevron-forward-outline"></ion-icon>
+            </button>
+          </div>
+
+          <button type="button" class="ms-nota-adhesiva ms-plan-nota-agregar" (click)="agregarComida()">
+            + agregar comida
+          </button>
+        </div>
+      </header>
+
+      <div class="ms-plan-columnas">
+        @for (dia of semana; track dia.numero) {
+          <div class="ms-dia-columna" [class.ms-dia-columna--hoy]="dia.esHoy">
+            <span class="ms-dia-columna-nombre">{{ dia.nombre }}</span>
+            <span class="ms-dia-columna-numero">{{ dia.numero }}</span>
+            @if (dia.esHoy) {
+              <span class="ms-tag-pildora ms-dia-columna-hoy">Hoy</span>
+            }
+
+            <div class="ms-dia-columna-comidas">
+              @for (comida of dia.comidas; track comida.id) {
+                <button type="button" class="ms-comida-card-desktop" (click)="abrirComida(comida.id)">
+                  <span class="ms-comida-card-desktop-tipo">{{ comida.tipo }}</span>
+                  <app-doodle class="ms-comida-card-desktop-doodle" [comida]="comida.nombre" [size]="24"></app-doodle>
+                  <span class="ms-comida-card-desktop-nombre">{{ comida.nombre }}</span>
+                </button>
+              }
+
+              @if (dia.comidas.length === 0) {
+                <p class="ms-dia-columna-vacio">nada planeado</p>
+                <button type="button" class="ms-btn-punteado ms-dia-columna-anotar" (click)="agregarComida()">
+                  + anotar
+                </button>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </ion-content>
+} @else {
+  <!-- Mobile (Figma "3. Plan semanal", buildPlanMobile): hoja de libreta
+       rayada cada 26px con margen rojo; cada día ocupa 3 renglones (78px) y
+       cada comida se escribe sobre un renglón. -->
+  <ion-content class="ms-plan-mobile-content" [fullscreen]="true">
+    <div class="ms-plan-mobile">
+      <header class="ms-plan-mobile-header">
+        <h1 class="ms-titulo-mobile">tu semana</h1>
+        <svg viewBox="0 0 64 64" class="ms-plan-mobile-logo" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path
+            d="M8 4H56V56L51.2 61L46.4 56L41.6 61L36.8 56L32 61L27.2 56L22.4 61L17.6 56L12.8 61L8 56Z"
+            fill="var(--ms-tinta-azul)"
+          />
+          <rect x="15" y="13" width="30" height="9" rx="2" fill="var(--ms-marcador)" transform="rotate(-4 30 17)" />
+          <rect x="16" y="30" width="32" height="3.5" rx="1.75" fill="var(--ms-papel-hoja)" />
+          <rect x="16" y="39" width="17" height="3.5" rx="1.75" fill="var(--ms-papel-hoja)" />
+          <path
+            d="M36 41l5 5 10-12"
+            fill="none"
+            stroke="var(--ms-marcador)"
+            stroke-width="4.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </header>
+
+      <div class="ms-semana-selector ms-plan-mobile-semana">
+        <button type="button" class="ms-icon-btn" aria-label="Semana anterior">
+          <ion-icon name="chevron-back-outline"></ion-icon>
+        </button>
+        <span class="ms-semana-selector-rango">{{ rangoSemana }}</span>
+        <button type="button" class="ms-icon-btn" aria-label="Semana siguiente">
+          <ion-icon name="chevron-forward-outline"></ion-icon>
+        </button>
+      </div>
+
+      @for (dia of semana; track dia.numero) {
+        <div class="ms-plan-dia" [class.ms-plan-dia--hoy]="dia.esHoy">
+          <div class="ms-plan-dia-fecha">
+            <span class="ms-plan-dia-corto">{{ dia.nombre.slice(0, 3) }}</span>
+            <span class="ms-plan-dia-numero">{{ dia.numero }}</span>
+            @if (dia.esHoy) {
+              <span class="ms-plan-dia-hoy">hoy</span>
+            }
+          </div>
+
+          <div class="ms-plan-dia-comidas">
+            @for (comida of dia.comidas; track comida.id) {
+              <button type="button" class="ms-plan-comida" (click)="abrirComida(comida.id)">
+                <app-doodle [comida]="comida.nombre" [size]="22"></app-doodle>
+                <span class="ms-plan-comida-nombre">{{ comida.nombre }}</span>
+                <span class="ms-plan-comida-tipo">{{ comida.tipo }}</span>
+              </button>
+            } @empty {
+              <p class="ms-plan-dia-vacio">nada planeado</p>
+            }
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- note('+ agregar comida', 144×60, rot -4) sobre la esquina inferior
+         derecha, en vez de un FAB circular. -->
+    <button slot="fixed" type="button" class="ms-nota-adhesiva ms-plan-mobile-agregar" (click)="agregarComida()">
+      + agregar comida
+    </button>
+  </ion-content>
+}
