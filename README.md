@@ -81,8 +81,8 @@ para el análisis completo de `robots.txt` y por qué se descartó Líder.
 
 ## Prototipo (Figma)
 
-- **[Prototipo navegable](https://www.figma.com/proto/wypZX6IwEnJy4xjiUCOl5E/MENUSMART---INGWEBAVANZADA?node-id=50-10692&p=f&viewport=-2178%2C207%2C0.74&t=fEgSVeStmNl4ZSWW-1&scaling=min-zoom&content-scaling=fixed&starting-point-node-id=50%3A10690&show-proto-sidebar=1&page-id=50%3A10462)**: se abre directo en modo presentación.
-- **[Archivo de diseño](https://www.figma.com/design/wypZX6IwEnJy4xjiUCOl5E/MENUSMART---INGWEBAVANZADA?node-id=50-10462&t=5fPKDI8QO3YoJub2-1)**: contiene las páginas *Prototipo* y *Guía de estilo*.
+- **[Prototipo navegable](https://www.figma.com/proto/wypZX6IwEnJy4xjiUCOl5E/MENUSMART---INGWEBAVANZADA?node-id=75-232&p=f&viewport=40%2C511%2C0.14&t=gLtPcKkSw3GX2q0W-1&scaling=min-zoom&content-scaling=fixed&starting-point-node-id=75%3A232&show-proto-sidebar=1&page-id=75%3A4)**: se abre directo en modo presentación.
+- **[Archivo de diseño](https://www.figma.com/design/wypZX6IwEnJy4xjiUCOl5E/MENUSMART---INGWEBAVANZADA?node-id=75-4&t=qnOBtnPnBOSqK8q9-1)**: contiene las páginas *Prototipo* y *Guía de estilo*.
 
 ### Cómo recorrerlo
 - En el panel lateral izquierdo (**Flows**) se elige el flujo:
