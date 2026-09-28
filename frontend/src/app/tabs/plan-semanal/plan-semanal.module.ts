@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 
 import { IonicModule } from '@ionic/angular/lazy';
 
+import { SharedModule } from '../../shared/shared.module';
 import { PlanSemanalPageRoutingModule } from './plan-semanal-routing.module';
 
 import { PlanSemanalPage } from './plan-semanal.page';
@@ -13,6 +14,7 @@ import { PlanSemanalPage } from './plan-semanal.page';
     CommonModule,
     FormsModule,
     IonicModule,
+    SharedModule,
     PlanSemanalPageRoutingModule
   ],
   declarations: [PlanSemanalPage]

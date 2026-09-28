@@ -1,10 +1,167 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-title>Comparador de precios</ion-title>
-  </ion-toolbar>
-</ion-header>
+@if (esDesktop$ | async) {
+  <!-- Desktop (Figma "D6. Comparador de precios"): boleta ancha (con
+       columnas Diferencia/Más barato) + tarjeta resumen con barras — NO la
+       boleta angosta de mobile, es otra estructura. -->
+  <ion-content class="ms-desktop-content">
+    <div class="ms-desktop-page">
+      <header class="ms-comp-desktop-header">
+        <h1 class="ms-titulo-desktop">comparador de precios</h1>
+        <p class="ms-subtitulo-desktop">{{ tiendas.join(' vs. ') }} · precios de referencia de tu lista semanal</p>
+      </header>
 
-<ion-content class="ion-padding">
-  <!-- TODO: diseño real según Figma -->
-  <p>Aquí va la comparación de precios entre Jumbo y Santa Isabel.</p>
-</ion-content>
+      <div class="ms-comp-desktop-columnas">
+        <!-- Boleta térmica de 720px con borde dentado arriba y abajo. -->
+        <div class="ms-comp-boleta-sombra">
+          <div class="ms-comp-boleta">
+            <p class="ms-comp-boleta-marca">MENUSMART</p>
+            <p class="ms-comp-boleta-sub">Boleta comparativa · semana 22–28 sep</p>
+            <div class="ms-comp-punteada ms-comp-punteada--84"></div>
+
+            <div class="ms-comp-fila ms-comp-fila--encabezado">
+              <span>Producto</span>
+              @for (tienda of tiendas; track tienda) {
+                <span class="ms-comp-num">{{ tienda }}</span>
+              }
+              <span class="ms-comp-num">Diferencia</span>
+              <span>Más barato</span>
+            </div>
+            <div class="ms-comp-punteada"></div>
+
+            <div class="ms-comp-filas">
+              @for (producto of productos; track producto.producto; let i = $index) {
+                <div class="ms-comp-fila">
+                  <span class="ms-comp-producto">{{ producto.producto }}</span>
+                  @for (precio of producto.precios; track $index) {
+                    <span class="ms-comp-num">
+                      <span class="ms-comp-precio" [class.ms-comp-precio--mejor]="esMasBarato(producto, $index)">
+                        {{ formatPrecio(precio) }}
+                      </span>
+                    </span>
+                  }
+                  <span class="ms-comp-num ms-comp-diferencia">{{ formatPrecio(diferencia(producto)) }}</span>
+                  <span>
+                    <span class="ms-timbre ms-comp-timbre-fila" [style.transform]="'rotate(' + (i % 2 ? 3 : -3) + 'deg)'">
+                      {{ masBaratoNombre(producto) }}
+                    </span>
+                  </span>
+                </div>
+              }
+            </div>
+
+            <div class="ms-comp-punteada"></div>
+            <div class="ms-comp-fila ms-comp-fila--total">
+              <span>Total</span>
+              @for (total of totales; track $index) {
+                <span class="ms-comp-num">
+                  <span class="ms-comp-precio" [class.ms-comp-precio--mejor]="$index === tiendaMasBarata.indice">
+                    {{ formatPrecio(total) }}
+                  </span>
+                </span>
+              }
+            </div>
+            <div class="ms-comp-punteada"></div>
+            <p class="ms-comp-gracias">Gracias por planificar</p>
+            <div class="ms-comp-barcode" aria-hidden="true">
+              @for (barra of barras; track barra.x) {
+                <span [style.left.px]="barra.x" [style.width.px]="barra.w"></span>
+              }
+            </div>
+          </div>
+        </div>
+
+        <div class="ms-comp-derecha">
+          <div class="ms-card-desktop ms-comp-resumen">
+            <h2 class="ms-comp-resumen-titulo">resumen</h2>
+
+            @for (total of totales; track $index) {
+              <div class="ms-comp-resumen-fila">
+                <div class="ms-comp-resumen-fila-textos">
+                  <span class="ms-comp-resumen-tienda">{{ tiendas[$index] }}</span>
+                  <span class="ms-comp-resumen-valor" [class.ms-comp-resumen-valor--mejor]="$index === tiendaMasBarata.indice">
+                    {{ formatPrecio(total) }}
+                  </span>
+                </div>
+                <div class="ms-comp-resumen-barra-fondo">
+                  <div
+                    class="ms-comp-resumen-barra"
+                    [class.ms-comp-resumen-barra--mejor]="$index === tiendaMasBarata.indice"
+                    [style.width.%]="barraAncho(total)"
+                  ></div>
+                </div>
+              </div>
+            }
+
+            <div class="ms-comp-resumen-punteada"></div>
+            <div class="ms-timbre ms-comp-timbre-conviene">
+              Conviene<br />{{ tiendas[tiendaMasBarata.indice] }}
+            </div>
+            <p class="ms-comp-resumen-ahorras">ahorras {{ formatPrecio(tiendaMasBarata.ahorro) }} esta semana</p>
+          </div>
+
+          @if (consejo) {
+            <div class="ms-nota-adhesiva ms-comp-consejo">
+              ojo: {{ consejo.producto }} sale {{ formatPrecio(consejo.ahorro) }} más barato en {{ consejo.tienda }}
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </ion-content>
+} @else {
+  <ion-header>
+    <ion-toolbar>
+      <ion-title class="ms-heading-libreta">comparador</ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  <ion-content class="ion-padding">
+    <p class="ms-text-secondary ms-comparador-subtitulo">
+      {{ tiendas.join(' vs. ') }}
+    </p>
+
+    <div class="ms-boleta">
+      <div class="ms-boleta-header">
+        <span class="ms-boleta-marca">MENUSMART</span>
+        <span>BOLETA COMPARATIVA</span>
+      </div>
+
+      <table class="ms-boleta-tabla">
+        <thead>
+          <tr>
+            <th>Producto</th>
+            @for (tienda of tiendas; track tienda) {
+              <th>{{ tienda }}</th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (producto of productos; track producto.producto) {
+            <tr>
+              <td>{{ producto.producto }}</td>
+              @for (precio of producto.precios; track $index) {
+                <td [class.ms-text-ahorro]="esMasBarato(producto, $index)">
+                  {{ formatPrecio(precio) }}
+                </td>
+              }
+            </tr>
+          }
+        </tbody>
+        <tfoot>
+          @for (total of totales; track $index) {
+            <tr>
+              <td>TOTAL {{ tiendas[$index] | uppercase }}</td>
+              <td [attr.colspan]="tiendas.length" [class.ms-text-ahorro]="$index === tiendaMasBarata.indice">
+                {{ formatPrecio(total) }}
+              </td>
+            </tr>
+          }
+        </tfoot>
+      </table>
+
+      <div class="ms-boleta-ahorro">
+        Conviene {{ tiendas[tiendaMasBarata.indice] }} · Ahorras
+        {{ formatPrecio(tiendaMasBarata.ahorro) }}
+      </div>
+    </div>
+  </ion-content>
+}
