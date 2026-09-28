@@ -1,0 +1,26 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title size="small" class="ms-label-secundario">Agregar ingrediente</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="cancelar()">
+        <ion-icon slot="icon-only" name="close-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-item lines="full" class="ms-field">
+    <ion-label position="stacked">Nombre</ion-label>
+    <ion-input [(ngModel)]="nombre" placeholder="Ej: Zanahoria"></ion-input>
+  </ion-item>
+
+  <ion-item lines="full" class="ms-field">
+    <ion-label position="stacked">Cantidad</ion-label>
+    <ion-input [(ngModel)]="cantidad" placeholder="Ej: 2 unid."></ion-input>
+  </ion-item>
+
+  <ion-button expand="block" class="ms-btn-primary" [disabled]="!esValido" (click)="agregar()">
+    Agregar
+  </ion-button>
+</ion-content>

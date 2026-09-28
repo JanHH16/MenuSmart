@@ -1,0 +1,138 @@
+// Medidas en px del helper sidebar() de Figma (panel de 260×900).
+.ms-sidebar {
+  position: relative;
+  width: 260px;
+  flex: 0 0 260px;
+  height: 100%;
+  background: var(--ms-tinta-azul);
+  color: var(--ms-papel-hoja);
+  overflow: hidden;
+
+  // Anillado: círculos de 12px color papel en x=236, desde y=26 cada 34px.
+  &::after {
+    content: '';
+    position: absolute;
+    top: 26px;
+    bottom: 20px;
+    right: 12px;
+    width: 12px;
+    background-image: radial-gradient(circle at 6px 6px, var(--ms-papel) 5.5px, transparent 6px);
+    background-size: 12px 34px;
+    background-repeat: repeat-y;
+    pointer-events: none;
+  }
+}
+
+// logoMark(28, 32, 42) + wordmark(80, 34, 36); el menú empieza en y=116.
+.ms-sidebar-logo {
+  height: 116px;
+  box-sizing: border-box;
+  padding: 32px 0 0 28px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.ms-sidebar-logo-svg {
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+}
+
+.ms-sidebar-wordmark {
+  margin-top: 2px;
+  font-size: 36px;
+  line-height: 1.2;
+}
+
+// Ítems de 200×48 en x=20, uno cada 58px.
+.ms-sidebar-menu {
+  list-style: none;
+  margin: 0;
+  padding: 0 20px;
+  width: 240px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ms-sidebar-item {
+  height: 48px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 16px;
+  border-radius: 6px;
+  color: var(--ms-papel-hoja);
+  font-family: var(--ms-font-boleta);
+  font-size: 13px;
+  text-decoration: none;
+
+  span {
+    opacity: 0.8;
+  }
+
+  &--activo {
+    background: var(--ms-marcador);
+    color: var(--ms-tinta-oscura);
+    font-weight: 700;
+
+    span {
+      opacity: 1;
+    }
+  }
+}
+
+.ms-sidebar-item-icono {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+// Tagline en (28, alto-150), a mano 26px, 190px de ancho (envuelve en 2
+// líneas) y opacidad 0.6; avatar de 36px en (28, alto-70).
+.ms-sidebar-tagline {
+  position: absolute;
+  left: 28px;
+  top: calc(100% - 150px);
+  width: 190px;
+  margin: 0;
+  font-family: var(--ms-font-libreta);
+  font-weight: 700;
+  font-size: 26px;
+  line-height: 1.25;
+  color: var(--ms-papel-hoja);
+  opacity: 0.6;
+}
+
+.ms-sidebar-user {
+  position: absolute;
+  left: 28px;
+  top: calc(100% - 70px);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ms-sidebar-avatar {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--ms-marcador);
+  color: var(--ms-tinta-oscura);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--ms-font-libreta);
+  font-weight: 700;
+  font-size: 20px;
+}
+
+.ms-sidebar-user-name {
+  font-family: var(--ms-font-boleta);
+  font-size: 12px;
+  color: var(--ms-papel-hoja);
+}
