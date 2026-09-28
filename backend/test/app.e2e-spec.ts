@@ -3,6 +3,7 @@ import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { App } from 'supertest/types';
 import { AppModule } from './../src/app.module';
+import { configureApp } from './../src/setup-app';
 
 describe('AppController (e2e)', () => {
   let app: INestApplication<App>;
@@ -13,9 +14,9 @@ describe('AppController (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
-    // Replica la configuracion real de bootstrap() en main.ts, para que este
-    // e2e test valide el comportamiento tal como corre en produccion.
-    app.setGlobalPrefix('api', { exclude: ['health'] });
+    // Misma configuracion que main.ts (configureApp), para que este e2e test
+    // valide el comportamiento real sin poder desincronizarse con el tiempo.
+    configureApp(app);
     await app.init();
   });
 
