@@ -1,3 +1,5 @@
+<img src="docs/assets/logo-menusmart.svg" alt="Logo de MenuSmart" width="300" height="187" />
+
 # MenuSmart
 
 Planificador de comidas y comparador de precios de supermercado, para estudiantes,
