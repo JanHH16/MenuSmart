@@ -1,36 +1,189 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-title>Crear cuenta</ion-title>
-  </ion-toolbar>
-</ion-header>
+<!-- Ojo: los campos con formControlName NO pueden ir en un ng-template
+     declarado fuera del <form [formGroup]>: Angular busca el formGroup padre
+     según dónde se DECLARA el template, no donde se inserta, y lanza NG01050
+     (eso abortaba la navegación a /register). Por eso van repetidos dentro
+     de cada formulario; este template solo tiene errores y botón. -->
+<ng-template #erroresYSubmit>
+  @if (form.get('confirmarContrasena')?.touched && form.hasError('passwordsNoCoinciden')) {
+    <p class="ms-error">✕ Las contraseñas no coinciden</p>
+  }
 
-<ion-content class="ion-padding">
-  <form [formGroup]="form" (ngSubmit)="submit()">
-    <ion-item>
-      <ion-label position="floating">Nombre</ion-label>
-      <ion-input type="text" formControlName="name"></ion-input>
-    </ion-item>
+  @if (errorMessage) {
+    <p class="ms-error">✕ {{ errorMessage }}</p>
+  }
 
-    <ion-item>
-      <ion-label position="floating">Email</ion-label>
-      <ion-input type="email" formControlName="email"></ion-input>
-    </ion-item>
-
-    <ion-item>
-      <ion-label position="floating">Contraseña</ion-label>
-      <ion-input type="password" formControlName="password"></ion-input>
-    </ion-item>
-
-    <ion-text color="danger" *ngIf="errorMessage">
-      <p>{{ errorMessage }}</p>
-    </ion-text>
-
-    <ion-button expand="block" type="submit" [disabled]="form.invalid || loading">
-      Crear cuenta
-    </ion-button>
-  </form>
-
-  <ion-button expand="block" fill="clear" routerLink="/login">
-    ¿Ya tienes cuenta? Inicia sesión
+  <ion-button expand="block" type="submit" class="ms-btn-primary" [disabled]="form.invalid || loading">
+    @if (loading) {
+      <ion-spinner name="dots" slot="start"></ion-spinner>
+    }
+    <span>Crear cuenta</span>
   </ion-button>
+</ng-template>
+
+@if (!(esDesktop$ | async)) {
+  <ion-header class="ms-auth-header">
+    <ion-toolbar>
+      <ion-buttons slot="start">
+        <ion-button fill="clear" class="ms-back-link" routerLink="/login">
+          <ion-icon name="chevron-back-outline" slot="start"></ion-icon>
+          Volver
+        </ion-button>
+      </ion-buttons>
+      <ion-buttons slot="end">
+        <svg viewBox="0 0 64 64" class="ms-logo-svg" xmlns="http://www.w3.org/2000/svg">
+          <path
+            d="M8 4H56V56L51.2 61L46.4 56L41.6 61L36.8 56L32 61L27.2 56L22.4 61L17.6 56L12.8 61L8 56Z"
+            fill="var(--ms-tinta-azul)"
+          />
+          <rect x="15" y="13" width="30" height="9" rx="2" fill="var(--ms-marcador)" transform="rotate(-4 30 17)" />
+          <rect x="16" y="30" width="32" height="3.5" rx="1.75" fill="var(--ms-papel-hoja)" />
+          <rect x="16" y="39" width="17" height="3.5" rx="1.75" fill="var(--ms-papel-hoja)" />
+          <path
+            d="M36 41l5 5 10-12"
+            fill="none"
+            stroke="var(--ms-marcador)"
+            stroke-width="4.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </ion-buttons>
+    </ion-toolbar>
+  </ion-header>
+}
+
+<ion-content class="ms-auth-content" [fullscreen]="true">
+  @if (esDesktop$ | async) {
+    <!-- Desktop (Figma "D2. Registro"): mismo panel de marca que Login, con
+         "Volver" flotando sobre la tarjeta (no dentro de un ion-header) y
+         contraseña/confirmar en dos columnas, como en el prototipo. -->
+    <div class="ms-auth-desktop">
+      <div class="ms-auth-brand">
+        <div class="ms-auth-brand-inner">
+          <div class="ms-auth-brand-top">
+            <div class="ms-auth-brand-icon">
+              <!-- Variante oscura (Figma: logoMark(onDark=true)): cuerpo en
+                   papel y líneas internas en tinta azul, sobre el panel de
+                   marca (fondo tinta) — invertida respecto a la del header. -->
+              <svg viewBox="0 0 64 64" class="ms-logo-svg" xmlns="http://www.w3.org/2000/svg">
+                <path
+                  d="M8 4H56V56L51.2 61L46.4 56L41.6 61L36.8 56L32 61L27.2 56L22.4 61L17.6 56L12.8 61L8 56Z"
+                  fill="var(--ms-papel-hoja)"
+                />
+                <rect x="15" y="13" width="30" height="9" rx="2" fill="var(--ms-marcador)" transform="rotate(-4 30 17)" />
+                <rect x="16" y="30" width="32" height="3.5" rx="1.75" fill="var(--ms-tinta-azul)" />
+                <rect x="16" y="39" width="17" height="3.5" rx="1.75" fill="var(--ms-tinta-azul)" />
+                <path
+                  d="M36 41l5 5 10-12"
+                  fill="none"
+                  stroke="var(--ms-marcador)"
+                  stroke-width="4.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </div>
+            <span class="ms-logo-text ms-logo-text--brand">
+              <span class="ms-logo-menu ms-logo-menu--brand">menu</span><span class="ms-logo-accent">smart</span>
+            </span>
+          </div>
+          <p class="ms-auth-brand-tagline">planifica tu semana,<br />anota tu lista,<br />ahorra en el súper.</p>
+
+          <!-- align-self:flex-end la manda al borde derecho de ESTA columna,
+               que ahora ocupa el 100% del panel (ver .ms-auth-brand-inner) —
+               así queda pegada al borde derecho real y agrupada con el
+               logo/tagline como un solo bloque, igual que en Figma. -->
+          <div class="ms-auth-brand-receipt">
+            <span class="ms-auth-brand-receipt-linea" style="width: 78%"></span>
+            <span class="ms-auth-brand-receipt-linea" style="width: 55%"></span>
+            <span class="ms-auth-brand-receipt-linea" style="width: 78%"></span>
+            <span class="ms-auth-brand-receipt-linea" style="width: 66%"></span>
+            <span class="ms-auth-brand-receipt-linea" style="width: 50%"></span>
+            <span class="ms-stamp-ahorro">Ahorro<br />$ 15.000</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="ms-auth-desktop-panel">
+        <ion-button fill="clear" class="ms-back-link ms-auth-back-desktop" routerLink="/login">
+          <ion-icon name="chevron-back-outline" slot="start"></ion-icon>
+          Volver
+        </ion-button>
+
+        <div class="ms-card-libreta ms-auth-card ms-auth-card--desktop">
+          <span class="ms-auth-card-cinta"></span>
+          <h1 class="ms-heading-libreta">crea tu libreta</h1>
+          <p class="ms-text-secondary ms-auth-subtitle">Tu semana organizada en un minuto</p>
+
+          <form [formGroup]="form" (ngSubmit)="submit()">
+            <ion-item lines="full" class="ms-field">
+              <ion-label position="stacked">Nombre</ion-label>
+              <ion-input type="text" formControlName="name"></ion-input>
+            </ion-item>
+
+            <ion-item lines="full" class="ms-field">
+              <ion-label position="stacked">Email</ion-label>
+              <ion-input type="email" formControlName="email" placeholder="tu@correo.cl"></ion-input>
+            </ion-item>
+
+            <div class="ms-field-row">
+              <ion-item lines="full" class="ms-field">
+                <ion-label position="stacked">Contraseña</ion-label>
+                <ion-input type="password" formControlName="password"></ion-input>
+              </ion-item>
+
+              <ion-item lines="full" class="ms-field">
+                <ion-label position="stacked">Confirmar contraseña</ion-label>
+                <ion-input type="password" formControlName="confirmarContrasena"></ion-input>
+              </ion-item>
+            </div>
+
+            <ng-container [ngTemplateOutlet]="erroresYSubmit"></ng-container>
+          </form>
+
+          <p class="ms-auth-footer">
+            ¿Ya tienes cuenta? <a routerLink="/login">Inicia sesión</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  } @else {
+    <div class="ms-auth-wrapper">
+      <div class="ms-card-libreta ms-auth-card">
+        <span class="ms-auth-card-cinta ms-auth-card-cinta--centro"></span>
+        <h1 class="ms-heading-libreta">crea tu libreta</h1>
+        <p class="ms-text-secondary ms-auth-subtitle">Tu semana organizada en un minuto</p>
+
+        <form [formGroup]="form" (ngSubmit)="submit()">
+          <ion-item lines="full" class="ms-field">
+            <ion-label position="stacked">Nombre</ion-label>
+            <ion-input type="text" formControlName="name"></ion-input>
+          </ion-item>
+
+          <ion-item lines="full" class="ms-field">
+            <ion-label position="stacked">Email</ion-label>
+            <ion-input type="email" formControlName="email" placeholder="tu@correo.cl"></ion-input>
+          </ion-item>
+
+          <ion-item lines="full" class="ms-field">
+            <ion-label position="stacked">Contraseña</ion-label>
+            <ion-input type="password" formControlName="password"></ion-input>
+          </ion-item>
+
+          <ion-item lines="full" class="ms-field">
+            <ion-label position="stacked">Confirmar contraseña</ion-label>
+            <ion-input type="password" formControlName="confirmarContrasena"></ion-input>
+          </ion-item>
+
+          <ng-container [ngTemplateOutlet]="erroresYSubmit"></ng-container>
+        </form>
+
+        <p class="ms-auth-footer">
+          ¿Ya tienes cuenta? <a routerLink="/login">Inicia sesión</a>
+        </p>
+      </div>
+
+      <p class="ms-tagline">planifica · anota · ahorra</p>
+    </div>
+  }
 </ion-content>
