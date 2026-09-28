@@ -1,7 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Observable } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
 import { LayoutService } from '../../core/services/layout.service';
 
@@ -12,29 +11,24 @@ import { LayoutService } from '../../core/services/layout.service';
   standalone: false,
 })
 export class RegisterPage {
-  form: FormGroup;
+  private readonly fb = inject(FormBuilder);
+  private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
+  private readonly layoutService = inject(LayoutService);
+
+  readonly esDesktop$ = this.layoutService.esDesktop$;
+
+  form: FormGroup = this.fb.group(
+    {
+      name: ['', [Validators.required, Validators.minLength(2)]],
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', [Validators.required, Validators.minLength(6)]],
+      confirmarContrasena: ['', [Validators.required]],
+    },
+    { validators: RegisterPage.passwordsCoincidenValidator },
+  );
   errorMessage: string | null = null;
   loading = false;
-
-  readonly esDesktop$: Observable<boolean>;
-
-  constructor(
-    private readonly fb: FormBuilder,
-    private readonly authService: AuthService,
-    private readonly router: Router,
-    layoutService: LayoutService,
-  ) {
-    this.esDesktop$ = layoutService.esDesktop$;
-    this.form = this.fb.group(
-      {
-        name: ['', [Validators.required, Validators.minLength(2)]],
-        email: ['', [Validators.required, Validators.email]],
-        password: ['', [Validators.required, Validators.minLength(6)]],
-        confirmarContrasena: ['', [Validators.required]],
-      },
-      { validators: RegisterPage.passwordsCoincidenValidator },
-    );
-  }
 
   private static passwordsCoincidenValidator(group: AbstractControl): ValidationErrors | null {
     const password = group.get('password')?.value;

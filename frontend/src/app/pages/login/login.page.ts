@@ -1,8 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
 import { LayoutService } from '../../core/services/layout.service';
 
@@ -13,24 +12,19 @@ import { LayoutService } from '../../core/services/layout.service';
   standalone: false,
 })
 export class LoginPage {
-  form: FormGroup;
+  private readonly fb = inject(FormBuilder);
+  private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
+  private readonly layoutService = inject(LayoutService);
+
+  readonly esDesktop$ = this.layoutService.esDesktop$;
+
+  form: FormGroup = this.fb.group({
+    email: ['', [Validators.required, Validators.email]],
+    password: ['', [Validators.required]],
+  });
   errorMessage: string | null = null;
   loading = false;
-
-  readonly esDesktop$: Observable<boolean>;
-
-  constructor(
-    private readonly fb: FormBuilder,
-    private readonly authService: AuthService,
-    private readonly router: Router,
-    layoutService: LayoutService,
-  ) {
-    this.esDesktop$ = layoutService.esDesktop$;
-    this.form = this.fb.group({
-      email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required]],
-    });
-  }
 
   submit(): void {
     if (this.form.invalid) {

@@ -1,0 +1,8 @@
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Commit del scaffold inicial de NestJS: solo tiene el token de ejemplo del badge de CircleCI del boilerplate por defecto, ya reemplazado en el README actual. No es un secreto real."
+commits = [
+  "435a5cb1f680ee7c0b9d1167f9699a32fb8f2465",
+]

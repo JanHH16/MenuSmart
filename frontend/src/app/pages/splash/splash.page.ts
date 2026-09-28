@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';
 
 /**
@@ -14,14 +14,12 @@ import { Router } from '@angular/router';
   standalone: false,
 })
 export class SplashPage implements OnInit, OnDestroy {
+  private readonly router = inject(Router);
+  private readonly cdr = inject(ChangeDetectorRef);
+
   stage = 0;
 
   private readonly timers: ReturnType<typeof setTimeout>[] = [];
-
-  constructor(
-    private readonly router: Router,
-    private readonly cdr: ChangeDetectorRef,
-  ) {}
 
   ngOnInit(): void {
     // Este proyecto corre sin zone.js (angular.json: "polyfills": []), así

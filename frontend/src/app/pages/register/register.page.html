@@ -20,7 +20,7 @@
   </ion-button>
 </ng-template>
 
-@if (!(esDesktop$ | async)) {
+@if ((esDesktop$ | async) === false) {
   <ion-header class="ms-auth-header">
     <ion-toolbar>
       <ion-buttons slot="start">

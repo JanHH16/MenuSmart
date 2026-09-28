@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { map, shareReplay } from 'rxjs/operators';
 
@@ -25,10 +25,10 @@ export const DESKTOP_BREAKPOINT = '(min-width: 1024px)';
 
 @Injectable({ providedIn: 'root' })
 export class LayoutService {
+  private readonly breakpointObserver = inject(BreakpointObserver);
+
   readonly esDesktop$ = this.breakpointObserver.observe(DESKTOP_BREAKPOINT).pipe(
     map((state) => state.matches),
     shareReplay({ bufferSize: 1, refCount: true }),
   );
-
-  constructor(private readonly breakpointObserver: BreakpointObserver) {}
 }

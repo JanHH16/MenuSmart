@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
@@ -22,7 +22,7 @@ const TOKEN_KEY = 'menusmart_token';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  constructor(private readonly http: HttpClient) {}
+  private readonly http = inject(HttpClient);
 
   login(payload: LoginPayload): Observable<AuthResponse> {
     return this.http
