@@ -70,6 +70,12 @@ web_modules/
 .env.*
 !.env.example
 
+# Archivos locales de trabajo (ej. PDF de la pauta del curso), no forman parte del proyecto
+.local/
+
+# Configuracion local de asistentes de codigo (Claude Code, etc.), no forma parte del proyecto
+.claude/
+
 # parcel-bundler cache (https://parceljs.org/)
 .cache
 .parcel-cache
@@ -141,3 +147,18 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+# Terraform
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+*.tfvars
+!*.tfvars.example
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc

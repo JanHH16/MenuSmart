@@ -1,0 +1,108 @@
+@if (esDesktop$ | async) {
+  <!-- Desktop (Figma "D7. Perfil"): tarjeta de usuario a la izquierda + datos
+       personales/preferencias a la derecha — NO las tarjetas apiladas de
+       mobile, es otra estructura. -->
+  <ion-content class="ms-desktop-content">
+    <div class="ms-desktop-page">
+      <header class="ms-perfil-desktop-header">
+        <h1 class="ms-titulo-desktop">mi libreta</h1>
+        <p class="ms-subtitulo-desktop">Tus datos y preferencias</p>
+      </header>
+
+      <div class="ms-perfil-desktop-columnas">
+        <div class="ms-perfil-usuario-wrap">
+          <span class="ms-cinta ms-perfil-usuario-cinta"></span>
+          <div class="ms-card-desktop ms-perfil-usuario">
+            <div class="ms-perfil-usuario-avatar">UD</div>
+            <h2 class="ms-perfil-usuario-nombre">{{ nombre }}</h2>
+            <p class="ms-perfil-usuario-email">{{ email }}</p>
+            <div class="ms-perfil-usuario-punteada"></div>
+            <div class="ms-perfil-usuario-stats">
+              <div>
+                <span class="ms-perfil-usuario-stat-valor">{{ comidasPlaneadas }}</span>
+                <span class="ms-perfil-usuario-stat-label">comidas planeadas</span>
+              </div>
+              <div>
+                <span class="ms-perfil-usuario-stat-valor">{{ formatoAhorro }}</span>
+                <span class="ms-perfil-usuario-stat-label">ahorrado este mes</span>
+              </div>
+            </div>
+            <button type="button" class="ms-btn-figma ms-btn-figma--secundario ms-perfil-logout" (click)="logout()">
+              Cerrar sesión
+            </button>
+          </div>
+        </div>
+
+        <div class="ms-perfil-desktop-derecha">
+          <div class="ms-card-desktop ms-perfil-datos">
+            <h2 class="ms-perfil-card-titulo">datos personales</h2>
+            <div class="ms-perfil-datos-fila">
+              <div class="ms-perfil-campo">
+                <span class="ms-label-desktop">Nombre</span>
+                <span class="ms-perfil-campo-valor">{{ nombre }}</span>
+              </div>
+              <div class="ms-perfil-campo">
+                <span class="ms-label-desktop">Email</span>
+                <span class="ms-perfil-campo-valor">{{ email }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="ms-card-desktop ms-perfil-preferencias">
+            <div class="ms-perfil-pref-header">
+              <h2 class="ms-perfil-card-titulo">preferencias</h2>
+              <span class="ms-tag-pildora ms-perfil-pref-tag">Próximamente</span>
+            </div>
+
+            @for (preferencia of preferenciasDesktop; track preferencia; let last = $last) {
+              <button
+                type="button"
+                class="ms-perfil-pref-fila"
+                [class.ms-perfil-pref-fila--con-linea]="!last"
+                (click)="proximamente()"
+              >
+                <span class="ms-perfil-pref-label">{{ preferencia }}</span>
+                <span class="ms-perfil-switch"><span class="ms-perfil-switch-bola"></span></span>
+              </button>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  </ion-content>
+} @else {
+  <ion-header>
+    <ion-toolbar>
+      <ion-title class="ms-heading-libreta">mi libreta</ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  <ion-content class="ion-padding">
+    <div class="ms-card-libreta ms-perfil-card">
+      <div class="ms-perfil-avatar">U</div>
+      <div>
+        <h2>{{ nombre }}</h2>
+        <p class="ms-text-secondary">{{ email }}</p>
+      </div>
+    </div>
+
+    <div class="ms-card-libreta ms-perfil-stat">
+      <span class="ms-mono ms-perfil-stat-value">{{ semanasPlaneadas }}</span>
+      <span class="ms-text-secondary">semanas planeadas</span>
+    </div>
+
+    <ion-list class="ms-perfil-lista" lines="full">
+      @for (opcion of opciones; track opcion.label) {
+        <ion-item button detail="false" (click)="proximamente()">
+          <ion-icon [name]="opcion.icon" slot="start" color="primary"></ion-icon>
+          <ion-label>{{ opcion.label }}</ion-label>
+          <span class="ms-label-secundario" slot="end">Pronto</span>
+        </ion-item>
+      }
+    </ion-list>
+
+    <ion-button expand="block" fill="outline" color="danger" (click)="logout()">
+      Cerrar sesión
+    </ion-button>
+  </ion-content>
+}

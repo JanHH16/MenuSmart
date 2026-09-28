@@ -1,0 +1,12 @@
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP"]
+
+[tool.pytest.ini_options]
+# Sin esto, pytest no agrega la raiz del proyecto a sys.path cuando se
+# invoca como "pytest" (sin "python -m"), y "from app.main import app"
+# falla con ModuleNotFoundError en un venv limpio (como el de CI).
+pythonpath = ["."]

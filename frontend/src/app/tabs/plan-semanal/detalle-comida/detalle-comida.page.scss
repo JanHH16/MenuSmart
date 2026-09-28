@@ -1,0 +1,458 @@
+.ms-comida-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+// Foto tipo "polaroid": marco blanco, cinta arriba, botón de cámara flotante.
+.ms-polaroid {
+  position: relative;
+  width: 128px;
+  flex-shrink: 0;
+  background: #ffffff;
+  padding: 8px 8px 22px;
+  border-radius: 4px;
+  box-shadow: 0 6px 14px rgba(27, 31, 59, 0.18);
+
+  &--clicable {
+    cursor: pointer;
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    width: 46px;
+    height: 16px;
+    background: rgba(255, 228, 92, 0.7);
+    transform: translateX(-50%) rotate(-3deg);
+  }
+}
+
+.ms-polaroid-foto,
+.ms-polaroid-foto-img {
+  aspect-ratio: 1 / 1;
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ms-polaroid-foto {
+  background: var(--ms-papel-oscuro);
+
+  ion-icon {
+    font-size: 2rem;
+    color: var(--ms-tinta-azul);
+  }
+}
+
+.ms-polaroid-foto-img {
+  width: 100%;
+  object-fit: cover;
+}
+
+.ms-polaroid-caption {
+  margin: 6px 0 0;
+  // Reserva espacio a la derecha para que el botón de cámara nunca tape el
+  // texto, y trunca con "…" a las 2 líneas si el nombre es muy largo.
+  padding-right: 22px;
+  text-align: center;
+  font-family: var(--ms-font-libreta);
+  font-size: 0.95rem;
+  color: var(--ms-tinta-oscura);
+  line-height: 1.15;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.ms-polaroid-camara {
+  position: absolute;
+  bottom: 6px;
+  right: 6px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 2px solid var(--ms-tinta-azul);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+
+  ion-icon {
+    font-size: 0.9rem;
+    color: var(--ms-tinta-azul);
+  }
+}
+
+.ms-comida-info {
+  flex: 1;
+  min-width: 0;
+
+  h1 {
+    margin: 10px 0 8px;
+  }
+}
+
+.ms-comida-tags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.ms-ingredientes-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.ms-ingrediente-nombre {
+  font-family: var(--ms-font-libreta) !important;
+  font-size: 1.25rem !important;
+  color: var(--ms-tinta-oscura);
+}
+
+.ms-agregar-ingrediente {
+  margin-top: 12px;
+  --border-style: dashed;
+}
+
+// ---------------------------------------------------------------------------
+// Desktop (Figma "D4. Detalle de comida", buildDetailDesktop). Medidas en px
+// del prototipo de 1440×900; las posiciones "y=" son relativas a la tarjeta.
+// ---------------------------------------------------------------------------
+.ms-detalle-desktop {
+  padding-top: 24px;
+}
+
+// backLink en y=24, 32px de alto.
+.ms-detalle-volver {
+  height: 32px;
+}
+
+// Título (size 50) y Guardar (200×56) en y=58; tarjetas en y=150.
+.ms-detalle-desktop-header {
+  height: 92px;
+  margin-top: 2px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.ms-detalle-titulo {
+  font-size: 50px;
+  line-height: 63px;
+}
+
+.ms-detalle-guardar {
+  width: 200px;
+  height: 56px;
+}
+
+.ms-detalle-columnas {
+  display: grid;
+  grid-template-columns: 440px minmax(0, 1fr);
+  gap: 32px;
+  align-items: start;
+}
+
+.ms-detalle-receta-wrap {
+  position: relative;
+}
+
+// tape(CX + lw/2 - 44, 138, 88, -3): centrada, 12px por encima de la tarjeta.
+.ms-detalle-receta-cinta {
+  top: -12px;
+  left: calc(50% - 44px);
+  width: 88px;
+  transform: rotate(-3deg);
+}
+
+.ms-detalle-receta {
+  height: 640px;
+  padding: 28px 28px 0;
+  overflow: hidden;
+}
+
+// Nombre a mano 42 en y=44.
+.ms-detalle-nombre {
+  margin: 1px 0 0;
+  font-family: var(--ms-font-libreta);
+  font-weight: 700;
+  font-size: 42px;
+  line-height: 52px;
+  color: var(--ms-tinta-azul);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// Línea roja de margen, de borde a borde en y=120.
+.ms-detalle-linea-roja {
+  position: absolute;
+  top: 120px;
+  left: 0;
+  right: 0;
+  height: 1.5px;
+  background: var(--ms-margen-rojo);
+  opacity: 0.7;
+}
+
+// "Día" en y=140 (chips 50×36 en y=160, cada 56px); "Tipo" en y=220
+// (chips 120×36 en y=240, cada 128px); "Foto" en y=300.
+.ms-detalle-nombre + .ms-detalle-linea-roja + .ms-label-desktop {
+  margin-top: 44px;
+}
+
+.ms-detalle-chips {
+  display: flex;
+  margin: 5px 0 24px;
+}
+
+.ms-detalle-chip-dia {
+  width: 50px;
+  height: 36px;
+  margin-right: 6px;
+}
+
+.ms-detalle-chip-tipo {
+  width: 120px;
+  height: 36px;
+  margin-right: 8px;
+}
+
+// Polaroid (170×196 en x=32, y=330, rot -2) y zona de subida (186×190 en
+// x=226, y=330).
+.ms-detalle-foto-fila {
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+  height: 196px;
+  margin: 15px 0 22px 4px;
+}
+
+.ms-detalle-polaroid-wrap {
+  position: relative;
+  transform: rotate(-2deg);
+}
+
+.ms-detalle-polaroid-cinta {
+  top: -10px;
+  left: calc(50% - 30px);
+  width: 60px;
+  transform: rotate(3deg);
+}
+
+.ms-detalle-polaroid {
+  position: relative;
+  display: block;
+  width: 170px;
+  height: 196px;
+  padding: 0;
+  border: none;
+  border-radius: 2px;
+  background: #ffffff;
+  box-shadow: var(--ms-sombra-suave);
+}
+
+.ms-detalle-polaroid-foto {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  width: 150px;
+  height: 146px;
+  overflow: hidden;
+  background: #f3e8cf;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+// Círculo de marcador (opacidad 0.55) detrás del dibujo.
+.ms-detalle-polaroid-mancha {
+  position: absolute;
+  top: 37px;
+  left: 34px;
+  width: 73px;
+  height: 73px;
+  border-radius: 50%;
+  background: var(--ms-marcador);
+  opacity: 0.55;
+}
+
+.ms-detalle-polaroid-foto app-doodle {
+  position: relative;
+}
+
+.ms-detalle-polaroid-caption {
+  position: absolute;
+  top: 158px;
+  left: 6px;
+  right: 6px;
+  text-align: center;
+  font-family: var(--ms-font-libreta);
+  font-weight: 700;
+  font-size: 20px;
+  line-height: 20px;
+  color: var(--ms-tinta-oscura);
+}
+
+.ms-detalle-subir-foto {
+  width: 186px;
+  height: 190px;
+  box-sizing: border-box;
+  padding: 44px 16px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: 1.5px dashed var(--ms-tinta-azul);
+  border-radius: 8px;
+  background: transparent;
+
+  ion-icon {
+    font-size: 40px;
+    color: var(--ms-tinta-azul);
+  }
+}
+
+.ms-detalle-subir-foto-titulo {
+  margin-top: 12px;
+  font-family: var(--ms-font-boleta);
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ms-tinta-azul);
+}
+
+.ms-detalle-subir-foto-sub {
+  margin-top: 6px;
+  font-family: var(--ms-font-libreta);
+  font-weight: 700;
+  font-size: 20px;
+  line-height: 22px;
+  color: var(--ms-lapiz);
+  text-align: center;
+}
+
+// "Notas" en y=548; texto a mano 22 en y=564. Es un textarea editable pero
+// sin borde: se ve como el texto escrito del prototipo.
+.ms-detalle-notas {
+  display: block;
+  width: 100%;
+  margin: 1px 0 0;
+  padding: 0;
+  border: none;
+  outline: none;
+  resize: none;
+  background: transparent;
+  font-family: var(--ms-font-libreta);
+  font-weight: 700;
+  font-size: 22px;
+  line-height: 28px;
+  color: var(--ms-tinta-azul);
+
+  &::placeholder {
+    color: var(--ms-lapiz);
+    opacity: 1;
+  }
+
+  &:focus {
+    box-shadow: 0 1.5px 0 0 var(--ms-tinta-oscura);
+  }
+}
+
+// Tarjeta ingredientes: título a mano 38 en y=20, línea de tinta en y=84,
+// encabezados en y=94, filas de 60px desde y=122.
+.ms-detalle-ingredientes {
+  min-height: 640px;
+  padding: 20px 28px 28px;
+}
+
+.ms-detalle-ingredientes-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 48px;
+}
+
+.ms-detalle-ingredientes-titulo {
+  margin: 0;
+  font-family: var(--ms-font-libreta);
+  font-weight: 700;
+  font-size: 38px;
+  line-height: 48px;
+  color: var(--ms-tinta-oscura);
+}
+
+.ms-detalle-ingredientes-linea {
+  height: 1.5px;
+  margin-top: 16px;
+  background: var(--ms-tinta-oscura);
+}
+
+.ms-detalle-tabla-fila {
+  display: grid;
+  // "Cantidad" en x=340 y "Quitar" en x=rw-100 (relativos a la tarjeta).
+  grid-template-columns: 312px minmax(0, 1fr) 72px;
+  align-items: center;
+  height: 60px;
+  box-sizing: border-box;
+  border-bottom: 1px solid var(--ms-renglon);
+}
+
+.ms-detalle-tabla-encabezado {
+  height: auto;
+  margin: 8.5px 0 3px;
+  padding-bottom: 9px;
+}
+
+.ms-detalle-ingrediente-nombre {
+  font-family: var(--ms-font-libreta);
+  font-weight: 700;
+  font-size: 28px;
+  color: var(--ms-tinta-oscura);
+}
+
+.ms-detalle-ingrediente-cantidad {
+  font-family: var(--ms-font-boleta);
+  font-size: 14px;
+  color: var(--ms-lapiz);
+}
+
+// iconBtn('x', margen rojo, 34px).
+.ms-detalle-quitar {
+  width: 34px;
+  height: 34px;
+  margin-left: 8px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1.5px solid var(--ms-margen-rojo);
+  background: var(--ms-papel-hoja);
+  color: var(--ms-margen-rojo);
+
+  ion-icon {
+    font-size: 19px;
+  }
+}
+
+.ms-detalle-agregar {
+  width: 300px;
+  height: 50px;
+  margin-top: 20px;
+}

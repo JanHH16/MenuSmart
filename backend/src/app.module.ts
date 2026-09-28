@@ -6,29 +6,55 @@ import { AppService } from './app.service';
 import { HealthModule } from './health/health.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
+import { IngredientsModule } from './ingredients/ingredients.module';
+import { MealsModule } from './meals/meals.module';
+import { ProductsModule } from './products/products.module';
+import { ShoppingListsModule } from './shopping-lists/shopping-lists.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        type: 'postgres' as const,
-        host: config.get<string>('DATABASE_HOST'),
-        port: parseInt(config.get<string>('DATABASE_PORT', '5432'), 10),
-        username: config.get<string>('DATABASE_USER'),
-        password: config.get<string>('DATABASE_PASSWORD'),
-        database: config.get<string>('DATABASE_NAME'),
-        autoLoadEntities: true,
-        // TODO: pasar a migraciones formales antes de cerrar la EP1 (sección 5 del
-        // enunciado exige "estrategia de migraciones"); synchronize=true es solo
-        // para acelerar el desarrollo inicial.
-        synchronize: config.get<string>('NODE_ENV') !== 'production',
-      }),
+      useFactory: (config: ConfigService) => {
+        const esProduccion = config.get<string>('NODE_ENV') === 'production';
+
+        // Algunos proveedores administrados (ej. Render) solo entregan una
+        // connection string completa, no host/usuario/password por separado.
+        const databaseUrl = config.get<string>('DATABASE_URL');
+        const connectionOptions = databaseUrl
+          ? { url: databaseUrl }
+          : {
+              host: config.get<string>('DATABASE_HOST', 'localhost'),
+              port: parseInt(config.get<string>('DATABASE_PORT', '5432'), 10),
+              username: config.get<string>('DATABASE_USER'),
+              password: config.get<string>('DATABASE_PASSWORD'),
+              database: config.get<string>('DATABASE_NAME'),
+            };
+
+        return {
+          type: 'postgres' as const,
+          ...connectionOptions,
+          autoLoadEntities: true,
+          migrations: [__dirname + '/migrations/*{.ts,.js}'],
+          // synchronize y migrationsRun no pueden convivir: TypeORM corre
+          // synchronize() antes que las migraciones, así que si ambos están
+          // activos, la migración inicial choca con "la tabla ya existe".
+          // En desarrollo, synchronize agiliza iterar sobre entidades nuevas;
+          // en producción la única fuente de verdad del esquema son las
+          // migraciones.
+          migrationsRun: esProduccion,
+          synchronize: !esProduccion,
+        };
+      },
     }),
     HealthModule,
     UsersModule,
     AuthModule,
+    IngredientsModule,
+    MealsModule,
+    ProductsModule,
+    ShoppingListsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

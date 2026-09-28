@@ -1,0 +1,73 @@
+// Figma: tabBar() — 76px de alto, papel, borde superior kraft oscuro de 1.5;
+// ícono de 24 en y=12 y etiqueta mono 11 en mayúsculas en y=40.
+.ms-tab-bar {
+  --background: var(--ms-papel-hoja);
+  --border: 1.5px solid #dccdb0;
+  --color: var(--ms-lapiz);
+  --color-selected: var(--ms-tinta-azul);
+  height: 76px;
+
+  ion-tab-button {
+    --padding-top: 12px;
+    justify-content: flex-start;
+  }
+
+  ion-label {
+    margin: 4px 0 0 !important;
+    font-family: var(--ms-font-boleta);
+    font-size: 11px !important;
+    line-height: 14px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ms-lapiz);
+  }
+
+  // Tab activa: etiqueta en negrita tinta oscura con el marcador amarillo
+  // (72×14) detrás.
+  .tab-selected ion-label {
+    position: relative;
+    z-index: 0;
+    font-weight: 700;
+    color: var(--ms-tinta-oscura);
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      width: 72px;
+      height: 14px;
+      margin-left: -36px;
+      border-radius: 3px;
+      background: var(--ms-marcador);
+      z-index: -1;
+    }
+  }
+}
+
+.ms-tab-icono {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.ms-shell {
+  height: 100%;
+
+  &--desktop {
+    position: relative;
+  }
+}
+
+// ion-tabs se posiciona `absolute` internamente (pensado para cubrir todo
+// su contenedor), así que un simple flex sibling no le deja espacio al
+// sidebar: hay que reservarle el ancho explícitamente con `left`.
+.ms-shell--desktop .ms-tabs-outlet {
+  left: 260px;
+  right: 0;
+  width: auto;
+}

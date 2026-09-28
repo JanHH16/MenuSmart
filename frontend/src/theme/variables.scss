@@ -1,0 +1,83 @@
+// For information on how to create your own theme, please refer to:
+// https://ionicframework.com/docs/theming/
+
+// ---------------------------------------------------------------------------
+// Sistema de diseño MenuSmart — concepto "libreta y boleta"
+// (ver Figma: pagina "Guia de estilo")
+// ---------------------------------------------------------------------------
+:root {
+  // Tokens de color de la guia de estilo
+  --ms-tinta-azul: #1f3a93;
+  --ms-tinta-oscura: #1b1f3b;
+  --ms-marcador: #ffe45c;
+  --ms-margen-rojo: #e0624f;
+  --ms-timbre-verde: #2f7d55;
+  --ms-lapiz: #8a8fa3;
+  --ms-papel: #f3ecda;
+  --ms-papel-oscuro: #e7dcc0;
+  // Las tarjetas "hoja de libreta" deben leerse como una hoja de papel
+  // blanca sobre el fondo beige de la app, no confundirse con el fondo.
+  --ms-papel-hoja: #fffdf6;
+  --ms-lineas-hoja: rgba(31, 58, 147, 0.1);
+  // Color de la cinta adhesiva decorativa (Figma: C.tape).
+  --ms-cinta: #f4ebc4;
+  // Renglones de las hojas rayadas (Figma: C.rule).
+  --ms-renglon: #c9d5ee;
+  // Sombras del prototipo: softShadow() (tarjetas, notas) y hardShadow(n)
+  // (botones/tarjetas "de boleta", offset sólido sin difuminar).
+  --ms-sombra-suave: 0 6px 16px rgba(89, 64, 26, 0.18);
+
+  // Tipografia
+  // Segun la guia de estilo: lo que el usuario "escribe a mano" (titulos,
+  // valores que tipea) usa Caveat; el resto de la interfaz (labels, botones,
+  // texto de cuerpo, precios) tiene el look de una boleta impresa, en
+  // Space Mono. Por eso Space Mono es la fuente BASE de toda la app, no
+  // solo de los precios.
+  --ms-font-libreta: 'Caveat', cursive;
+  --ms-font-boleta: 'Space Mono', monospace;
+  --ms-font-base: var(--ms-font-boleta);
+}
+
+/** Ionic Colors **/
+:root {
+  --ion-color-primary: var(--ms-tinta-azul);
+  --ion-color-primary-rgb: 31, 58, 147;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-contrast-rgb: 255, 255, 255;
+  --ion-color-primary-shade: #1b3382;
+  --ion-color-primary-tint: #354d9e;
+
+  --ion-color-secondary: var(--ms-timbre-verde);
+  --ion-color-secondary-rgb: 47, 125, 85;
+  --ion-color-secondary-contrast: #ffffff;
+  --ion-color-secondary-contrast-rgb: 255, 255, 255;
+  --ion-color-secondary-shade: #296e4b;
+  --ion-color-secondary-tint: #438a66;
+
+  --ion-color-danger: var(--ms-margen-rojo);
+  --ion-color-danger-rgb: 224, 98, 79;
+  --ion-color-danger-contrast: #ffffff;
+  --ion-color-danger-contrast-rgb: 255, 255, 255;
+  --ion-color-danger-shade: #c55646;
+  --ion-color-danger-tint: #e37262;
+
+  --ion-color-warning: var(--ms-marcador);
+  --ion-color-warning-rgb: 255, 228, 92;
+  --ion-color-warning-contrast: #1b1f3b;
+  --ion-color-warning-contrast-rgb: 27, 31, 59;
+  --ion-color-warning-shade: #e0c951;
+  --ion-color-warning-tint: #ffe76d;
+
+  --ion-color-dark: var(--ms-tinta-oscura);
+  --ion-color-medium: var(--ms-lapiz);
+
+  --ion-background-color: var(--ms-papel);
+  --ion-background-color-rgb: 243, 236, 218;
+  --ion-text-color: var(--ms-tinta-oscura);
+  --ion-text-color-rgb: 27, 31, 59;
+
+  --ion-toolbar-background: var(--ms-papel);
+  --ion-item-background: transparent;
+
+  --ion-font-family: var(--ms-font-base);
+}

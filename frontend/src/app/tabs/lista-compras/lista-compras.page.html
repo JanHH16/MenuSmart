@@ -1,0 +1,93 @@
+@if (esDesktop$ | async) {
+  <!-- Desktop (Figma "D5. Lista de compras"): columnas por categoría (look
+       "nota arrancada", ligeramente rotadas) + barra de progreso abajo — NO
+       la hoja única de mobile, es otra estructura. -->
+  <ion-content class="ms-desktop-content">
+    <div class="ms-desktop-page">
+      <header class="ms-lista-desktop-header">
+        <div>
+          <h1 class="ms-titulo-desktop">lista de esta semana</h1>
+          <p class="ms-subtitulo-desktop">
+            Generada desde {{ totalComidas }} comidas · {{ totalItems }} productos · sin ingredientes duplicados
+          </p>
+        </div>
+        <button type="button" class="ms-btn-figma ms-btn-figma--primario ms-lista-comparar" (click)="irAComparador()">
+          Comparar precios →
+        </button>
+      </header>
+
+      <div class="ms-lista-columnas">
+        @for (categoria of categorias; track categoria.nombre; let i = $index) {
+          <div class="ms-lista-grupo-wrap">
+            <span class="ms-cinta ms-lista-grupo-cinta" [style.transform]="'rotate(' + rotaciones[i % 4] * 3 + 'deg)'"></span>
+            <div class="ms-card-desktop ms-lista-grupo" [style.transform]="'rotate(' + rotaciones[i % 4] + 'deg)'">
+              <h2 class="ms-lista-grupo-titulo">{{ categoria.nombre }}</h2>
+              <span class="ms-lista-grupo-cuenta">{{ categoria.items.length }} productos</span>
+
+              @for (item of categoria.items; track item.id) {
+                <label class="ms-lista-item">
+                  <input type="checkbox" class="ms-checkbox-figma" [(ngModel)]="item.comprado" />
+                  <span class="ms-lista-item-nombre" [class.ms-lista-item-nombre--comprado]="item.comprado">
+                    {{ item.nombre }}
+                  </span>
+                  <span class="ms-lista-item-cantidad">{{ item.cantidad }}</span>
+                </label>
+              }
+            </div>
+          </div>
+        }
+      </div>
+
+      <div class="ms-card-desktop ms-lista-progreso">
+        <div>
+          <span class="ms-label-desktop">En el carro</span>
+          <p class="ms-lista-progreso-valor">{{ itemsComprados }} de {{ totalItems }} productos</p>
+        </div>
+        <div class="ms-lista-progreso-fondo">
+          <div class="ms-lista-progreso-barra" [style.width.%]="progresoPorcentaje"></div>
+        </div>
+      </div>
+    </div>
+  </ion-content>
+} @else {
+  <ion-header>
+    <ion-toolbar>
+      <ion-title class="ms-heading-libreta">lista de esta semana</ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  <ion-content class="ion-padding">
+    <!-- Mismo "En el carro" que la tarjeta de progreso desktop, en vez del
+         resumen "N comidas · N productos". -->
+    <div class="ms-lista-progreso-mobile">
+      <div class="ms-lista-progreso-mobile-textos">
+        <span class="ms-label-secundario">En el carro</span>
+        <span class="ms-lista-progreso-mobile-valor">{{ itemsComprados }} de {{ totalItems }} productos</span>
+      </div>
+      <div class="ms-lista-progreso-fondo ms-lista-progreso-fondo--mobile">
+        <div class="ms-lista-progreso-barra" [style.width.%]="progresoPorcentaje"></div>
+      </div>
+    </div>
+
+    <div class="ms-card-libreta ms-lista-hoja">
+      @for (categoria of categorias; track categoria.nombre) {
+        <h2 class="ms-categoria-titulo">{{ categoria.nombre | uppercase }}</h2>
+
+        @for (item of categoria.items; track item.id) {
+          <label class="ms-item-row">
+            <ion-checkbox [(ngModel)]="item.comprado"></ion-checkbox>
+            <span class="ms-item-nombre" [class.ms-item-comprado]="item.comprado">
+              {{ item.nombre }}
+            </span>
+            <span class="ms-mono ms-text-secondary ms-item-cantidad">{{ item.cantidad }}</span>
+          </label>
+        }
+      }
+
+      <ion-button expand="block" class="ms-btn-primary" (click)="irAComparador()">
+        Comparar precios
+        <ion-icon slot="end" name="arrow-forward-outline"></ion-icon>
+      </ion-button>
+    </div>
+  </ion-content>
+}
