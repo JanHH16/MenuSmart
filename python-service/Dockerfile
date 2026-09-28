@@ -13,4 +13,7 @@ COPY app ./app
 
 EXPOSE 8000
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Forma shell (no exec): permite que ${PORT} se expanda en tiempo de
+# ejecucion, en vez de quedar hardcodeado y desincronizado de PORT en
+# docker-compose.yml.
+CMD uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}
