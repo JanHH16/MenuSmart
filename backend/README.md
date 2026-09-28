@@ -11,8 +11,11 @@ cp .env.example .env   # completar valores, especialmente JWT_SECRET
 npm run start:dev
 ```
 
-Requiere PostgreSQL corriendo (ver `docker-compose.yml` en la raíz del proyecto) y el
-servicio Python disponible en `PYTHON_SERVICE_URL` para los endpoints que dependen de él.
+Requiere PostgreSQL corriendo. Sin levantar todo Docker Compose, basta con
+`docker compose up -d database` desde la raíz del proyecto (queda en `localhost:5433`,
+usar `DATABASE_HOST=localhost` y `DATABASE_PORT=5433` en `.env`). También requiere el
+servicio Python disponible en `PYTHON_SERVICE_URL` para los endpoints que dependen de él
+(ver [README general](../README.md#desarrollo-local-sin-docker) para levantarlo solo).
 
 ## Scripts
 

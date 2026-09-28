@@ -10,8 +10,8 @@ GitHub Actions · Terraform
 
 | Integrante | Ámbitos principales |
 |---|---|
-| Jan Houter. ([@JanHH16](https://github.com/JanHH16)) | Backend (NestJS), servicio Python, persistencia, DevOps/CI-CD, infraestructura (Terraform), documentación técnica |
-| Camila Torres. [@camitwrs](https://github.com/camitwrs) | Frontend (diseño de vistas), prototipo Figma, revisión de código (seguridad, calidad, cobertura de pruebas) |
+| Jan Houter. ([@JanHH16](https://github.com/JanHH16)) | Backend (NestJS), servicio Python (FastAPI), persistencia (PostgreSQL/TypeORM), DevOps/CI-CD (GitHub Actions), infraestructura como código (Terraform), documentación técnica |
+| Camila Torres. [@camitwrs](https://github.com/camitwrs) | Frontend (Angular/Ionic): arquitectura de layout adaptativo mobile/desktop, implementación de todas las vistas y su lógica de negocio, diseño del prototipo Figma, revisión de código (seguridad, calidad, cobertura de pruebas) |
 
 ## Problema y usuarios objetivo
 
@@ -152,10 +152,43 @@ Cada servicio tiene su propio `.env.example`: [`backend/.env.example`](backend/.
 
 ## Desarrollo local sin Docker
 
-Ver instrucciones específicas en [`backend/README.md`](backend/README.md) (NestJS) y
-correr `npm install && ionic serve` dentro de `frontend/` para el frontend. El servicio
-Python usa un entorno virtual (`python -m venv venv`) y
-`pip install -r requirements-dev.txt`.
+**Base de datos:** no hace falta levantar los 4 servicios completos para desarrollar un
+solo componente. Basta con levantar solo Postgres:
+
+```bash
+docker compose up -d database
+```
+
+Esto expone Postgres en `localhost:5433` (mapeado desde el puerto 5432 del contenedor).
+En el `.env` de `backend/` usa `DATABASE_HOST=localhost` y `DATABASE_PORT=5433` para
+apuntar a esta instancia sin correr `docker compose up --build` completo.
+
+**Backend (NestJS):** ver instrucciones específicas en
+[`backend/README.md`](backend/README.md), en resumen `npm install && npm run start:dev`
+dentro de `backend/`, con la base de datos ya corriendo (paso anterior).
+
+**Frontend (Angular/Ionic):**
+
+```bash
+cd frontend
+npm install
+ionic serve
+```
+
+Queda disponible en `http://localhost:8100` (puerto por defecto de `ionic serve`, distinto
+al `8080` que usa el contenedor de Docker Compose).
+
+**Servicio Python (FastAPI):**
+
+```bash
+cd python-service
+python -m venv venv
+# Windows: venv\Scripts\activate | Linux/Mac: source venv/bin/activate
+pip install -r requirements-dev.txt
+uvicorn app.main:app --reload --port 8000
+```
+
+Queda disponible en `http://localhost:8000`, igual que en Docker Compose.
 
 ## Pruebas
 
