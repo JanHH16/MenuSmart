@@ -378,3 +378,38 @@
   margin: 40px 20px 0;
   transform: rotate(2deg);
 }
+
+// Estado de los datos (fechas, avisos, botón de actualizar) y estados sin boleta.
+.ms-comp-estado {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 0 0 16px;
+  font-size: 0.8rem;
+
+  p {
+    margin: 0;
+  }
+}
+
+.ms-comp-estado-fechas {
+  color: var(--ms-lapiz);
+}
+
+.ms-comp-aviso {
+  color: var(--ms-margen-rojo);
+}
+
+.ms-comp-vacio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 32px 16px;
+  text-align: center;
+
+  p {
+    margin: 0;
+  }
+}

@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, computed, inject, OnInit } from '@angular/core';
 import { LayoutService } from '../../core/services/layout.service';
 import { ComparadorService, PrecioProducto } from '../../core/services/comparador.service';
 
@@ -8,15 +8,50 @@ import { ComparadorService, PrecioProducto } from '../../core/services/comparado
   styleUrls: ['./comparador.page.scss'],
   standalone: false,
 })
-export class ComparadorPage {
+export class ComparadorPage implements OnInit {
   private readonly comparadorService = inject(ComparadorService);
   private readonly layoutService = inject(LayoutService);
 
   readonly esDesktop$ = this.layoutService.esDesktop$;
   readonly tiendas = this.comparadorService.tiendas;
-  readonly productos: PrecioProducto[] = this.comparadorService.getProductos();
-  readonly totales = this.comparadorService.getTotales();
-  readonly tiendaMasBarata = this.comparadorService.getTiendaMasBarata();
+  readonly productos = this.comparadorService.productos;
+  readonly totales = this.comparadorService.totales;
+  readonly tiendaMasBarata = this.comparadorService.tiendaMasBarata;
+  readonly estado = this.comparadorService.estado;
+  readonly actualizando = this.comparadorService.actualizando;
+  readonly mensaje = this.comparadorService.mensaje;
+  readonly hayDesactualizados = this.comparadorService.hayDesactualizados;
+  readonly ultimaActualizacion = this.comparadorService.ultimaActualizacion;
+
+  readonly ganadora = computed(() => {
+    const indice = this.tiendaMasBarata().indice;
+    return indice === null ? null : this.tiendas[indice];
+  });
+
+  ngOnInit(): void {
+    this.comparadorService.cargar();
+  }
+
+  actualizar(): void {
+    this.comparadorService.actualizar();
+  }
+
+  reintentar(): void {
+    this.comparadorService.cargar();
+  }
+
+  /** "21 nov, 14:32", o "sin datos" si la tienda nunca se ha actualizado. */
+  formatFecha(fecha: Date | null): string {
+    if (!fecha) {
+      return 'sin datos';
+    }
+    return fecha.toLocaleString('es-CL', {
+      day: 'numeric',
+      month: 'short',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  }
 
   esMasBarato(producto: PrecioProducto, indiceTienda: number): boolean {
     return producto.precios[indiceTienda] === Math.min(...producto.precios);
@@ -62,22 +97,25 @@ export class ComparadorPage {
   }
 
   barraAncho(total: number): number {
-    const max = Math.max(...this.totales);
+    const max = Math.max(...this.totales());
     return max === 0 ? 0 : Math.round((total / max) * 100);
   }
 
   // Figma: nota "ojo: …" con el producto que conviene comprar en la OTRA
   // tienda (la que no gana en el total), el de mayor diferencia. Si no hay
   // ninguno, no se muestra la nota.
-  readonly consejo = this.calcularConsejo();
+  readonly consejo = computed(() => this.calcularConsejo());
 
   // Código de barras decorativo del pie de la boleta (Figma: barcode()).
   readonly barras = this.calcularBarras(220);
 
   private calcularConsejo(): { producto: string; ahorro: number; tienda: string } | null {
-    const ganadora = this.tiendaMasBarata.indice;
+    const ganadora = this.tiendaMasBarata().indice;
+    if (ganadora === null) {
+      return null;
+    }
     let mejor: { producto: string; ahorro: number; tienda: string } | null = null;
-    for (const producto of this.productos) {
+    for (const producto of this.productos()) {
       const barata = this.indiceMasBarato(producto);
       const ahorro = this.diferencia(producto);
       if (barata !== null && barata !== ganadora && (!mejor || ahorro > mejor.ahorro)) {
