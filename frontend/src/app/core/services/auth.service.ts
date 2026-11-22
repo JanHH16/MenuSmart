@@ -44,6 +44,21 @@ export class AuthService {
     return localStorage.getItem(TOKEN_KEY);
   }
 
+  /** Correo del usuario, leído del propio token (solo se usa para mostrarlo en el perfil). */
+  getEmail(): string | null {
+    const token = this.getToken();
+    if (!token) {
+      return null;
+    }
+    try {
+      const carga = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+      const datos = JSON.parse(atob(carga)) as { email?: unknown };
+      return typeof datos.email === 'string' ? datos.email : null;
+    } catch {
+      return null;
+    }
+  }
+
   isAuthenticated(): boolean {
     return !!this.getToken();
   }

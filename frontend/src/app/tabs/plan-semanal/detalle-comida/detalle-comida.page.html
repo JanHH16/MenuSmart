@@ -1,4 +1,7 @@
 @if (comida) {
+  @if (error) {
+    <p class="ms-text-secondary" role="alert">{{ error }}</p>
+  }
   @if (esDesktop$ | async) {
     <!-- Desktop (Figma "D4. Detalle de comida", buildDetailDesktop): "Volver
          al plan", título y Guardar arriba; tarjeta receta (440px) + tarjeta

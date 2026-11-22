@@ -22,7 +22,8 @@ export class RegisterPage {
     {
       name: ['', [Validators.required, Validators.minLength(2)]],
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]],
+      // Misma política que el backend: 8 a 72 caracteres, con al menos una letra y un número.
+      password: ['', [Validators.required, Validators.pattern(/^(?=.*[A-Za-z])(?=.*\d).{8,72}$/)]],
       confirmarContrasena: ['', [Validators.required]],
     },
     { validators: RegisterPage.passwordsCoincidenValidator },

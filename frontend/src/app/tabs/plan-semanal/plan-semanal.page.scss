@@ -392,3 +392,20 @@
   margin: 0 6px;
   font-size: 11px;
 }
+
+.ms-plan-estado {
+  margin: 0 0 12px;
+  font-size: 0.85rem;
+  color: var(--ms-lapiz);
+}
+
+.ms-plan-estado-reintentar {
+  margin-left: 8px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ms-tinta-azul);
+  text-decoration: underline;
+  font: inherit;
+  cursor: pointer;
+}
