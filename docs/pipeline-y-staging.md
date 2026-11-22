@@ -4,10 +4,10 @@ Este documento describe cómo se validan los cambios, cómo se despliegan a stag
 (Render) y cómo se revierten. Los workflows están en `.github/workflows/` y los scripts
 que usan en `.github/scripts/`.
 
-> **Estado:** el pipeline y los scripts están listos, pero el ambiente de staging en
-> Render todavía no existe (`terraform apply` no se ha ejecutado). Hasta completar los
-> [pasos manuales](#pasos-manuales-pendientes), el job `deploy-staging` falla en su primer
-> paso con un mensaje que lista qué falta configurar. Los demás jobs funcionan hoy.
+> **Estado (22-11-2026):** el staging existe en Render (plan gratuito), el job `deploy-staging`
+> pasó en verde y el rollback se probó una vez (`solo-frontend` hacia un commit anterior). Si el
+> environment `staging` no tiene el secret y las variables, `deploy-staging` falla en su primer
+> paso con un mensaje que lista qué falta configurar. Los demás jobs no dependen de Render.
 
 ## Vista general
 
