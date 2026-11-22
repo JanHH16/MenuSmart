@@ -17,6 +17,7 @@ flowchart LR
 
     subgraph Calidad["Jobs de calidad (en paralelo)"]
         BE["backend<br/>lint, build, unit, e2e, audit"]
+        MIG["migraciones<br/>base vacia, sin deriva"]
         FE["frontend<br/>lint, build, unit, audit"]
         PY["python-service<br/>ruff, bandit, pytest,<br/>recuperacion, pip-audit"]
         INT["integracion-python<br/>NestJS contra FastAPI real"]
@@ -41,8 +42,9 @@ flowchart LR
 
 | Job | Qué valida | Corre en |
 |---|---|---|
-| `backend` | Lint, build, pruebas unitarias, e2e contra PostgreSQL real (con el servicio Python simulado), `npm audit` | todo push y PR |
-| `frontend` | Lint, build, pruebas unitarias, `npm audit` | todo push y PR |
+| `backend` | Lint, build, pruebas unitarias, e2e contra PostgreSQL real (con el servicio Python simulado), `npm audit` (falla con severidad alta o crítica) | todo push y PR |
+| `migraciones` | Ejecuta todas las migraciones sobre una base vacía y falla si quedan entidades sin migración (ver [migraciones-y-auditoria.md](migraciones-y-auditoria.md)) | todo push y PR |
+| `frontend` | Lint, build, pruebas unitarias, `npm audit` (falla con severidad alta o crítica) | todo push y PR |
 | `python-service` | `ruff`, `bandit`, `pytest` completo, pruebas de recuperación del scraper, `pip-audit` | todo push y PR |
 | `integracion-python` | Pruebas de integración NestJS y FastAPI con el servicio Python real | todo push y PR |
 | `terraform` | `terraform fmt -check`, `init -backend=false`, `validate` | todo push y PR |
