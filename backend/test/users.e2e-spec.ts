@@ -141,7 +141,7 @@ describe('Cuenta de usuario y autenticación (e2e)', () => {
     beforeAll(async () => {
       // Datos del usuario que deben desaparecer en cascada.
       const [comida] = await dataSource.query<{ id: string }[]>(
-        `INSERT INTO "comidas" ("usuarioId", "nombre", "diaSemana") VALUES ($1, 'Comida E2E', 'lunes') RETURNING "id"`,
+        `INSERT INTO "comidas" ("usuarioId", "nombre", "diaSemana", "semana") VALUES ($1, 'Comida E2E', 'lunes', '2026-11-23') RETURNING "id"`,
         [userId],
       );
       comidaId = comida.id;
