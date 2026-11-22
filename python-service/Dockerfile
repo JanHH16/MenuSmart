@@ -2,6 +2,12 @@ FROM python:3.14-slim
 
 WORKDIR /app
 
+# La imagen base trae paquetes del sistema que pueden tener CVEs con correccion ya publicada
+# (ej. zlib1g). Se actualizan al construir y se limpia la lista de paquetes para no inflar la imagen.
+RUN apt-get update \
+    && apt-get upgrade -y --no-install-recommends \
+    && rm -rf /var/lib/apt/lists/*
+
 # pip y setuptools vienen empaquetados en la imagen base y pueden traer CVEs
 # conocidos incluso sin que el proyecto los use directamente en runtime.
 RUN pip install --no-cache-dir --upgrade pip setuptools
