@@ -855,3 +855,43 @@
   color: var(--ms-tinta-oscura);
   text-align: center;
 }
+
+// ---------------------------------------------------------------------------
+// Accesibilidad del shell (no reemplaza lo que cada página deba resolver)
+// ---------------------------------------------------------------------------
+
+// Foco visible para quien navega con teclado. :focus-visible no se activa con
+// el clic del mouse, así que no cambia el aspecto para el resto de usuarios.
+// Ionic marca con .ion-focused sus componentes con foco de teclado.
+:focus-visible,
+.ion-focused {
+  outline: 3px solid var(--ms-tinta-azul);
+  outline-offset: 2px;
+}
+
+// Sobre fondos azules (sidebar y panel de marca) el contorno azul no se ve:
+// se usa el amarillo marcador y hacia adentro, porque el sidebar recorta lo
+// que sobresale (overflow: hidden).
+.ms-sidebar,
+.ms-auth-brand {
+  :focus-visible,
+  .ion-focused {
+    outline-color: var(--ms-marcador);
+    outline-offset: -3px;
+  }
+}
+
+// Quien pide menos movimiento en el sistema no recibe animaciones ni
+// transiciones propias. Las de Ionic (páginas, modales) se apagan con la
+// opción `animated` en app.module.ts.
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0s !important;
+    scroll-behavior: auto !important;
+  }
+}

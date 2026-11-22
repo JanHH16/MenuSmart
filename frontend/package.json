@@ -21,6 +21,8 @@
     "@angular/platform-browser": "22.3.0",
     "@angular/platform-browser-dynamic": "22.3.0",
     "@angular/router": "22.3.0",
+    "@angular/service-worker": "22.3.0",
+    "@capacitor/android": "8.5.2",
     "@capacitor/app": "8.1.1",
     "@capacitor/camera": "8.2.4",
     "@capacitor/core": "8.5.2",
