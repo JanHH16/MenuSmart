@@ -70,6 +70,12 @@ jobs:
         working-directory: backend
         run: npm run test:e2e
 
+      # Unitarias y e2e juntas, en serie (comparten la base de datos), con umbral minimo:
+      # si la cobertura baja de 90% de sentencias o 70% de ramas, el job falla.
+      - name: Cobertura de pruebas (unitarias y e2e)
+        working-directory: backend
+        run: npm run test:cobertura
+
       # Politica de severidad: falla ante vulnerabilidades ALTAS o CRITICAS en
       # dependencias de produccion (--omit=dev). Ver docs/migraciones-y-auditoria.md.
       - name: Analisis de dependencias vulnerables (severidad alta o critica)
@@ -176,7 +182,8 @@ jobs:
 
       - name: Pruebas unitarias
         working-directory: frontend
-        run: npx ng test --watch=false
+        # Con informe de cobertura (se muestra en el log del job).
+        run: npx ng test --watch=false --coverage
 
       # Politica de severidad: falla ante vulnerabilidades ALTAS o CRITICAS en
       # dependencias de produccion (--omit=dev). Ver docs/migraciones-y-auditoria.md.
@@ -217,7 +224,7 @@ jobs:
 
       - name: Pruebas unitarias (todas, incluye el scraper con fixtures)
         working-directory: python-service
-        run: pytest
+        run: pytest --cov=app --cov-report=term --cov-fail-under=90
 
       # Escenarios de fallo del scraper. Corren con transporte HTTP simulado y
       # fixtures congeladas: nunca se accede a internet ni a las tiendas reales.
