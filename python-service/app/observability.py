@@ -27,6 +27,38 @@ _MUESTRAS_POR_RUTA = 500
 
 request_id_var: ContextVar[str | None] = ContextVar("request_id", default=None)
 
+REDACTADO = "[REDACTED]"
+_PROFUNDIDAD_MAXIMA = 8
+# Cualquier clave que contenga uno de estos fragmentos (sin distinguir mayusculas) se oculta.
+_CLAVE_SENSIBLE = re.compile(
+    r"password|passwd|token|secret|authorization|cookie|api[_-]?key", re.IGNORECASE
+)
+# Credenciales que se cuelan dentro de un texto libre (ej. un mensaje de excepcion).
+_TEXTO_SENSIBLE = re.compile(
+    r"Bearer\s+[A-Za-z0-9._~+/=-]+|eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]*"
+)
+
+
+def redactar(valor: Any, _profundidad: int = 0) -> Any:
+    """Copia `valor` reemplazando por "[REDACTED]" los campos sensibles, en profundidad.
+
+    Tambien tacha tokens Bearer y JWT que aparezcan dentro de textos. No modifica el original.
+    """
+    if _profundidad > _PROFUNDIDAD_MAXIMA:
+        return REDACTADO
+    if isinstance(valor, dict):
+        return {
+            clave: REDACTADO
+            if isinstance(clave, str) and _CLAVE_SENSIBLE.search(clave)
+            else redactar(contenido, _profundidad + 1)
+            for clave, contenido in valor.items()
+        }
+    if isinstance(valor, list | tuple | set):
+        return [redactar(item, _profundidad + 1) for item in valor]
+    if isinstance(valor, str):
+        return _TEXTO_SENSIBLE.sub(REDACTADO, valor)
+    return valor
+
 
 def id_de_solicitud(valor_recibido: str | None) -> str:
     """Reutiliza el id que manda el llamador (NestJS) si es seguro; si no, genera uno."""
@@ -36,7 +68,10 @@ def id_de_solicitud(valor_recibido: str | None) -> str:
 
 
 class JsonFormatter(logging.Formatter):
-    """Una linea JSON por registro, con el id de la solicitud en curso si existe."""
+    """Una linea JSON por registro, con el id de la solicitud en curso si existe.
+
+    Nunca escribe contrasenas, tokens ni cabeceras de autenticacion: `redactar` los oculta.
+    """
 
     def format(self, record: logging.LogRecord) -> str:
         datos: dict[str, Any] = {
@@ -52,7 +87,7 @@ class JsonFormatter(logging.Formatter):
         datos.update(getattr(record, "campos", {}))
         if record.exc_info:
             datos["error"] = self.formatException(record.exc_info)
-        return json.dumps(datos, ensure_ascii=False, default=str)
+        return json.dumps(redactar(datos), ensure_ascii=False, default=str)
 
 
 def configure_logging() -> None:

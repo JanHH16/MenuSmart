@@ -11,7 +11,9 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { LIMITE_ACTUALIZAR_PRECIOS } from '../rate-limit';
 import { TIENDAS } from '../python-client/scrape.types';
 import { CATALOGO } from './catalogo';
 import { CompareQueryDto } from './dto/compare-query.dto';
@@ -33,6 +35,7 @@ export class PricesController {
   }
 
   @Post('refresh')
+  @Throttle({ default: LIMITE_ACTUALIZAR_PRECIOS })
   @HttpCode(HttpStatus.ACCEPTED)
   @ApiOperation({
     summary: 'Inicia la actualización de precios (segundo plano)',

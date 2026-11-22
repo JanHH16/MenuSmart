@@ -1,8 +1,15 @@
+// bcrypt real, pero con compare observable para comprobar que siempre se ejecuta.
+jest.mock('bcrypt', () => {
+  const real = jest.requireActual<typeof import('bcrypt')>('bcrypt');
+  return { ...real, compare: jest.fn(real.compare) };
+});
+
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConflictException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { AuthService } from './auth.service';
+import { BCRYPT_RONDAS } from './auth.constants';
 import { UsersService } from '../users/users.service';
 import { User } from '../users/entities/user.entity';
 
@@ -62,6 +69,8 @@ describe('AuthService', () => {
       const createdArg = usersService.create.mock.calls[0][0];
       expect(createdArg.email).toBe('a@a.com');
       expect(createdArg.passwordHash).not.toBe('123456');
+      // El costo del hash es el configurado (12 rondas), no el valor por defecto antiguo.
+      expect(bcrypt.getRounds(createdArg.passwordHash)).toBe(BCRYPT_RONDAS);
       expect(result).toEqual({ accessToken: 'signed-token' });
     });
   });
@@ -73,6 +82,33 @@ describe('AuthService', () => {
       await expect(authService.login({ email: 'a@a.com', password: '123456' })).rejects.toThrow(
         UnauthorizedException,
       );
+    });
+
+    it('responde igual si el correo no existe o si la contraseña es incorrecta (sin enumeración)', async () => {
+      const passwordHash = await bcrypt.hash('correcta', 4);
+      usersService.findByEmail.mockResolvedValueOnce(null);
+      const sinUsuario = await authService
+        .login({ email: 'x@a.com', password: 'cualquiera1' })
+        .catch((e: UnauthorizedException) => e);
+      usersService.findByEmail.mockResolvedValueOnce({ id: '1', passwordHash } as User);
+      const conUsuario = await authService
+        .login({ email: 'a@a.com', password: 'incorrecta1' })
+        .catch((e: UnauthorizedException) => e);
+
+      expect(sinUsuario).toBeInstanceOf(UnauthorizedException);
+      expect((sinUsuario as UnauthorizedException).getResponse()).toEqual(
+        (conUsuario as UnauthorizedException).getResponse(),
+      );
+    });
+
+    it('compara contra un hash señuelo cuando el correo no existe, para igualar el tiempo', async () => {
+      const comparar = bcrypt.compare as unknown as jest.Mock;
+      comparar.mockClear();
+      usersService.findByEmail.mockResolvedValue(null);
+      await expect(
+        authService.login({ email: 'x@a.com', password: 'cualquiera1' }),
+      ).rejects.toThrow(UnauthorizedException);
+      expect(comparar).toHaveBeenCalledTimes(1);
     });
 
     it('lanza UnauthorizedException si la contraseña no coincide', async () => {

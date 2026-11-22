@@ -1,4 +1,5 @@
 import { Controller, Get, Logger } from '@nestjs/common';
+import { SkipThrottle } from '@nestjs/throttler';
 import { HttpService } from '@nestjs/axios';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
@@ -9,6 +10,8 @@ interface DependencyStatus {
   message?: string;
 }
 
+// Orquestadores y monitores lo consultan seguido: no debe contar para el limite.
+@SkipThrottle()
 @Controller('health')
 export class HealthController {
   private readonly logger = new Logger(HealthController.name);
