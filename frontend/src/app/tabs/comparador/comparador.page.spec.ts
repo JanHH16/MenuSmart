@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting, TestRequest } from '@angular/common/http/testing';
 import { ComparadorPage } from './comparador.page';
 import { PrecioProducto } from '../../core/services/comparador.service';
 
@@ -6,20 +8,60 @@ describe('ComparadorPage', () => {
   let component: ComparadorPage;
   let fixture: ComponentFixture<ComparadorPage>;
 
+  let http: HttpTestingController;
+  let cargaInicial: TestRequest;
+
   beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
+    http = TestBed.inject(HttpTestingController);
     fixture = TestBed.createComponent(ComparadorPage);
     component = fixture.componentInstance;
     fixture.detectChanges();
+    cargaInicial = http.expectOne((req) => req.url.endsWith('/prices/compare'));
   });
+
+  afterEach(() => http.verify());
 
   it('should create', () => {
     expect(component).toBeTruthy();
   });
 
+  it('pide la comparación al backend al abrirse y muestra el estado de carga', () => {
+    expect(component.estado()).toBe('cargando');
+  });
+
+  it('pasa a "error" si el backend no responde y no hay datos', () => {
+    cargaInicial.flush('error', { status: 500, statusText: 'Server Error' });
+    expect(component.estado()).toBe('error');
+  });
+
+  it('pasa a "listo" con los productos que entrega el backend', () => {
+    cargaInicial.flush({
+      ultimaActualizacion: { jumbo: null, santa_isabel: null },
+      comunes: [
+        {
+          slug: 'arroz-1kg',
+          nombre: 'Arroz 1 kg',
+          unidad: 'kg',
+          cantidad: 1,
+          tiendas: {
+            jumbo: { precio: 2000, desactualizado: false },
+            santa_isabel: { precio: 1500, desactualizado: false },
+          },
+        },
+      ],
+    });
+    expect(component.estado()).toBe('listo');
+    expect(component.productos()).toHaveLength(1);
+    expect(component.ganadora()).toBe('Santa Isabel');
+  });
+
   // Regresión: masBaratoNombre() usaba `precios[0] < precios[1] ? 0 : 1`,
   // que con precios iguales elegía la tienda del índice 1 (Santa Isabel)
   // aunque esMasBarato() marcara las DOS celdas como "más baratas" en la
-  // tabla — un sello contradictorio con la tabla que lo acompaña.
+  // tabla: un sello contradictorio con la tabla que lo acompaña.
   describe('empate de precios', () => {
     const productoEmpatado: PrecioProducto = {
       producto: 'Producto empatado',
