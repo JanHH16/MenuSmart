@@ -10,6 +10,7 @@ import { IngredientsModule } from './ingredients/ingredients.module';
 import { MealsModule } from './meals/meals.module';
 import { ProductsModule } from './products/products.module';
 import { ShoppingListsModule } from './shopping-lists/shopping-lists.module';
+import { PricesModule } from './prices/prices.module';
 
 @Module({
   imports: [
@@ -55,6 +56,7 @@ import { ShoppingListsModule } from './shopping-lists/shopping-lists.module';
     MealsModule,
     ProductsModule,
     ShoppingListsModule,
+    PricesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
