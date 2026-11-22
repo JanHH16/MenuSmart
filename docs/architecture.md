@@ -16,8 +16,8 @@ flowchart TB
     SantaIsabel["Santaisabel.cl<br/>(sitio externo)"]
 
     Usuario -->|"planifica comidas, genera lista de compras,<br/>compara precios"| App
-    App -->|"obtiene precios de productos<br/>(scraping autorizado, ver ADR-002)"| Jumbo
-    App -->|"obtiene precios de productos<br/>(scraping autorizado, ver ADR-002)"| SantaIsabel
+    App -->|"obtiene precios de productos<br/>(scraping respetando robots.txt, ver ADR-002 y ADR-003)"| Jumbo
+    App -->|"obtiene precios de productos<br/>(scraping respetando robots.txt, ver ADR-002 y ADR-003)"| SantaIsabel
 ```
 
 ## 2. Diagrama de contenedores
@@ -37,7 +37,7 @@ flowchart TB
     end
 
     subgraph PythonSvc["Servicio especializado"]
-        FastAPI["Python + FastAPI<br/>Normalizacion de ingredientes<br/>(scraping de precios: planeado, ver ADR-002)"]
+        FastAPI["Python + FastAPI<br/>Normalizacion de ingredientes<br/>y scraping de precios (ADR-002, ADR-003)"]
     end
 
     subgraph DB["Persistencia"]
@@ -60,9 +60,9 @@ Reglas de comunicación (ver sección 3 del enunciado del curso):
 
 - El frontend **nunca** llama directo al servicio Python ni a PostgreSQL: todo pasa por
   NestJS.
-- El servicio Python **no modifica directamente** las tablas de NestJS; si necesita datos
-  persistidos, los pide vía un endpoint interno de NestJS (no implementado aún, no ha sido
-  necesario porque el servicio Python todavía no persiste nada por sí mismo).
+- El servicio Python **no tiene acceso a la base de datos**: normaliza ingredientes y extrae
+  precios de las tiendas, y devuelve el resultado a NestJS, que lo valida y lo persiste (ver
+  [ADR-004](adr/004-arquitectura-y-justificacion.md), decisiones 2 y 3).
 
 ## 3. Diagrama de despliegue
 

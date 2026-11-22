@@ -86,15 +86,19 @@ optimización de compra exigida por el curso.
 
 ## 2. Modelo lógico (implementado hoy)
 
+Refleja las entidades de `backend/src/` y las 5 migraciones de `backend/src/migrations/`.
+
 ```mermaid
 erDiagram
     USERS ||--o{ COMIDAS : "usuarioId"
     COMIDAS ||--o{ INGREDIENTES : "comidaId"
     INGREDIENTES }o--o| PRODUCTOS : "productoId"
     PRODUCTOS ||--o{ PRECIOS_SUPERMERCADO : "productoId"
+    EJECUCIONES_SCRAPING ||--o{ PRECIOS_SUPERMERCADO : "ejecucionId"
     USERS ||--o{ LISTAS_COMPRA : "usuarioId"
     LISTAS_COMPRA ||--o{ LISTA_COMPRA_ITEMS : "listaCompraId"
     LISTA_COMPRA_ITEMS }o--o| PRODUCTOS : "productoId"
+    USERS ||--o{ RECOMENDACION_FEEDBACK : "usuarioId"
 
     USERS {
         uuid id PK
@@ -107,7 +111,11 @@ erDiagram
         uuid id PK
         uuid usuarioId FK
         varchar nombre
+        varchar tipo
         varchar diaSemana
+        date semana
+        int porciones
+        text notas
         timestamp createdAt
     }
     INGREDIENTES {
@@ -120,15 +128,42 @@ erDiagram
     }
     PRODUCTOS {
         uuid id PK
-        varchar nombreNormalizado UK
+        varchar slug UK
+        varchar nombreNormalizado
+        varchar nombre
+        varchar marca
         varchar categoria
+        varchar imagenUrl
+        float cantidad
+        varchar unidad
     }
     PRECIOS_SUPERMERCADO {
         uuid id PK
         uuid productoId FK
+        uuid ejecucionId FK "nullable"
         varchar supermercado
         float precio
-        timestamp fechaObtencion
+        int precioUnitario
+        boolean disponible
+        varchar urlProducto
+        varchar consulta
+        timestamptz fechaObtencion
+        date fechaDia
+    }
+    EJECUCIONES_SCRAPING {
+        uuid id PK
+        varchar tienda
+        varchar estado
+        timestamptz iniciadaEn
+        timestamptz finalizadaEn
+        int consultasTotal
+        int registrosExtraidos
+        int registrosValidos
+        int registrosDuplicados
+        int registrosDescartados
+        jsonb descartesPorMotivo
+        jsonb errores
+        int duracionMs
     }
     LISTAS_COMPRA {
         uuid id PK
@@ -143,6 +178,18 @@ erDiagram
         varchar nombreNormalizado
         float cantidadTotal
         varchar unidad
+        varchar terminoCatalogo
+        varchar categoria
+        boolean comprado
+        jsonb reglas
+        jsonb nombresOriginales
+    }
+    RECOMENDACION_FEEDBACK {
+        uuid id PK
+        uuid usuarioId FK
+        varchar recetaId
+        varchar accion
+        timestamptz creadoEn
     }
 ```
 
@@ -151,15 +198,18 @@ erDiagram
 | Tabla | Columnas clave | Notas |
 |---|---|---|
 | `users` | `id` PK, `email` UK, `passwordHash`, `name`, `createdAt` | Hash bcrypt, nunca contraseña en texto plano |
-| `comidas` | `id` PK, `usuarioId` FK → `users`, `nombre`, `diaSemana` | `onDelete: CASCADE` con `users` |
-| `ingredientes` | `id` PK, `comidaId` FK → `comidas`, `productoId` FK → `productos` (nullable), `cantidad`, `unidad` | `productoId` es nulo hasta que el ingrediente se normaliza contra el catálogo |
-| `productos` | `id` PK, `nombreNormalizado` UK, `categoria` | Catálogo normalizado; hoy se llena manualmente, el scraper (ADR-002, EP2) lo llenará automáticamente |
-| `precios_supermercado` | `id` PK, `productoId` FK → `productos`, `supermercado`, `precio`, `fechaObtencion` | Vacía hasta que exista el scraper (EP2) |
-| `listas_compra` | `id` PK, `usuarioId` FK → `users`, `semana` | Una fila por semana planificada por usuario |
-| `lista_compra_items` | `id` PK, `listaCompraId` FK → `listas_compra`, `productoId` FK → `productos` (nullable), `cantidadTotal`, `unidad` | Resultado de consolidar ingredientes repetidos entre comidas de la semana (lógica de consolidación: Fase 6) |
+| `comidas` | `id` PK, `usuarioId` FK, `nombre`, `tipo`, `diaSemana`, `semana`, `porciones` | `onDelete: CASCADE` con `users`. Índice `(usuarioId, semana)`. `semana` es el lunes de la semana |
+| `ingredientes` | `id` PK, `comidaId` FK, `nombre`, `cantidad`, `unidad`, `productoId` FK (nullable) | `CASCADE` con `comidas`. Texto libre del usuario, sin normalizar |
+| `productos` | `id` PK, `slug` UK, `nombreNormalizado`, `nombre`, `marca`, `categoria`, `cantidad`, `unidad` | Producto real de una tienda. El `slug` (de la URL) es único y lo comparten ambas tiendas. Lo llena el scraper vía NestJS |
+| `precios_supermercado` | `id` PK, `productoId` FK, `supermercado`, `precio`, `precioUnitario`, `disponible`, `urlProducto`, `consulta`, `fechaObtencion`, `fechaDia`, `ejecucionId` FK | Procedencia: tienda, fecha, URL y ejecución. Índice único `(supermercado, productoId, fechaDia)`: un precio por producto, tienda y día. Índice por `consulta` |
+| `ejecuciones_scraping` | `id` PK, `tienda`, `estado`, `iniciadaEn`, `finalizadaEn`, contadores de consultas y registros, `descartesPorMotivo`, `errores`, `duracionMs` | Una fila por tienda y actualización. Alimenta las métricas de calidad ([calidad-de-datos.md](calidad-de-datos.md)). Índice `(tienda, iniciadaEn)` |
+| `listas_compra` | `id` PK, `usuarioId` FK, `semana` | Única por `(usuarioId, semana)`. `CASCADE` con `users` |
+| `lista_compra_items` | `id` PK, `listaCompraId` FK, `nombreNormalizado`, `cantidadTotal`, `unidad`, `terminoCatalogo`, `categoria`, `comprado`, `reglas`, `nombresOriginales` | Resultado de normalizar y sumar los ingredientes de la semana ([normalizacion-de-ingredientes.md](normalizacion-de-ingredientes.md)). `reglas` y `nombresOriginales` guardan la trazabilidad |
+| `recomendacion_feedback` | `id` PK, `usuarioId` FK, `recetaId`, `accion` (`aceptada` o `rechazada`), `creadoEn` | Única por `(usuarioId, recetaId)`. `CASCADE` con `users` ([capacidad-adaptativa.md](capacidad-adaptativa.md)) |
 
 Entidades definidas en `backend/src/users/entities/`, `backend/src/meals/entities/`,
-`backend/src/products/entities/` y `backend/src/shopping-lists/entities/`.
+`backend/src/products/entities/`, `backend/src/prices/entities/`,
+`backend/src/shopping-lists/entities/` y `backend/src/recommendations/entities/`.
 
 ## 3. Estrategia de migraciones
 
