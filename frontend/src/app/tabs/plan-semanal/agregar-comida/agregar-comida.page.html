@@ -27,6 +27,10 @@
         }
       </header>
 
+      @if (error) {
+        <p class="ms-text-secondary" role="alert">{{ error }}</p>
+      }
+
       <div class="ms-agregar-desktop-segmento">
         <div class="ms-segmented">
           <button
@@ -362,6 +366,9 @@
         ></ion-textarea>
       </div>
 
+      @if (error) {
+        <p class="ms-text-secondary" role="alert">{{ error }}</p>
+      }
       <ion-button expand="block" class="ms-btn-primary" [disabled]="!puedeGuardar" (click)="guardar()">
         Guardar comida
       </ion-button>

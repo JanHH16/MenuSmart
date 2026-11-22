@@ -15,6 +15,7 @@ import { ShoppingListsModule } from './shopping-lists/shopping-lists.module';
 import { PricesModule } from './prices/prices.module';
 import { ObservabilityModule } from './observability/observability.module';
 import { LIMITE_GLOBAL } from './rate-limit';
+import { RecommendationsModule } from './recommendations/recommendations.module';
 
 @Module({
   imports: [
@@ -64,6 +65,7 @@ import { LIMITE_GLOBAL } from './rate-limit';
     ProductsModule,
     ShoppingListsModule,
     PricesModule,
+    RecommendationsModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],

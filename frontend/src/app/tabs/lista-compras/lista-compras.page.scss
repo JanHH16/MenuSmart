@@ -223,3 +223,53 @@
   border-radius: 7px;
   background: var(--ms-tinta-azul);
 }
+
+.ms-lista-acciones {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0 0 16px;
+  font-size: 0.85rem;
+
+  p {
+    margin: 0;
+  }
+}
+
+.ms-lista-aviso {
+  color: var(--ms-margen-rojo);
+}
+
+.ms-lista-costo-nota {
+  color: var(--ms-lapiz);
+  font-size: 0.8rem;
+}
+
+.ms-lista-regenerar {
+  padding: 8px 14px;
+  border: 1px dashed var(--ms-lapiz);
+  border-radius: 8px;
+  background: none;
+  color: var(--ms-tinta-azul);
+  font: inherit;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: default;
+  }
+}
+
+.ms-lista-vacia {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 32px 16px;
+  text-align: center;
+
+  p {
+    margin: 0;
+  }
+}

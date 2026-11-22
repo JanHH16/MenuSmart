@@ -30,6 +30,13 @@ export interface NormalizedIngredient {
   name: string;
   quantity: number;
   unit: string;
+  /** Término del catálogo de precios al que se mapeó, o null si no hubo coincidencia. */
+  term?: string | null;
+  category?: string | null;
+  /** Reglas aplicadas (mapeo de nombre, conversión de unidad, equivalencias). */
+  rules?: string[];
+  original_names?: string[];
+  merged_lines?: number;
 }
 
 export interface NormalizeResponse {

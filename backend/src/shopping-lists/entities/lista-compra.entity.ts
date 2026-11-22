@@ -6,11 +6,13 @@ import {
   OneToMany,
   JoinColumn,
   CreateDateColumn,
+  Unique,
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 import { ListaCompraItem } from './lista-compra-item.entity';
 
 @Entity('listas_compra')
+@Unique('UQ_listas_compra_usuario_semana', ['usuarioId', 'semana'])
 export class ListaCompra {
   @PrimaryGeneratedColumn('uuid')
   id: string;
