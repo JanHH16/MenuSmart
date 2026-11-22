@@ -1,0 +1,607 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "MenuSmart Python Service",
+    "version": "0.2.0"
+  },
+  "paths": {
+    "/health": {
+      "get": {
+        "summary": "Health",
+        "operationId": "health_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ingredients/normalize": {
+      "post": {
+        "tags": [
+          "ingredients"
+        ],
+        "summary": "Normalize Ingredients",
+        "description": "Normaliza ingredientes escritos por el usuario para poder sumarlos y valorizarlos.\n\nLimpia el nombre, lo mapea a un termino del catalogo de precios (por nombre exacto,\nsingular o sinonimo), convierte las cantidades a kg, l o un y une las lineas repetidas.\nCada item informa las reglas aplicadas para poder explicar el resultado. Es lo que permite\ngenerar la lista de compras y estimar su costo en cada supermercado.",
+        "operationId": "normalize_ingredients_ingredients_normalize_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NormalizeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NormalizeResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/scrape/search": {
+      "post": {
+        "tags": [
+          "scrape"
+        ],
+        "summary": "Search Prices",
+        "description": "Busca precios de las consultas dadas en una tienda (Jumbo o Santa Isabel).\n\nRespeta el robots.txt de la tienda, limita la frecuencia de solicitudes y devuelve\nsolo registros validados y sin duplicados. `estado` es `ok` si todas las consultas\nfuncionaron, `parcial` si algunas fallaron y `fallido` si ninguna devolviÃ³ datos.\nNestJS es quien persiste el resultado: este servicio no escribe en la base de datos.",
+        "operationId": "search_prices_scrape_search_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScrapeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScrapeResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ErrorScrape": {
+        "properties": {
+          "consulta": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Consulta"
+          },
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "timeout",
+              "red",
+              "bloqueo",
+              "http",
+              "robots",
+              "estructura",
+              "respuesta_invalida"
+            ],
+            "title": "Tipo"
+          },
+          "detalle": {
+            "type": "string",
+            "title": "Detalle"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tipo",
+          "detalle"
+        ],
+        "title": "ErrorScrape"
+      },
+      "EstadisticasScrape": {
+        "properties": {
+          "consultas_total": {
+            "type": "integer",
+            "title": "Consultas Total"
+          },
+          "consultas_ok": {
+            "type": "integer",
+            "title": "Consultas Ok"
+          },
+          "consultas_fallidas": {
+            "type": "integer",
+            "title": "Consultas Fallidas"
+          },
+          "registros_extraidos": {
+            "type": "integer",
+            "title": "Registros Extraidos"
+          },
+          "registros_validos": {
+            "type": "integer",
+            "title": "Registros Validos"
+          },
+          "registros_duplicados": {
+            "type": "integer",
+            "title": "Registros Duplicados"
+          },
+          "registros_descartados": {
+            "type": "integer",
+            "title": "Registros Descartados"
+          },
+          "descartes_por_motivo": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Descartes Por Motivo"
+          },
+          "duracion_ms": {
+            "type": "integer",
+            "title": "Duracion Ms"
+          }
+        },
+        "type": "object",
+        "required": [
+          "consultas_total",
+          "consultas_ok",
+          "consultas_fallidas",
+          "registros_extraidos",
+          "registros_validos",
+          "registros_duplicados",
+          "registros_descartados",
+          "descartes_por_motivo",
+          "duracion_ms"
+        ],
+        "title": "EstadisticasScrape"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "NormalizeRequest": {
+        "properties": {
+          "ingredients": {
+            "items": {
+              "$ref": "#/components/schemas/RawIngredient"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Ingredients"
+          }
+        },
+        "type": "object",
+        "required": [
+          "ingredients"
+        ],
+        "title": "NormalizeRequest"
+      },
+      "NormalizeResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/NormalizedIngredient"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "original_count": {
+            "type": "integer",
+            "title": "Original Count"
+          },
+          "normalized_count": {
+            "type": "integer",
+            "title": "Normalized Count"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "original_count",
+          "normalized_count"
+        ],
+        "title": "NormalizeResponse"
+      },
+      "NormalizedIngredient": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Nombre del termino del catalogo, o el nombre limpio si no hay."
+          },
+          "quantity": {
+            "type": "number",
+            "title": "Quantity",
+            "description": "Cantidad total ya convertida a la unidad de `unit`."
+          },
+          "unit": {
+            "type": "string",
+            "title": "Unit",
+            "description": "kg, l o un cuando se pudo convertir; si no, la unidad original."
+          },
+          "term": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Term",
+            "description": "Termino del catalogo de precios al que se mapeo, o null."
+          },
+          "category": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Category",
+            "description": "Categoria del termino, o null."
+          },
+          "rules": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Rules",
+            "description": "Reglas aplicadas (mapeo de nombre, conversion de unidad, equivalencias)."
+          },
+          "original_names": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Original Names",
+            "description": "Nombres tal como los escribio el usuario."
+          },
+          "merged_lines": {
+            "type": "integer",
+            "title": "Merged Lines",
+            "description": "Cuantas lineas de ingredientes se unieron.",
+            "default": 1
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "quantity",
+          "unit"
+        ],
+        "title": "NormalizedIngredient"
+      },
+      "ProductoScrapeado": {
+        "properties": {
+          "consulta": {
+            "type": "string",
+            "title": "Consulta"
+          },
+          "external_id": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 3,
+            "title": "External Id"
+          },
+          "nombre": {
+            "type": "string",
+            "maxLength": 300,
+            "minLength": 1,
+            "title": "Nombre"
+          },
+          "nombre_normalizado": {
+            "type": "string",
+            "maxLength": 300,
+            "minLength": 1,
+            "title": "Nombre Normalizado"
+          },
+          "marca": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Marca"
+          },
+          "precio": {
+            "type": "integer",
+            "maximum": 100000000.0,
+            "exclusiveMinimum": 0.0,
+            "title": "Precio"
+          },
+          "moneda": {
+            "type": "string",
+            "const": "CLP",
+            "title": "Moneda",
+            "default": "CLP"
+          },
+          "cantidad": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cantidad"
+          },
+          "unidad": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "kg",
+                  "l",
+                  "un"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unidad"
+          },
+          "precio_unitario": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Precio Unitario"
+          },
+          "disponible": {
+            "type": "boolean",
+            "title": "Disponible"
+          },
+          "url": {
+            "type": "string",
+            "title": "Url"
+          },
+          "imagen": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Imagen"
+          }
+        },
+        "type": "object",
+        "required": [
+          "consulta",
+          "external_id",
+          "nombre",
+          "nombre_normalizado",
+          "precio",
+          "disponible",
+          "url"
+        ],
+        "title": "ProductoScrapeado"
+      },
+      "RawIngredient": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Name"
+          },
+          "quantity": {
+            "type": "number",
+            "exclusiveMinimum": 0.0,
+            "title": "Quantity"
+          },
+          "unit": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Unit"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "quantity",
+          "unit"
+        ],
+        "title": "RawIngredient"
+      },
+      "ScrapeRequest": {
+        "properties": {
+          "tienda": {
+            "type": "string",
+            "enum": [
+              "jumbo",
+              "santa_isabel"
+            ],
+            "title": "Tienda"
+          },
+          "consultas": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 10,
+            "minItems": 1,
+            "title": "Consultas"
+          },
+          "max_resultados_por_consulta": {
+            "type": "integer",
+            "maximum": 40.0,
+            "minimum": 1.0,
+            "title": "Max Resultados Por Consulta",
+            "default": 10
+          }
+        },
+        "type": "object",
+        "required": [
+          "tienda",
+          "consultas"
+        ],
+        "title": "ScrapeRequest"
+      },
+      "ScrapeResponse": {
+        "properties": {
+          "tienda": {
+            "type": "string",
+            "enum": [
+              "jumbo",
+              "santa_isabel"
+            ],
+            "title": "Tienda"
+          },
+          "estado": {
+            "type": "string",
+            "enum": [
+              "ok",
+              "parcial",
+              "fallido"
+            ],
+            "title": "Estado"
+          },
+          "obtenido_en": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Obtenido En"
+          },
+          "resultados": {
+            "items": {
+              "$ref": "#/components/schemas/ProductoScrapeado"
+            },
+            "type": "array",
+            "title": "Resultados"
+          },
+          "errores": {
+            "items": {
+              "$ref": "#/components/schemas/ErrorScrape"
+            },
+            "type": "array",
+            "title": "Errores"
+          },
+          "estadisticas": {
+            "$ref": "#/components/schemas/EstadisticasScrape"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tienda",
+          "estado",
+          "obtenido_en",
+          "resultados",
+          "errores",
+          "estadisticas"
+        ],
+        "title": "ScrapeResponse"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}
