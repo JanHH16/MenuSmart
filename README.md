@@ -196,7 +196,7 @@ Esto levanta los 4 servicios: PostgreSQL (el backend corre las migraciones al ar
 | Servicio Python | http://localhost:8000 (documentación en `/docs`) |
 | PostgreSQL (desde el host) | `localhost:5433` |
 
-**Primer uso:** la base está vacía y **no hay precios**. Para cargarlos, entra a la app, abre el comparador y usa el botón de actualizar precios (o `POST /api/prices/refresh` con tu token). Consulta las tiendas reales a 1 solicitud por segundo y toma cerca de 1 a 2 minutos por tienda. Sin precios, la lista de compras y el recomendador no pueden estimar costos.
+**Primer uso:** la base está vacía y **no hay precios**. Para cargarlos, entra a la app, abre el comparador y usa el botón de actualizar precios (o `POST /api/prices/refresh` con tu token). Consulta las tiendas reales a 1 solicitud por segundo y, en la última medición, tomó entre 37 y 43 segundos por tienda (puede tardar más). Sin precios, la lista de compras y el recomendador no pueden estimar costos.
 
 ## Variables de entorno
 
@@ -213,7 +213,7 @@ Variables del backend:
 | Variable | Valor por defecto | Descripción |
 |---|---|---|
 | `DATABASE_HOST`, `DATABASE_PORT`, `DATABASE_USER`, `DATABASE_PASSWORD`, `DATABASE_NAME` | (ejemplo: `localhost`, `5433`) | Conexión a PostgreSQL (con Docker Compose: puerto 5433 del host) |
-| `JWT_SECRET` | sin valor por defecto | Obligatorio; sin él el backend no arranca (en la rama de seguridad) |
+| `JWT_SECRET` | sin valor por defecto | Obligatorio; sin él el backend no arranca |
 | `JWT_EXPIRES_IN` | `3600s` | Duración del token |
 | `PYTHON_SERVICE_URL` | `http://localhost:8000` | Dirección del servicio Python |
 | `PRICES_MIN_REFRESH_INTERVAL_MINUTES` | `10` | Minutos mínimos entre dos actualizaciones exitosas |
