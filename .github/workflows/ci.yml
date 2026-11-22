@@ -70,9 +70,11 @@ jobs:
         working-directory: backend
         run: npm run test:e2e
 
-      - name: Analisis de dependencias vulnerables
+      # Politica de severidad: falla ante vulnerabilidades ALTAS o CRITICAS en
+      # dependencias de produccion (--omit=dev). Ver docs/migraciones-y-auditoria.md.
+      - name: Analisis de dependencias vulnerables (severidad alta o critica)
         working-directory: backend
-        run: npm audit --omit=dev --audit-level=critical
+        run: npm audit --omit=dev --audit-level=high
 
   # ---------------------------------------------------------------------------
   # Frontend (Angular / Ionic)
@@ -107,9 +109,11 @@ jobs:
         working-directory: frontend
         run: npx ng test --watch=false
 
-      - name: Analisis de dependencias vulnerables
+      # Politica de severidad: falla ante vulnerabilidades ALTAS o CRITICAS en
+      # dependencias de produccion (--omit=dev). Ver docs/migraciones-y-auditoria.md.
+      - name: Analisis de dependencias vulnerables (severidad alta o critica)
         working-directory: frontend
-        run: npm audit --omit=dev --audit-level=critical
+        run: npm audit --omit=dev --audit-level=high
 
   # ---------------------------------------------------------------------------
   # Servicio Python (FastAPI)
@@ -153,7 +157,11 @@ jobs:
         run: |
           pytest -v tests/test_scraper_service.py -k "timeout_reintenta or error_de_servidor_se_recupera or bloqueo_429 or sin_estructura_esperada or robots_no_disponible or estado_parcial or redireccion_fuera or demasiado_grande"
 
-      - name: Analisis de dependencias vulnerables
+      # pip-audit no tiene niveles de severidad: termina con codigo distinto de
+      # cero ante CUALQUIER vulnerabilidad conocida en las dependencias de
+      # produccion (requirements.txt, con versiones fijas), tenga o no correccion
+      # publicada. Es mas estricto que la politica "alta o critica" de npm.
+      - name: Analisis de dependencias vulnerables (cualquier vulnerabilidad)
         working-directory: python-service
         run: |
           pip install pip-audit
