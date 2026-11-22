@@ -19,7 +19,12 @@
       <header class="ms-plan-desktop-header">
         <div>
           <h1 class="ms-titulo-desktop">tu semana</h1>
-          <p class="ms-subtitulo-desktop">Toca una comida para editarla</p>
+          <div class="ms-plan-desktop-subtitulo">
+            <p class="ms-subtitulo-desktop">Toca una comida para editarla</p>
+            <button type="button" class="ms-btn-figma ms-btn-figma--secundario ms-plan-sugerencias" (click)="verSugerencias()">
+              Sugerencias
+            </button>
+          </div>
         </div>
 
         <div class="ms-plan-desktop-header-actions">
@@ -139,6 +144,15 @@
          derecha, en vez de un FAB circular. -->
     <button slot="fixed" type="button" class="ms-nota-adhesiva ms-plan-mobile-agregar" (click)="agregarComida()">
       + agregar comida
+    </button>
+
+    <button
+      slot="fixed"
+      type="button"
+      class="ms-btn-figma ms-btn-figma--secundario ms-plan-mobile-sugerencias"
+      (click)="verSugerencias()"
+    >
+      Sugerencias
     </button>
   </ion-content>
 }

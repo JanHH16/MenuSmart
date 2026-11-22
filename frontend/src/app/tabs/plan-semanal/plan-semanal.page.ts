@@ -38,4 +38,8 @@ export class PlanSemanalPage implements OnInit {
   agregarComida(): void {
     this.router.navigateByUrl('/tabs/plan-semanal/nueva');
   }
+
+  verSugerencias(): void {
+    this.router.navigateByUrl('/tabs/plan-semanal/sugerencias');
+  }
 }
