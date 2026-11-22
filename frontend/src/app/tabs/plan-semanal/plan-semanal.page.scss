@@ -200,6 +200,15 @@
   transform: rotate(-4deg);
 }
 
+// Acceso a las sugerencias, abajo a la izquierda (la nota adhesiva va a la derecha).
+.ms-plan-mobile-sugerencias {
+  position: absolute;
+  left: 16px;
+  bottom: 30px;
+  height: 44px;
+  padding: 0 16px;
+}
+
 // ---------------------------------------------------------------------------
 // Desktop (Figma "D3. Plan semanal", buildPlanDesktop): columnas por día.
 // Medidas en px del prototipo de 1440×900.
@@ -211,6 +220,26 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 24px;
+}
+
+// "Sugerencias" va junto al subtítulo para no mover las columnas de Figma.
+.ms-plan-desktop-subtitulo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+}
+
+.ms-plan-sugerencias {
+  height: 28px;
+  padding: 0 12px;
+  font-size: 11px;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 3px solid var(--ms-tinta-azul);
+    outline-offset: 2px;
+  }
 }
 
 .ms-plan-desktop-header-actions {
