@@ -23,7 +23,7 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "test:e2e": "jest --config ./test/jest-e2e.json --runInBand",
     "evaluar:recomendador": "ts-node scripts/evaluar-recomendador.ts",
     "test:cobertura": "jest --config ./test/jest-cobertura.json --runInBand --coverage",
     "medir:latencia": "node scripts/medir-latencia.mjs"

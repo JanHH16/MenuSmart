@@ -117,9 +117,13 @@ describe('Recomendaciones (e2e)', () => {
     const porCosto = await recomendar('&pesoCosto=100&limite=30');
     const porReuso = await recomendar('&pesoCosto=0&limite=30');
     expect(porCosto.pesos).toEqual({ costo: 1, reuso: 0 });
-    const posicion = (r: Respuesta, id: string) => r.recomendaciones.findIndex((x) => x.recetaId === id);
-    // "Arroz con huevo" comparte arroz y cebolla con el plan.
-    expect(posicion(porReuso, 'arroz-con-huevo')).toBeLessThan(posicion(porCosto, 'arroz-con-huevo'));
+    expect(porReuso.pesos).toEqual({ costo: 0, reuso: 1 });
+    // Con todo el peso en la reutilización, las recetas que comparten ingredientes con el plan
+    // van antes que las que no comparten ninguno. No depende de los precios cargados en la base.
+    const compartidas = porReuso.recomendaciones.map((r) => r.ingredientesCompartidos.length > 0);
+    expect(compartidas.some(Boolean)).toBe(true);
+    expect(compartidas.some((c) => !c)).toBe(true);
+    expect(compartidas.lastIndexOf(true)).toBeLessThan(compartidas.indexOf(false));
   });
 
   it('con adaptativo=false devuelve el orden base alfabético y sin puntaje', async () => {
