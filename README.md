@@ -14,11 +14,11 @@ Proyecto de la asignatura **Ingeniería Web Avanzada**.
 |---|---|
 | Repositorio | https://github.com/JanHH16/MenuSmart |
 | Entrega Parcial 1 (tag) | `v1.0.0-ep1` |
-| Tag de la Entrega Parcial 2 y de la Entrega Final | Pendiente: completar |
-| Ambiente de staging | Pendiente: completar (no está desplegado, ver [Limitaciones](#limitaciones-conocidas)) |
+| Tag de la Entrega Parcial 2 y de la Entrega Final | `v1.1.0-ep2` (EP2) y `v2.0.0-ef` (Entrega Final), creados el 22-11-2026 sobre `main` |
+| Ambiente de staging | Sitio: https://menusmart-staging-frontend.onrender.com · API: https://menusmart-staging-backend.onrender.com (plan gratuito de Render: si estaba dormido, la primera visita tarda cerca de 1 minuto; ver [Limitaciones](#limitaciones-conocidas)) |
 | Tablero de gestión del proyecto | Pendiente: completar |
 | Prototipo Figma | [Ver abajo](#prototipo-figma) |
-| Documentación de la API (Swagger) | `http://localhost:3000/api/docs` con el backend corriendo; especificaciones en [`docs/api/`](docs/api/README.md) |
+| Documentación de la API (Swagger) | https://menusmart-staging-backend.onrender.com/api/docs, o `http://localhost:3000/api/docs` con el backend corriendo; especificaciones en [`docs/api/`](docs/api/README.md) |
 
 ## Integrantes y responsabilidades
 
@@ -328,10 +328,10 @@ Resumen de las rutas de NestJS (todas con `Authorization: Bearer <token>` salvo 
 
 | Estado | Contenido |
 |---|---|
-| En esta rama | Jobs de backend (lint, build, pruebas unitarias y e2e, `npm audit`), frontend (lint, build, pruebas, `npm audit`), Python (ruff, bandit, pytest, `pip-audit`), detección de secretos (gitleaks) y construcción de imágenes con escaneo Trivy |
-| En ramas por unir | `feature/ci-auditoria`: umbral `--audit-level=high` y job `migraciones` (base vacía y sin deriva). `feature/pipeline-staging`: integración NestJS-FastAPI con el servicio real, validación de Terraform, despliegue automático a staging, health checks y rollback |
+| Jobs de calidad | Backend (lint, build, pruebas unitarias y e2e, cobertura mínima, `npm audit` en nivel alto), frontend (lint, build, pruebas, `npm audit`), Python (ruff, bandit, pytest con cobertura mínima, `pip-audit`), migraciones (base vacía y sin deriva), integración NestJS-FastAPI con el servicio real y con clave de servicio, validación de Terraform y detección de secretos (gitleaks) |
+| Imágenes y despliegue | Construcción de las 3 imágenes con escaneo Trivy; en cada push a `develop`, despliegue automático a staging con health checks. El workflow manual `Rollback de staging` redespliega un commit anterior; el workflow `Android` compila el APK de depuración |
 
-Detalle, secretos y variables de GitHub, y pasos manuales: [`docs/pipeline-y-staging.md`](docs/pipeline-y-staging.md) (documento de la rama `feature/pipeline-staging`; si no aparece en esta rama todavía, está allí). Política de migraciones y auditoría: [`docs/migraciones-y-auditoria.md`](docs/migraciones-y-auditoria.md) (rama `feature/ci-auditoria`).
+Detalle, secretos y variables de GitHub, y pasos manuales: [`docs/pipeline-y-staging.md`](docs/pipeline-y-staging.md). Política de migraciones y auditoría: [`docs/migraciones-y-auditoria.md`](docs/migraciones-y-auditoria.md).
 
 **Infraestructura como código:** [`infra/`](infra/) define en Terraform (proveedor Render) la base de datos y los tres servicios; por defecto en plan gratuito. El servicio Python tiene URL pública y solo responde al backend gracias a una clave de servicio ([ADR-001](docs/adr/001-infraestructura-render.md)).
 
@@ -343,7 +343,7 @@ terraform validate
 terraform plan
 ```
 
-**Estado del despliegue:** `terraform apply` no se ha ejecutado (requiere una cuenta real de Render), por eso no hay ambiente de staging en vivo. Los pasos manuales están en el documento de pipeline.
+**Estado del despliegue:** el 22-11-2026 se ejecutó `terraform apply` (4 recursos en plan gratuito de Render) y el pipeline desplegó `develop` a staging con los health checks en verde. El rollback se probó una vez con `solo-frontend` hacia un commit anterior. Detalle y advertencias de los servicios gratuitos en el documento de pipeline.
 
 ## Observabilidad
 
@@ -375,8 +375,8 @@ El trabajo de la entrega se desarrolló en ramas por tema y se reúne en `integr
 
 ## Limitaciones conocidas
 
-- **Sin staging desplegado:** la infraestructura está definida y validada como código, pero `terraform apply` no se ha ejecutado.
-- **APK de Android sin compilar ni probar** en un dispositivo.
+- **Staging en plan gratuito:** los servicios se duermen tras 15 minutos sin tráfico y la primera visita tarda cerca de 1 minuto (conviene despertarlos antes de una demostración); la base de datos gratuita de Render caduca a los 30 días. El servicio Python es público y se protege solo con una clave de servicio compartida con el backend.
+- **APK de Android:** el CI lo compila, pero no se ha probado en un dispositivo.
 - **Dependencia de una fuente frágil:** el scraper lee el HTML de las tiendas; si cambian su estructura o su `robots.txt`, fallará (se conservan los precios anteriores con su fecha). Los términos de servicio no se analizaron jurídicamente.
 - **Actualización de precios manual:** no hay programador automático ni alertas.
 - **Normalización léxica:** el mapeo de ingredientes compara palabras. Descarta algunos casos conocidos ("leche condensada", "harina de maíz"), pero otros nombres compuestos pueden mapearse al término más cercano ("aceite de oliva" se toma como aceite). Catálogo de 31 ingredientes.
@@ -389,7 +389,7 @@ El trabajo de la entrega se desarrolló en ramas por tema y se reúne en `integr
 
 ## Trabajo futuro
 
-- Desplegar staging, medir el rollback y completar los pasos manuales del pipeline.
+- Pasar staging a instancias de pago (siempre despiertas, Python privado) si el proyecto continúa.
 - Probar y firmar el APK; Lighthouse sobre la PWA.
 - Realizar la prueba con 5 a 10 usuarios y publicar los resultados.
 - Programar la actualización de precios y agregar alertas.
