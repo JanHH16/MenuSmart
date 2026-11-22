@@ -29,6 +29,13 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
     }
 
+    # El service worker y los archivos que lo describen deben revalidarse siempre: si el
+    # navegador los guarda en cache, una version nueva de la app tarda dias en llegar.
+    location ~* ^/(ngsw\.json|ngsw-worker\.js|safety-worker\.js|worker-basic\.min\.js|index\.html|manifest\.webmanifest)$ {
+        add_header Cache-Control "no-cache";
+        try_files $uri =404;
+    }
+
     # SPA de Angular: cualquier ruta no encontrada cae en index.html
     location / {
         try_files $uri $uri/ /index.html;
