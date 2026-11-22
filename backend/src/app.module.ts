@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -12,6 +14,7 @@ import { ProductsModule } from './products/products.module';
 import { ShoppingListsModule } from './shopping-lists/shopping-lists.module';
 import { PricesModule } from './prices/prices.module';
 import { ObservabilityModule } from './observability/observability.module';
+import { LIMITE_GLOBAL } from './rate-limit';
 
 @Module({
   imports: [
@@ -50,6 +53,8 @@ import { ObservabilityModule } from './observability/observability.module';
         };
       },
     }),
+    // Limite general por IP; las rutas sensibles lo endurecen con @Throttle (ver rate-limit.ts).
+    ThrottlerModule.forRoot([{ name: 'default', ...LIMITE_GLOBAL }]),
     ObservabilityModule,
     HealthModule,
     UsersModule,
@@ -61,6 +66,6 @@ import { ObservabilityModule } from './observability/observability.module';
     PricesModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],
 })
 export class AppModule {}
