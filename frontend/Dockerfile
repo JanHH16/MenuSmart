@@ -8,6 +8,11 @@ RUN npm run build
 
 # ---- Production stage: servido con nginx ----
 FROM nginx:alpine AS production
+
+# Los paquetes de la imagen base pueden tener CVEs con correccion ya publicada
+# (ej. libxml2). Se actualizan al construir.
+RUN apk upgrade --no-cache
+
 COPY --from=builder /app/www /usr/share/nginx/html
 COPY nginx.conf.template /etc/nginx/templates/default.conf.template
 
