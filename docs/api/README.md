@@ -7,9 +7,7 @@ MenuSmart tiene dos APIs, cada una con su especificación OpenAPI generada desde
 | **NestJS** (API principal) | [`openapi.json`](openapi.json) | `http://localhost:3000/api/docs` (Swagger UI) y `http://localhost:3000/api/docs-json` | El frontend |
 | **FastAPI** (servicio Python) | [`openapi-python.json`](openapi-python.json) | `http://localhost:8000/docs` (Swagger UI), `/redoc` y `http://localhost:8000/openapi.json` | Solo NestJS (servicio interno) |
 
-Los dos archivos de este directorio se **exportaron de las aplicaciones corriendo** el 22-11-2026 (NestJS desde el estado de la rama `feature/core-domain`; FastAPI desde el servicio de esta rama). No se escriben a mano.
-
-> **Alcance del archivo de NestJS.** Refleja la rama `feature/core-domain`. No incluye `GET /api/metrics` (rama `feature/observability`) ni `GET` y `DELETE /api/users/me` (rama `feature/seguridad`), que se suman al unir las ramas. Después de unirlas hay que regenerar el archivo (ver más abajo). La interfaz Swagger de la aplicación unida sí los muestra.
+Los dos archivos de este directorio se **exportaron de las aplicaciones corriendo** el 22-11-2026 (ambas desde `integration/ep2-ef`). No se escriben a mano.
 
 ## Autenticación
 
@@ -19,11 +17,11 @@ Las rutas de NestJS, salvo `/health`, `/api` (mensaje de bienvenida), `POST /api
 
 | Método y ruta | Tag | Descripción |
 |---|---|---|
-| `GET /health` | Health | Estado del backend, de PostgreSQL y del servicio Python (fuera del prefijo `/api`) |
-| `GET /api` | App | Mensaje de bienvenida |
-| `POST /api/auth/register` | Auth | Registro; devuelve `accessToken` |
-| `POST /api/auth/login` | Auth | Inicio de sesión; devuelve `accessToken` |
-| `POST /api/ingredients/normalize` | Ingredients | Normaliza y suma ingredientes (llama al servicio Python) |
+| `GET /health` | observabilidad | Estado del backend, de PostgreSQL y del servicio Python (fuera del prefijo `/api`) |
+| `GET /api` | observabilidad | Mensaje de bienvenida |
+| `POST /api/auth/register` | auth | Registro; devuelve `accessToken` |
+| `POST /api/auth/login` | auth | Inicio de sesión; devuelve `accessToken` |
+| `POST /api/ingredients/normalize` | ingredients | Normaliza y suma ingredientes (llama al servicio Python) |
 | `GET /api/meals` | meals | Comidas del plan semanal del usuario |
 | `POST /api/meals` | meals | Agrega una comida con sus ingredientes |
 | `GET /api/meals/{id}` | meals | Detalle de una comida |
@@ -42,18 +40,22 @@ Las rutas de NestJS, salvo `/health`, `/api` (mensaje de bienvenida), `POST /api
 | `POST /api/recommendations/accept` | recommendations | Acepta una sugerencia (la agrega al plan) |
 | `POST /api/recommendations/reject` | recommendations | Rechaza una sugerencia |
 | `DELETE /api/recommendations/feedback` | recommendations | Vuelve a mostrar las rechazadas |
+| `GET /api/users/me` | users | Datos personales que se guardan de la cuenta |
+| `DELETE /api/users/me` | users | Elimina la cuenta y todos sus datos (exige la contraseña; 204) |
+| `GET /api/metrics` | observabilidad | Tiempos de respuesta por ruta y resultado de las actualizaciones de precios |
 
-Total: 23 operaciones. Los parámetros y cuerpos de cada una están en el JSON y en Swagger UI.
+Total: 26 operaciones, todas con resumen; las rutas protegidas documentan el 401 y las que reciben datos, el 400. Los parámetros y cuerpos de cada una están en el JSON y en Swagger UI.
 
 ## Endpoints del servicio Python (de `openapi-python.json`)
 
 | Método y ruta | Descripción |
 |---|---|
 | `GET /health` | Estado del servicio |
+| `GET /metrics` | Tiempos de respuesta por ruta y resultado de las corridas de scraping |
 | `POST /ingredients/normalize` | Normalización de ingredientes ([normalizacion-de-ingredientes.md](../normalizacion-de-ingredientes.md)) |
 | `POST /scrape/search` | Búsqueda de precios en una tienda (Jumbo o Santa Isabel), con validación y estadísticas ([ADR-003](../adr/003-metodo-scraping.md)) |
 
-Con la rama `feature/observability` se suma `GET /metrics`.
+`GET /metrics` informa tiempos por ruta y resultados de scraping desde el arranque.
 
 ## Cómo regenerar las especificaciones
 
@@ -86,17 +88,13 @@ Invoke-RestMethod http://localhost:8000/openapi.json | ConvertTo-Json -Depth 100
 
 ## Estado de la documentación (verificado en `openapi.json`)
 
-Todos los controladores de dominio aparecen: `auth`, `ingredients`, `prices`, `meals`, `shopping-lists`, `recommendations` (y `health` y la raíz `/api`). Falta `metrics`, que está en otra rama (arriba).
+Aparecen todos los controladores: `auth`, `ingredients`, `prices`, `meals`, `shopping-lists`, `recommendations`, `users`, las métricas, la salud y la raíz `/api`. Las 26 operaciones tienen resumen y las rutas protegidas marcan la seguridad Bearer. Se documentan los errores 400, 401, 409 y 429 que producen `auth` y las rutas con JWT; el 404 de lo ajeno y el 422 de la lista sin ingredientes quedan solo en la descripción de cada operación.
 
-Brechas conocidas, que no se corrigieron aquí porque implican cambiar código fuente:
+Brechas conocidas:
 
 | Brecha | Detalle |
 |---|---|
-| Sin descripción | `GET /api`, `GET /health`, `POST /api/auth/register`, `POST /api/auth/login` y `POST /api/ingredients/normalize` no tienen `summary` ni `description` |
-| Sin etiqueta propia ni seguridad | `auth` e `ingredients` no usan `@ApiTags`/`@ApiOperation`; `POST /api/ingredients/normalize` exige token pero Swagger no lo marca (falta `@ApiBearerAuth`) |
-| Sin descripción larga | Las operaciones de `meals` salvo dos, `GET /api/prices/catalog`, `/runs`, `/runs/{id}`, y los endpoints de aceptar, rechazar y restablecer recomendaciones tienen solo `summary` |
 | Respuestas sin forma | Las respuestas de `shopping-lists`, `prices/compare`, `prices/quality` y `recommendations` aparecen como `type: object` sin sus campos, porque devuelven interfaces de TypeScript y no clases con `@ApiProperty` |
-| Errores no documentados | Ninguna operación declara las respuestas 400, 401, 404, 409 o 429 que sí produce (por ejemplo 409 y 429 en `POST /api/prices/refresh` solo figuran en la descripción) |
-| Python | Los `summary` son los autogenerados por FastAPI ("Health", "Normalize Ingredients", "Search Prices"); `GET /health` no tiene descripción |
+| Python | Los `summary` son los autogenerados por FastAPI ("Health", "Normalize Ingredients", "Search Prices") |
 
 Los esquemas de entrada (cuerpos y parámetros con validación) sí están completos, porque salen de los DTO con `class-validator`.

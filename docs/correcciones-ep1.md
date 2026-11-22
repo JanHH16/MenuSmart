@@ -2,20 +2,20 @@
 
 Este documento relaciona cada observación recibida en la EP1 con lo que se hizo, la evidencia y el estado real. La EP1 quedó etiquetada como `v1.0.0-ep1`.
 
-**Cómo leer el estado:** *Hecho* significa que el cambio existe en el código o la documentación y se verificó como se indica; *Hecho en otra rama* significa que existe en una rama de trabajo que todavía no está unida a esta (se nombra); *Parcial* indica qué falta. Nada se declara resuelto sin evidencia.
+**Cómo leer el estado:** *Hecho* significa que el cambio existe en el código o la documentación y se verificó como se indica; *Parcial* indica qué falta. Nada se declara resuelto sin evidencia.
 
-Ramas mencionadas: `feature/docs-ep2` (esta), `feature/core-domain` (dominio, recomendador, API), `feature/ci-auditoria` (auditoría y migraciones), `feature/pipeline-staging` (CI/CD y staging), `integration/ep2-ef` (unión de todas, verificada solo en local).
+Todo el trabajo está unido en `integration/ep2-ef` (verificada en local; el CI en GitHub lo verá Jan). Las ramas de origen de cada cambio se nombran como referencia: `feature/core-domain` (dominio, recomendador, API), `feature/ci-auditoria` (auditoría y migraciones), `feature/pipeline-staging` (CI/CD y staging), `feature/docs-ep2` (documentación).
 
 ## Resumen
 
 | # | Observación de la EP1 | Qué se hizo | Estado |
 |---|---|---|---|
 | 1 | Fortalecer la justificación arquitectónica, relacionar objetivos con indicadores de utilidad y definir cómo se comprobará que las recomendaciones reducen costos y desperdicios | ADR-004 y ADR-005, documento de objetivos e indicadores con protocolo de prueba, simulación del recomendador contra versiones base | **Hecho** en documentación y simulación; **Parcial** en la comprobación con usuarios reales (pendiente de ejecutar) |
-| 2 | `synchronize: true` en desarrollo: la estructura final debe ser reproducible exclusivamente mediante migraciones | Job `migraciones` en el CI (base vacía, todas las migraciones, comprobación de deriva) y documento de política | **Hecho en otra rama** (`feature/ci-auditoria`); `synchronize` se mantiene en desarrollo por decisión documentada |
-| 3 | Documentar la API mediante Swagger | Swagger UI en `/api/docs` con el plugin de Nest, especificaciones exportadas en `docs/api/` | **Hecho**, con brechas de descripción listadas |
+| 2 | `synchronize: true` en desarrollo: la estructura final debe ser reproducible exclusivamente mediante migraciones | Job `migraciones` en el CI (base vacía, todas las migraciones, comprobación de deriva) y documento de política | **Hecho**; `synchronize` se mantiene en desarrollo por decisión documentada |
+| 3 | Documentar la API mediante Swagger | Swagger UI en `/api/docs` con el plugin de Nest, especificaciones exportadas en `docs/api/` | **Hecho**, con brechas menores (respuestas como `object`) |
 | 4 | Documentar las reglas o algoritmos para normalizar ingredientes | `docs/normalizacion-de-ingredientes.md` con reglas, ejemplos ejecutados y limitaciones | **Hecho** |
 | 5 | Explicar cómo el procesamiento se usará para generar listas de compras y comparar precios | Sección 7 del documento de normalización, y la funcionalidad ya implementada en el backend | **Hecho** (documentación y código) |
-| 6 | Cambiar `--audit-level=critical` (las altas no provocan fallo) | `--audit-level=high` en backend y frontend y corrección de las vulnerabilidades altas que aparecieron | **Hecho en otra rama** (`feature/ci-auditoria`) |
+| 6 | Cambiar `--audit-level=critical` (las altas no provocan fallo) | `--audit-level=high` en backend y frontend y corrección de las vulnerabilidades altas que aparecieron | **Hecho** |
 
 ## Detalle por observación
 
@@ -39,18 +39,18 @@ Resultado medido: la canasta del menú adaptativo cuesta entre 25% y 56% menos q
 
 | Aspecto | Evidencia |
 |---|---|
-| Job `migraciones` del CI: base vacía, `migration:run`, `migration:show` y `migration:check` (falla si hay entidades sin migración); `docker-images` y `deploy-staging` dependen de él | Rama `feature/ci-auditoria`: `.github/workflows/ci.yml` (job `migraciones`), commit `c71af0f` |
-| Scripts `migration:check` y `migration:show` | Rama `feature/ci-auditoria`: `backend/package.json` |
-| Política, procedimiento para crear migraciones y limitaciones | Rama `feature/ci-auditoria`: `docs/migraciones-y-auditoria.md`, sección 2 (commit `7fcfd39`) |
+| Job `migraciones` del CI: base vacía, `migration:run`, `migration:show` y `migration:check` (falla si hay entidades sin migración); `docker-images` y `deploy-staging` dependen de él | `.github/workflows/ci.yml` (job `migraciones`), commit `c71af0f` de `feature/ci-auditoria` |
+| Scripts `migration:check` y `migration:show` | `backend/package.json` |
+| Política, procedimiento para crear migraciones y limitaciones | `docs/migraciones-y-auditoria.md`, sección 2 |
 | Producción sin `synchronize` y con `migrationsRun` | `backend/src/app.module.ts` (en esta rama) |
 | La CLI de migraciones usa `synchronize: false` fijo | `backend/src/data-source.ts` (en esta rama) |
 | Decisión y consecuencias | [ADR-004](adr/004-arquitectura-y-justificacion.md), decisión 5 |
 
-**Verificado en local (22-11-2026)** sobre el código de `feature/core-domain`: en una base vacía se ejecutaron las 5 migraciones (`InitialSchema`, `DominioComidasProductosListas`, `PreciosScraping`, `PlanSemanalYListas`, `RecomendacionFeedback`) sin error y `migration:generate --check` respondió "No changes in database schema were found" (sin deriva entre entidades y migraciones). La base temporal se eliminó.
+**Verificado en local (22-11-2026)** sobre `integration/ep2-ef`: en una base vacía se ejecutaron las 5 migraciones (`InitialSchema`, `DominioComidasProductosListas`, `PreciosScraping`, `PlanSemanalYListas`, `RecomendacionFeedback`) sin error y `migration:generate --check` respondió "No changes in database schema were found" (sin deriva entre entidades y migraciones). La base temporal se eliminó.
 
 **Qué falta o conviene saber:**
 
-- El job `migraciones` está en una rama que aún no se une a esta; hasta unirla, el CI de esta rama no lo ejecuta.
+- El job `migraciones` está en `.github/workflows/ci.yml` de `integration/ep2-ef` y es requisito de `docker-images` y `deploy-staging`.
 - No se vio correr el job en GitHub Actions (solo se reprodujeron sus pasos en local).
 - Se mantiene `synchronize` en desarrollo a propósito; la garantía es que producción no lo usa y que el CI falla si una entidad cambia sin su migración. No se verifica el método `down` de cada migración.
 - Una base de desarrollo creada con `synchronize` no sirve para probar migraciones (hay que usar una base vacía).
@@ -60,14 +60,14 @@ Resultado medido: la canasta del menú adaptativo cuesta entre 25% y 56% menos q
 | Aspecto | Evidencia |
 |---|---|
 | Swagger UI en `/api/docs`, con autenticación Bearer y el plugin de `@nestjs/swagger` | `backend/src/main.ts`, `backend/nest-cli.json` (commit `0566520`) |
-| Controladores con `@ApiTags`, `@ApiOperation` y `@ApiBearerAuth` | `prices`, `meals`, `shopping-lists`, `recommendations` |
-| Especificación exportada de la aplicación corriendo (23 operaciones) | [`docs/api/openapi.json`](api/openapi.json) |
+| Controladores con `@ApiTags`, `@ApiOperation`, `@ApiBearerAuth` y respuestas 400, 401, 409 y 429 | `auth`, `ingredients`, `prices`, `meals`, `shopping-lists`, `recommendations`, `users`, métricas y salud |
+| Especificación exportada de la aplicación corriendo (26 operaciones, todas con resumen) | [`docs/api/openapi.json`](api/openapi.json) |
 | Especificación del servicio Python (3 operaciones) | [`docs/api/openapi-python.json`](api/openapi-python.json) |
 | Cómo regenerar y brechas conocidas | [`docs/api/README.md`](api/README.md) |
 
-**Verificado:** con el backend corriendo, `/api/docs-json` entregó la especificación con 23 operaciones; FastAPI publica la suya en `/openapi.json`.
+**Verificado:** con el backend de `integration/ep2-ef` corriendo, `/api/docs-json` entregó la especificación con 26 operaciones y ninguna sin resumen; FastAPI publica la suya en `/openapi.json`.
 
-**Qué falta:** `auth` e `ingredients` no tienen descripciones ni etiquetas propias y la ruta de ingredientes no marca la seguridad en Swagger; la mayoría de las respuestas aparecen como `object` sin campos y no se documentan los errores 4xx. `GET /api/metrics` (`feature/observability`) y `GET`/`DELETE /api/users/me` (`feature/seguridad`) aparecerán al unir las ramas y regenerar el archivo.
+**Qué falta:** la mayoría de las respuestas aparecen como `object` sin campos (no se declararon DTO de respuesta).
 
 ### 4. Reglas y algoritmos de normalización de ingredientes
 
@@ -75,9 +75,9 @@ Resultado medido: la canasta del menú adaptativo cuesta entre 25% y 56% menos q
 |---|---|
 | Reglas (limpieza, mapeo exacto, singular y por contención, sinónimos, unidades, densidad y peso por unidad, unión de líneas), con entradas y salidas reales | [normalizacion-de-ingredientes.md](normalizacion-de-ingredientes.md) |
 | Código | `python-service/app/normalizacion.py` y `normalizacion_datos.py` |
-| Pruebas | `python-service/tests/test_normalizacion.py` y `test_ingredients.py` (suite completa: 115 pruebas del servicio Python en verde el 22-11-2026) |
+| Pruebas | `python-service/tests/test_normalizacion.py` y `test_ingredients.py` (suite completa: 149 pruebas del servicio Python en verde el 22-11-2026) |
 
-**Qué falta:** el mapeo es léxico y tiene errores conocidos (por ejemplo `leche condensada` se mapea a `leche`); están documentados como limitaciones, no corregidos.
+**Qué falta:** el mapeo es léxico. Se corrigieron los casos que se detectaron (`leche condensada`, `leche de coco`, `harina de maíz`, `aceite de coco`, `pasta de tomate`), pero otros nombres compuestos pueden mapearse al término más cercano (`aceite de oliva` se toma como aceite); están documentados como limitaciones.
 
 ### 5. De la normalización a la lista de compras y la comparación de precios
 
@@ -104,20 +104,20 @@ Resultado medido: la canasta del menú adaptativo cuesta entre 25% y 56% menos q
 
 | Código | Backend | Frontend |
 |---|---|---|
-| `feature/core-domain` (esta línea, con umbral `critical`) | 4 altas y 1 moderada (`body-parser`, `follow-redirects`...) | 2 altas |
+| `feature/core-domain` (antes de unir la auditoría, con umbral `critical`) | 4 altas y 1 moderada (`body-parser`, `follow-redirects`...) | 2 altas |
 | `feature/ci-auditoria` | 0 vulnerabilidades | 0 vulnerabilidades |
 | `integration/ep2-ef` | 0 vulnerabilidades | 0 vulnerabilidades |
 
 Es decir: con el umbral anterior (`critical`) el pipeline pasaba aunque había 6 vulnerabilidades altas en producción; con `high` habría fallado hasta aplicar las correcciones, que están en la rama indicada.
 
-**Qué falta:** en esta rama (`feature/docs-ep2`) el archivo `.github/workflows/ci.yml` sigue con `--audit-level=critical` y los `package-lock.json` sin actualizar, porque este trabajo solo toca documentación. Se corrige al unir `feature/ci-auditoria`. No se ejecutó `pip-audit` ni se vio correr el CI en GitHub.
+**Qué falta:** no se ejecutó `pip-audit` en GitHub ni se vio correr el CI allí; la verificación fue local.
 
 ## Otros problemas del pipeline y del estado del proyecto
 
 | Tema (sección 24.2, entregable 1) | Estado | Evidencia |
 |---|---|---|
-| Despliegue automático a staging, health checks, integración NestJS-FastAPI, validación de Terraform, rollback | Hecho en otra rama; el ambiente real no existe todavía | Rama `feature/pipeline-staging`: `.github/workflows/`, `docs/pipeline-y-staging.md` |
-| Proxy del frontend configurable (`BACKEND_URL`) en lugar de `http://backend:3000` fijo | Hecho en otra rama | Rama `feature/pipeline-staging`: `frontend/nginx.conf.template` |
-| README desactualizado (decía que Swagger y el scraping no existían) | Hecho | [README.md](../README.md) reescrito en esta rama |
+| Despliegue automático a staging, health checks, integración NestJS-FastAPI, validación de Terraform, rollback | **Hecho**; el ambiente real no existe todavía | `.github/workflows/`, `docs/pipeline-y-staging.md` |
+| Proxy del frontend configurable (`BACKEND_URL`) en lugar de `http://backend:3000` fijo | **Hecho** | `frontend/nginx.conf.template` |
+| README desactualizado (decía que Swagger y el scraping no existían) | Hecho | [README.md](../README.md) reescrito |
 | Arquitectura y modelo de datos actualizados | Hecho | [ADR-004](adr/004-arquitectura-y-justificacion.md); `docs/architecture.md` (el scraper y la regla de que Python no escribe en la base) y `docs/database.md` (tablas reales de las 5 migraciones) |
 | Backlog y estado del proyecto | **Pendiente de Jan:** el enlace al tablero no está en el repositorio | [checklist-entrega.md](checklist-entrega.md) |

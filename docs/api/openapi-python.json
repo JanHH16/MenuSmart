@@ -21,6 +21,30 @@
         }
       }
     },
+    "/metrics": {
+      "get": {
+        "tags": [
+          "observabilidad"
+        ],
+        "summary": "Metrics",
+        "description": "Tiempos de respuesta por ruta y resultado de las corridas de scraping, desde el arranque.",
+        "operationId": "metrics_metrics_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Metrics Metrics Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/ingredients/normalize": {
       "post": {
         "tags": [
