@@ -1,6 +1,6 @@
 # Guía de estudio para la presentación y la defensa técnica individual
 
-Documento único para que Jan y Camila estudien el mismo material y respondan de forma coherente. Está verificado contra el repositorio al **22-11-2026** (rama `develop`). Si algo cambia en el código, hay que actualizar la sección correspondiente.
+**Documento único** para que Jan y Camila estudien el mismo material y respondan de forma coherente. Reúne la guía por componente, el guion de la demostración en el staging, el plan de práctica de hoy y de mañana, el resumen del registro de participación y el esquema de la presentación. Está verificado contra el repositorio al **22-11-2026** (rama `develop`). Si algo cambia en el código, hay que actualizar la sección correspondiente.
 
 - **Repositorio:** https://github.com/JanHH16/MenuSmart
 - **Staging (plan gratuito de Render):** sitio https://menusmart-staging-frontend.onrender.com, API https://menusmart-staging-backend.onrender.com, Swagger https://menusmart-staging-backend.onrender.com/api/docs
@@ -22,7 +22,7 @@ Cada componente tiene: **qué es**, **archivos para leer**, **decisiones y por q
 | 2 | Sección 4 (participación e IA): decidir juntos qué dirá cada uno | 30 min |
 | 3 | Componentes de la Parte B: cada uno estudia los suyos y le explica un resumen al otro (Camila: 11, 14 y 23; Jan: 6, 7, 9, 12, 13, 20 a 22). Ambos leen 5, 10, 15, 16 y 24 | 90 min |
 | 4 | Sección 26 (preguntas difíciles): se preguntan al azar el uno al otro | 40 min |
-| 5 | Ensayo de la demo en el staging (sección 25) con cronómetro | 40 min |
+| 5 | Ensayo de la demo en el staging (sección 25) con cronómetro. El plan hora por hora de hoy y de mañana está en la sección 30 | 40 min |
 
 **Cómo responder:**
 
@@ -504,47 +504,196 @@ Datos al 22-11-2026 (comando: `git log --no-merges --format='%an|%ad' --date=sho
 
 # Parte C. La presentación
 
-## 25. Demo en el staging (guion y preparación)
+## 25. Demostración en el staging: guion completo (10 minutos)
 
-Tiempo total sugerido: 10 minutos. El guion completo con textos para decir está en [guion-demo.md](guion-demo.md) (escrito pensando en local; **en la demo se usa el staging**).
+La demostración se hace **en el staging** (el enunciado pide ejecutarla ahí, no con capturas). Los comandos usan PowerShell y la dirección del staging. El plan de preparación de hoy y de mañana está en la sección 30.
 
-### Preparación (30 minutos antes)
+### 25.1 Preparación (comprobar 30 minutos antes)
 
-| Qué | Cómo |
+| Qué | Cómo comprobarlo |
 |---|---|
-| Despertar los 3 servicios | Abrir https://menusmart-staging-frontend.onrender.com, iniciar sesión y recorrer plan, lista y comparador. Abrir https://menusmart-staging-backend.onrender.com/health: debe decir `"status":"ok"` con `database` y `pythonService` en `ok`. La primera visita puede tardar cerca de un minuto |
-| Datos de demo | La cuenta de Jan tiene 14 comidas en la semana del 23 de noviembre (con lista de 27 ingredientes) y 8 recetas en la del 30 de noviembre. **Sin usar la contraseña en pantalla** |
-| Precios | Cargados el 22-11 para Jumbo y Santa Isabel (cobertura 31 de 31). No hay problema de "desactualizado" hasta 48 horas después |
-| Pestañas abiertas | La app, Swagger (`/api/docs`), GitHub Actions (el último run verde de `CI` en `develop`), el repositorio y una terminal |
-| Evitar | Mostrar contraseñas, el archivo `.env` o `terraform.tfvars` |
+| Servicios despiertos | Abrir https://menusmart-staging-backend.onrender.com/health: debe decir `"status":"ok"` con `database` y `pythonService` en `ok`. Abrir el sitio https://menusmart-staging-frontend.onrender.com y recorrer plan, lista y comparador. La primera visita puede tardar cerca de un minuto |
+| Datos de la cuenta | La cuenta de Jan tiene 14 comidas en la semana del lunes 23 de noviembre (lista de 27 ingredientes, 4 comprados) y 8 recetas en la semana del 30 de noviembre. Quedan huecos libres para aceptar sugerencias en vivo |
+| Precios | Cargados el 22-11 con cobertura de 31 de 31 en ambas tiendas. Siguen vigentes hasta 48 horas después |
+| Token para la terminal (10 minutos antes; dura 1 hora) | Ver el bloque de abajo. No muestra la contraseña |
+| Pestañas | La app; Swagger (`/api/docs`); GitHub Actions con el último run verde del workflow `CI` en `develop`; el repositorio; el panel de Render con los logs del backend y de Python; una terminal PowerShell con letra grande |
+| Plan B local | `docker compose up -d --build` ya corriendo (`docker compose ps` con los 4 servicios en `healthy`), para el escenario 8 y por si el staging falla |
+| Evitar | Mostrar contraseñas, el archivo `.env` o `infra/terraform.tfvars` |
 
-### Cómo cubrir los 10 puntos de la demostración
+**Token para la terminal (la contraseña se pide en una ventana y no se escribe en pantalla):**
 
-1. **Recuperación automatizada:** mostrar la última ejecución de precios (`GET /api/prices/quality` o `/api/prices/runs` en Swagger) o lanzar una nueva con `POST /api/prices/refresh` (tarda cerca de un minuto por tienda; se permite una cada 10 minutos).
-2. **Validación y preparación:** explicar el contrato Pydantic, la deduplicación y la métrica de registros válidos y descartados.
-3. **Procesamiento en FastAPI:** normalizar ingredientes (`/api/ingredients/normalize` o generar la lista en la app) y mostrar el `0,5 kg` de arroz sumado de dos comidas.
-4. **Comunicación NestJS-FastAPI:** el `X-Request-ID` que viaja entre ambos y la clave de servicio.
-5. **Persistencia:** el modelo de datos y las migraciones.
-6. **Consulta y visualización:** el comparador, la lista con costo en cada tienda y la pantalla de sugerencias.
-7. **Pipeline:** mostrar en GitHub Actions un run verde con los 9 jobs, y, si hay tiempo, lanzar "Rollback de staging" con `solo-frontend` (seguro y corto, 30 segundos).
-8. **Staging:** la URL, el `/health` en `ok` y el job `deploy-staging` en verde.
-9. **Métrica de evaluación:** la calidad de datos y la evaluación del recomendador contra las bases (sección 14).
-10. **Error o indisponibilidad:** explicar y mostrar las pruebas de recuperación (`/health` con `degraded`, 503 limpio, datos anteriores disponibles). Si se quiere mostrar en vivo, se puede suspender el servicio Python en el panel de Render, **pero se tarda en reanudar y es arriesgado con servicios gratuitos**; es más seguro mostrar las pruebas.
+```powershell
+$B = "https://menusmart-staging-backend.onrender.com/api"
+$cred = Get-Credential
+$r = Invoke-RestMethod -Method Post "$B/auth/login" -ContentType "application/json" -Body (@{ email = $cred.UserName; password = $cred.GetNetworkCredential().Password } | ConvertTo-Json)
+$h = @{ Authorization = "Bearer $($r.accessToken)" }
+```
 
-### Para mostrar "me arrepentí" (cambios en vivo)
+### 25.2 Línea de tiempo
 
-1. **Editar una comida:** abrir "Arroz con pollo" del lunes y cambiarle el día o las porciones.
-2. **Regenerar la lista:** se actualiza y conserva lo ya marcado como comprado.
-3. **Eliminar una comida** ("Tortilla de papas") y regenerar: baja el costo.
-4. **Aceptar una sugerencia** en un hueco libre del plan y borrarla si te arrepientes.
-5. **Rechazar una receta y restablecer los rechazos:** el estofado de cerdo y las hamburguesas ya están rechazados y vuelven al restablecer.
-6. **Mover el deslizador de costo contra reutilización** y mostrar que el orden cambia; **desactivar la adaptación** para volver al orden base.
+| Minutos | Escenario | Qué se muestra |
+|---|---|---|
+| 0:00 a 0:45 | Contexto | Problema y arquitectura (diagrama del README) |
+| 0:45 a 2:30 | 1. Funcionamiento normal | Plan, lista de compras y costo por tienda |
+| 2:30 a 4:00 | 2. Capacidad adaptativa | Sugerencias, explicación, controles, arrepentimiento y comparación con la base |
+| 4:00 a 5:00 | 3. Información web | Comparador, procedencia y calidad de datos |
+| 5:00 a 6:00 | 4. Pipeline | GitHub Actions y rollback |
+| 6:00 a 6:45 | 5. Pruebas | Ejecución y evidencia en CI |
+| 6:45 a 7:30 | 6. Seguridad | Autenticación, validación, límites, clave de servicio, secretos |
+| 7:30 a 8:30 | 7. Logs, métricas, salud | `/health`, `/api/metrics`, logs con `requestId` |
+| 8:30 a 9:30 | 8. Degradación controlada | Servicio Python caído |
+| 9:30 a 10:00 | Cierre | Limitaciones y qué sigue |
 
-### Si algo falla
+Orden de prioridad si falta tiempo: 1, 2, 3, 8 (el núcleo), luego 7, 6, 5 y 4. El enunciado pide los 10 puntos de la demostración, así que conviene abreviar los comandos antes que omitir un escenario.
 
-- **Un servicio tarda en responder:** es el plan gratuito. Decirlo ("está despertando, en un servicio de pago esto no ocurre") y esperar.
-- **Staging no responde:** levantar el entorno local con Docker Compose (`docker compose up -d --build`, app en `http://localhost:8080`) y decirlo desde el primer minuto.
-- **El scraper falla:** mostrar que los precios anteriores siguen disponibles con su fecha. Eso es justamente la recuperación ante indisponibilidad.
+### Contexto (0:00 a 0:45)
+
+**Pantalla:** README en el diagrama de arquitectura.
+
+**Decir:** "MenuSmart ayuda a planificar la semana y gastar menos. El problema: se compra sin lista, se repiten ingredientes que sobran y no se comparan tiendas. Tiene un frontend Angular con Ionic, un backend NestJS dueño de la base PostgreSQL y un servicio Python que normaliza ingredientes y obtiene precios de Jumbo y Santa Isabel, sin acceso a la base. Está desplegado en Render con Terraform; lo que van a ver corre en el staging."
+
+### Escenario 1. Funcionamiento normal (0:45 a 2:30)
+
+1. **Pantalla:** app, cuenta de Jan, pestaña **Plan semanal** (semana del 23 de noviembre). Mostrar las comidas planificadas.
+2. **Hacer:** **Agregar comida**, escribir un ingrediente con texto libre (por ejemplo "tomates", 500, "g") y guardar.
+3. **Pestaña Lista de compras:** regenerar la lista.
+4. **Mostrar:** ingredientes sumados aunque estaban escritos distinto (el arroz de dos comidas queda en 0,5 kg), costo estimado en Jumbo y en Santa Isabel, cuál conviene (Jumbo, con un ahorro de unos $5.230) y los ítems sin precio, con su motivo.
+
+**Decir:** "El servicio Python limpia y suma los ingredientes: 'Arroz 200 g' y 'arroz 300 g' quedan en una línea de 0,5 kg. El backend valoriza cada ítem con los precios vigentes y solo suma en el total los ítems con precio en ambas tiendas, para que la comparación sea justa. Los que no tienen precio lo dicen y explican por qué."
+
+**Evidencia:** `docs/normalizacion-de-ingredientes.md`, `backend/src/shopping-lists/costo.ts`.
+
+### Escenario 2. Capacidad adaptativa (2:30 a 4:00)
+
+1. **Pantalla:** sugerencias del plan semanal.
+2. **Mostrar:** sugerencias ordenadas, costo por porción, ingredientes que reutiliza del plan y la **explicación** de cada una.
+3. **Aceptar** una sugerencia en un hueco libre y volver a pedirlas: las que comparten ingredientes con el plan suben.
+4. **Arrepentirse:** borrar esa comida del plan. **Rechazar** una receta (deja de aparecer) y **restablecer los rechazos** (el estofado de cerdo y las hamburguesas ya están rechazados y vuelven).
+5. **Cambiar la importancia del costo** y mostrar que el orden cambia. **Desactivar la adaptación** para volver al orden base.
+6. **Comparar con la base desde la terminal:**
+
+```powershell
+Invoke-RestMethod "$B/recommendations?semana=2026-11-23&limite=3" -Headers $h | ConvertTo-Json -Depth 6
+Invoke-RestMethod "$B/recommendations?semana=2026-11-23&limite=3&adaptativo=false" -Headers $h | ConvertTo-Json -Depth 6
+```
+
+**Decir:** "El recomendador es una política de reglas, no un modelo entrenado: puntaje = peso del costo por el costo normalizado, más el peso de la reutilización por la fracción de ingredientes que ya están en tu plan. No hay datos históricos para entrenar un modelo y así es explicable. La persona controla el peso, excluye ingredientes, rechaza o apaga la adaptación. Contra una versión sin adaptación, la simulación con precios reales dio una canasta entre 25 % y 56 % más barata. Es una simulación; no la medimos con personas."
+
+**Evidencia:** `docs/capacidad-adaptativa.md`, `docs/evaluacion-recomendador.md`, `backend/src/recommendations/scoring.ts`.
+
+### Escenario 3. Información web (4:00 a 5:00)
+
+1. **Pantalla:** pestaña **Comparador**: mejor precio por ingrediente en cada tienda, productos idénticos, fecha de cada precio y aviso de desactualizado.
+2. **Terminal (calidad de los datos):**
+
+```powershell
+Invoke-RestMethod "$B/prices/quality" -Headers $h | ConvertTo-Json -Depth 6
+Invoke-RestMethod "$B/prices/runs?limite=2" -Headers $h | ConvertTo-Json -Depth 4
+```
+
+3. **Mostrar:** porcentaje de registros válidos, duplicados y descartados, cobertura del catálogo (31 de 31) y horas desde la última actualización.
+4. **Opcional, si hay tiempo:** lanzar `POST $B/prices/refresh` (responde 202, corre en segundo plano y tarda cerca de un minuto por tienda) y mostrar el estado de la corrida en `GET $B/prices/runs`. Se permite una exitosa cada 10 minutos.
+
+```powershell
+Invoke-RestMethod -Method Post "$B/prices/refresh" -Headers $h
+```
+
+**Decir:** "Los precios salen del bloque JSON-LD de la búsqueda de cada tienda. El scraper respeta robots.txt, hace una solicitud por segundo y se identifica. Cada precio guarda tienda, fecha, URL y la ejecución que lo trajo. Hoy: cerca de 99 % y 96 % de registros válidos y 31 de 31 ingredientes con precio en ambas tiendas."
+
+**Evidencia:** `docs/calidad-de-datos.md`, ADR-002 y ADR-003.
+
+### Escenario 4. Pipeline de GitHub Actions (5:00 a 6:00)
+
+1. **Pantalla:** pestaña Actions, último run del workflow `CI` en `develop`, en verde.
+2. **Mostrar:** los 9 jobs (backend, migraciones, frontend, Python, integración NestJS y FastAPI, Terraform, detección de secretos, imágenes con Trivy y despliegue a staging) y que las imágenes y el despliegue dependen de que los anteriores pasen (quality gate).
+3. Abrir el job `Backend` y mostrar lint, build, pruebas, cobertura y `npm audit --audit-level=high`.
+4. Mostrar el job `Desplegar a staging y verificar salud` y sus health checks.
+5. **Opcional (30 segundos, seguro):** ejecutar el workflow **Rollback de staging** con el SHA `614dba58aba555f309b1fac3b2960bb579a370ca` y `solo-frontend`: redespliega el frontend, que es idéntico, y verifica la salud.
+
+**Decir:** "Cada push corre lint, pruebas, análisis de dependencias, detección de secretos, construcción y escaneo de imágenes y validación de Terraform. Solo si todo pasa, un push a develop despliega a staging y verifica la salud por SHA exacto. El umbral de `npm audit` es 'high'; antes era 'critical'. Hay un workflow de rollback por SHA."
+
+**Evidencia:** `.github/workflows/ci.yml`, `docs/pipeline-y-staging.md`, `docs/migraciones-y-auditoria.md`.
+
+### Escenario 5. Evidencia de pruebas (6:00 a 6:45)
+
+```powershell
+cd python-service; pytest -q                 # 161 pruebas, cerca de 1 segundo
+cd ..\backend; npx jest                      # 201 pruebas unitarias
+cd ..\frontend; npx ng test --watch=false    # 109 pruebas
+```
+
+**Decir:** "Hay pruebas unitarias en los tres componentes, e2e del backend contra una PostgreSQL real y una integración que en CI levanta el servicio Python real, con su clave de servicio, y ejecuta el cliente de NestJS contra él. Las partes sensibles tienen pruebas propias: contrato NestJS-FastAPI, normalización, recuperación ante fallas del scraper, costos y recomendador. En total son 527, con cobertura mínima exigida en el CI."
+
+**Dato listo:** el log del CI con las pruebas e2e (no se corren en vivo porque necesitan base de datos).
+
+### Escenario 6. Controles de seguridad (6:45 a 7:30)
+
+1. **Sin token se rechaza:** `curl.exe -i https://menusmart-staging-backend.onrender.com/api/prices/compare` responde 401.
+2. **Python exige su clave de servicio:** `curl.exe -i https://menusmart-staging-python.onrender.com/metrics` responde 401, y `.../health` responde 200.
+3. **Validación estricta** (campos desconocidos y datos inválidos dan 400):
+
+```powershell
+try { Invoke-RestMethod -Method Post "$B/auth/login" -ContentType "application/json" -Body '{"email":"no-es-un-correo","campoExtra":1}' } catch { $_.Exception.Response.StatusCode.value__ }
+```
+
+4. **Límite de solicitudes** (al final del escenario; bloquea el login de esa IP por 1 minuto): repetir 11 veces un login incorrecto hasta recibir 429.
+
+```powershell
+1..11 | ForEach-Object { try { Invoke-RestMethod -Method Post "$B/auth/login" -ContentType "application/json" -Body '{"email":"a@a.cl","password":"incorrecta1"}' } catch { $_.Exception.Response.StatusCode.value__ } }
+```
+
+5. **Secretos:** mostrar `.env.example` (valores de ejemplo), que `.env` y `terraform.tfvars` están en `.gitignore`, y el job de gitleaks en CI.
+6. **Privacidad:** `GET` y `DELETE /api/users/me`: la persona ve y borra sus datos (el borrado exige la contraseña). **No ejecutar el borrado con la cuenta de demo.**
+
+**Decir:** "Contraseñas con bcrypt, JWT, validación con whitelist, consultas parametrizadas, límite de solicitudes por IP, detección de secretos en cada push y escaneo de imágenes. El servicio Python solo responde al backend: exige una clave de servicio compartida. Las limitaciones están documentadas: no hay roles ni recuperación de contraseña, y CORS está abierto."
+
+**Evidencia:** `docs/seguridad-privacidad-etica.md`.
+
+### Escenario 7. Registros, métricas y salud (7:30 a 8:30)
+
+1. **Salud:** `curl.exe https://menusmart-staging-backend.onrender.com/health` (backend, base de datos y servicio Python).
+2. **Métricas:**
+
+```powershell
+Invoke-RestMethod "$B/metrics" -Headers $h | ConvertTo-Json -Depth 6
+```
+
+   Mostrar tiempos por ruta (p50 y p95), errores 5xx y el resultado de las actualizaciones de precios.
+3. **Logs:** en el panel de Render, pestaña Logs del backend: líneas JSON con `requestId`. Hacer una solicitud (por ejemplo generar la lista) y buscar el mismo `requestId` en los logs del servicio Python.
+
+**Decir:** "Los logs son JSON con un identificador de solicitud que viaja del backend al servicio Python; así se sigue una petición de punta a punta. `/health` verifica la base y el servicio Python. Las métricas viven en memoria y se reinician con el proceso; no hay alertas automáticas."
+
+### Escenario 8. Error o degradación controlada (8:30 a 9:30)
+
+Se hace **en local con Docker Compose**, porque suspender y reanudar un servicio gratuito de Render tarda y es arriesgado. En el staging se muestra solo el `/health` como evidencia.
+
+1. **Apagar Python:** `docker compose stop python-service`.
+2. **Estado degradado:** `curl.exe http://localhost:3000/health` responde `"status":"degraded"` con `pythonService` en `error`.
+3. **Lo que sigue funcionando:** el comparador y la lista ya generada, con precios guardados y su fecha; las sugerencias, sin medir la reutilización.
+4. **Lo que falla con un error claro:** generar una lista nueva responde 503 ("El servicio de procesamiento de ingredientes no está disponible en este momento"); una actualización de precios deja la corrida en `fallido` y conserva los precios anteriores.
+5. **Recuperar:** `docker compose start python-service` y mostrar que `/health` vuelve a `ok`.
+
+**Decir:** "Cuando el servicio de procesamiento cae, NestJS no se cuelga: responde 503 con un mensaje claro, reintenta una vez solo ante falta de respuesta y lo ya guardado sigue disponible. Lo mismo pasa si una tienda cambia su página o bloquea al scraper: la consulta falla con un tipo de error y los precios anteriores se conservan."
+
+**Evidencia:** `backend/test/prices.e2e-spec.ts` ("si el servicio Python no responde..."), `docs/calidad-de-datos.md`.
+
+### Cierre (9:30 a 10:00)
+
+**Decir:** "Lo que no está: la prueba del APK en un dispositivo, la evaluación con usuarios, la actualización automática de precios y un staging de pago, porque el actual es gratuito y se duerme. Está en las limitaciones del README. Lo siguiente es medir con 5 a 10 personas, automatizar la actualización de precios y pasar a instancias de pago."
+
+### 25.3 Plan B
+
+| Si falla | Qué hacer |
+|---|---|
+| **El staging tarda en responder** | Es el plan gratuito. Decirlo ("está despertando; en un plan de pago no pasa") y esperar |
+| **El staging no responde** | Usar el entorno local con Docker Compose (app en `http://localhost:8080`, API en `http://localhost:3000`). Decirlo desde el primer minuto. Tener abierta la URL del último despliegue exitoso como evidencia secundaria |
+| **La fuente externa (tiendas) no responde** | No hace falta: se usan los precios guardados. Si falla justo al lanzar la actualización, convertirlo en el escenario 8: mostrar el estado de la corrida y que los precios anteriores siguen disponibles |
+| **No hay internet** | Todo corre en local salvo el scraping. Se pueden simular las tiendas con el servidor de integración (`uvicorn tests.servidor_integracion:app --port 8000` desde `python-service/`) |
+| **GitHub no carga** | Mostrar `.github/workflows/ci.yml` en el editor y capturas de un run verde como respaldo, no como evidencia principal |
+| **Una prueba falla en vivo** | Mostrar el log del último run verde del CI y explicar la causa si se conoce. No improvisar arreglos en pantalla |
+| **El token expiró (1 hora)** | Repetir el bloque de login de la sección 25.1 |
+| **Falla el recomendador o faltan precios** | Mostrar la explicación "no hay precios suficientes" (es el comportamiento diseñado) y la salida con `adaptativo=false` |
+| **Error 429 al iniciar sesión** | Se alcanzó el límite de solicitudes (por ejemplo tras el escenario 6). Esperar 1 minuto |
 
 ## 26. Preguntas difíciles (practíquenlas al azar)
 
@@ -605,3 +754,97 @@ Tiempo total sugerido: 10 minutos. El guion completo con textos para decir está
 - **Jan** (backend, Python, DevOps e infraestructura): 6, 7, 8, 9, 12, 13, 17, 18, 20, 21 y 22.
 - **Ensayo cruzado:** cada uno le hace al otro 10 preguntas de las secciones del otro. Si una respuesta se queda corta, abrir el archivo indicado y leerlo.
 - **No memorizar frases:** el enunciado dice que la defensa busca comprensión, no memorización.
+
+---
+
+# Parte D. Plan de práctica y entrega
+
+## 30. Plan detallado para hoy y para mañana
+
+### Esta noche (domingo 22 de noviembre)
+
+| Hora aprox. | Qué | Quién | Resultado esperado |
+|---|---|---|---|
+| 0:00 a 0:30 | Leer en voz alta las secciones 1 a 4. Acordar la sección 4 (participación): qué dirá cada uno, con las mismas frases | Jan y Camila | Los dos cuentan la misma historia, verdadera |
+| 0:30 a 2:00 | Estudio por componentes (reparto de la sección 29). Cada uno resume al otro lo suyo en 5 minutos | Cada uno | Cada uno puede explicar el frontend, el backend, Python y el pipeline a nivel general |
+| 2:00 a 2:40 | Ensayo cruzado: 10 preguntas cada uno de las secciones y de la 26. Responder en 30 a 60 segundos | Jan y Camila | Se detectan respuestas cortas y se leen los archivos |
+| 2:40 a 3:20 | **Ensayo de la demostración** en el staging, con cronómetro y siguiendo la sección 25 | Jan y Camila | Tiempo total, qué se corta y qué falla |
+| 3:20 a 3:40 | Revisar los fallos del ensayo, anotar dudas y decidir qué escenarios se abrevian | Jan y Camila | Lista corta de ajustes |
+
+**Antes de dormir, confirmar con la profesora (o en el foro del curso):** hora y formato de la defensa (presentación grupal y luego preguntas individuales), si hay que mostrar el staging en vivo, y si se admite el uso de asistencia de IA declarada en el registro.
+
+### Mañana (lunes 23 de noviembre)
+
+| Cuándo | Qué | Cómo |
+|---|---|---|
+| **60 minutos antes** | Despertar el staging | Abrir el sitio del staging, iniciar sesión y recorrer plan, lista y comparador. Abrir `/health` del backend: debe decir `ok` |
+| 45 minutos antes | Revisar datos | Plan de la semana del 23 con 14 comidas y su lista; sugerencias con costo (no deben decir "sin precios") |
+| 30 minutos antes | Preparar la terminal | Token (sección 25.1), letra grande, notificaciones apagadas. `docker compose up -d --build` y `docker compose ps` con los 4 servicios en `healthy` (para el escenario 8 y el Plan B) |
+| 20 minutos antes | Pestañas | App, Swagger, Actions (último run verde), repositorio, Render (logs), README con el diagrama |
+| 10 minutos antes | Refrescar el token | Repetir el bloque de login (dura 1 hora). No repetir el límite de solicitudes (escenario 6) antes de la demo |
+| 5 minutos antes | Última mirada | Recorrer una vez más plan, lista y comparador para que ninguna pantalla "despierte" frente al público |
+
+**Durante la demostración:** hablar con calma, nombrar el archivo de evidencia en cada escenario, y si algo falla, decirlo y pasar al Plan B (sección 25.3). Un fallo bien manejado suma: es el escenario 8.
+
+**Durante las preguntas individuales:** responder con las reglas de la sección 0: primero la respuesta, luego el detalle, nombrar un archivo y reconocer limitaciones. Si no se sabe, decirlo y buscar en el repositorio.
+
+### Qué no hacer
+- No ejecutar `DELETE /api/users/me` con la cuenta de demo.
+- No mostrar `.env`, `infra/terraform.tfvars` ni contraseñas.
+- No lanzar el escenario del límite de solicitudes antes de mostrar el login.
+- No afirmar "es seguro", "garantiza" ni "está en producción": es staging.
+- No decir "la IA lo hizo y no sé": decir cómo se hizo y explicar cómo funciona.
+
+### Si la defensa se posterga
+La base de datos gratuita de Render caduca a los 30 días de su creación (cerca del 22 de diciembre). Si la defensa fuera después, hay que recrear el staging con `terraform apply` y volver a cargar los datos de la cuenta de demo.
+
+---
+
+# Anexos
+
+## Anexo A. Registro de participación (resumen)
+
+La versión completa y oficial es [registro-participacion.md](registro-participacion.md). Este resumen es para estudiar.
+
+**Integrantes:** Jan (backend, persistencia, scraping, DevOps, documentación) y Camila (frontend, experiencia de usuario, prototipo Figma, diseño de la interacción adaptativa, revisión de calidad).
+
+**Commits (22-11-2026, sin uniones):** 103 en total.
+
+| Autor | Commits | Días con actividad | Primer y último commit |
+|---|---|---|---|
+| Jan | 79 | 6 | 2026-09-25 y 2026-11-22 |
+| Camila Torres | 24 | 3 | 2026-09-26 y 2026-09-28 |
+
+Por mes: septiembre, Jan 25 y Camila 24; noviembre, Jan 54 (3 el día 21 y 51 el día 22).
+
+| Área | Jan | Camila |
+|---|---|---|
+| Backend | 35 | 0 |
+| Python | 17 | 0 |
+| Frontend (sin Android) | 25 | 19 |
+| Android | 1 | 0 |
+| CI/CD y Docker | 12 | 0 |
+| Infraestructura | 3 | 0 |
+| Documentación | 29 | 5 |
+
+**Pull requests:** 19 unidos. Camila unió #1, #3, #5, #6, #9, #11, #12, #13, #15 y #16; Jan unió #2, #4, #10, #17, #19, #20, #21 y #22 (las de esta etapa con apoyo del asistente de IA, por su instrucción); la #18 la marcó GitHub como unida al llevar `develop` sus commits.
+
+**Declaraciones a confirmar por Camila:**
+1. Camila tuvo problemas con su equipo anterior y se incorporó a este proyecto; parte del trabajo se subió desde la cuenta de Jan.
+2. Camila revisó y validó el trabajo.
+3. La EP2 se entregó con retraso (prevista para el 19 de octubre), por lo que el desarrollo de esta etapa se concentró en los días 21 y 22 de noviembre, con asistencia de IA (Claude, bajo la dirección de Jan, sin línea de coautor en los commits).
+
+**Lo que el historial no puede mostrar:** diseño (Figma), revisión de código y decisiones en reuniones; quién escribió realmente cada cambio hecho desde la cuenta compartida o con asistencia de IA; la importancia relativa de cada commit.
+
+## Anexo B. Esquema de la presentación breve (6 diapositivas)
+
+La presentación grupal es breve y la demostración es lo central. Esquema sugerido, con una idea por diapositiva:
+
+1. **Problema y usuarios:** compras sin lista, ingredientes que sobran, falta de comparación entre tiendas. Quién lo usa: estudiantes, parejas y familias.
+2. **Solución y valor:** plan semanal, lista normalizada, costo en Jumbo y Santa Isabel, sugerencias baratas y explicables. Las cifras: 31 ingredientes con precio en ambas tiendas, 25 recetas.
+3. **Arquitectura:** el diagrama de la sección 2 (frontend, NestJS, Python, PostgreSQL, scraping) y por qué cada decisión (un solo dueño de la base, Python aislado, reglas en vez de aprendizaje automático).
+4. **Capacidad adaptativa:** la fórmula, los controles de la persona y los resultados de la simulación (25 % a 56 % menos que la aleatoria), con su limitación.
+5. **Calidad y DevSecOps:** 527 pruebas, 24 checks en el CI, escaneos de seguridad, despliegue y rollback en staging, accesibilidad con axe.
+6. **Limitaciones y siguientes pasos:** sin medición con usuarios, staging gratuito, APK sin probar en dispositivo, actualización de precios manual; y lo que sigue.
+
+Si hay tiempo, se puede convertir este esquema en un archivo de diapositivas.

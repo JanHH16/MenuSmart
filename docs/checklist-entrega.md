@@ -46,13 +46,13 @@ Contraste honesto del repositorio con las rúbricas de la **EP2** (sección 29.3
 | Entregable | Estado |
 |---|---|
 | Enlace al repositorio | Hecho: https://github.com/JanHH16/MenuSmart |
-| Tag o release evaluable | **Pendiente de Jan** (existe `v1.0.0-ep1`; falta el de la EP2) |
+| Tag o release evaluable | Hecho: `v1.0.0-ep1` (EP1), `v1.1.0-ep2` (EP2) y `v2.0.0-ef` (Entrega Final), el 22-11-2026 sobre `main` |
 | Enlace al ambiente desplegado | https://menusmart-staging-frontend.onrender.com (plan gratuito: despertarlo antes de la demo) |
 | Enlace al tablero | **Pendiente de Jan** |
 | Enlace al prototipo | Hecho (Figma, en el README) |
 | README actualizado | Hecho |
 | Breve presentación del avance | **Pendiente de Jan** (no hay diapositivas) |
-| Demostración funcional | Guion hecho ([guion-demo.md](guion-demo.md)); ensayo pendiente |
+| Demostración funcional | Guion hecho (sección 25 de [guia-estudio-defensa.md](guia-estudio-defensa.md)); ensayo pendiente |
 | Registro de participación | Borrador hecho; **confirmar** por Jan y el equipo |
 
 ## 2. Rúbrica de la Entrega Final (sección 29.4)
@@ -99,7 +99,7 @@ Marcar cada uno al terminarlo.
 ### Datos y demostración
 
 - [ ] En staging: registrar la cuenta de demo y **actualizar los precios** una vez, con anticipación.
-- [ ] Preparar el volcado de respaldo de la base con precios (plan B de [guion-demo.md](guion-demo.md)).
+- [ ] Preparar el volcado de respaldo de la base con precios (Plan B en la sección 25.3 de [guia-estudio-defensa.md](guia-estudio-defensa.md)).
 - [ ] **Ensayar la demostración con cronómetro** (10 minutos, 8 escenarios).
 
 ### Evaluación con usuarios
@@ -118,7 +118,7 @@ Marcar cada uno al terminarlo.
 - [ ] Enlace al **staging** en el README.
 - [ ] Completar las celdas "confirmar" de [registro-participacion.md](registro-participacion.md) con el equipo y confirmar con la profesora la política de uso de IA.
 - [ ] Preparar la breve presentación del avance.
-- [ ] **Tag y release de la EP2**, con la fecha real (no se modifica el historial):
+- [x] **Tags y releases** `v1.1.0-ep2` (EP2) y `v2.0.0-ef` (Entrega Final), con la fecha real (22-11-2026) y sin modificar el historial. Comandos de referencia:
 
 ```powershell
 git checkout main; git pull
@@ -128,7 +128,7 @@ gh release create v1.1.0-ep2 --title "Entrega Parcial 2" --notes "Ver README y d
 ```
 
 - [ ] **Confirmar la fecha** de entrega y demostración con la profesora, y si exige el staging en vivo.
-- [ ] Para la Entrega Final, repetir con `v2.0.0-ef` cuando esté lista.
+- [x] La Entrega Final usa `v2.0.0-ef`, creado igual.
 
 ## 5. Hallazgos conocidos que no se corrigieron
 
