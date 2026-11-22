@@ -2,12 +2,13 @@ from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
 import httpx
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 
 from app.observability import MetricsRegistry, ObservabilityMiddleware, configure_logging
 from app.routers import health, ingredients, metrics, scrape
 from app.scrapers.config import ScraperSettings
 from app.scrapers.service import ScraperService
+from app.seguridad import exigir_clave_de_servicio
 
 
 @asynccontextmanager
@@ -25,7 +26,10 @@ app = FastAPI(title="MenuSmart Python Service", version="0.2.0", lifespan=lifesp
 app.state.metrics = MetricsRegistry()
 app.add_middleware(ObservabilityMiddleware, metrics=app.state.metrics)
 
+# /health queda abierto (lo usan los orquestadores); el resto exige la clave de servicio si esta
+# configurada (ver app/seguridad.py).
 app.include_router(health.router)
-app.include_router(metrics.router)
-app.include_router(ingredients.router)
-app.include_router(scrape.router)
+_protegidas = [Depends(exigir_clave_de_servicio)]
+app.include_router(metrics.router, dependencies=_protegidas)
+app.include_router(ingredients.router, dependencies=_protegidas)
+app.include_router(scrape.router, dependencies=_protegidas)

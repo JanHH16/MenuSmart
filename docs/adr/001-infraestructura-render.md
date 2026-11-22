@@ -22,7 +22,8 @@ staging:
 - `render_postgres`: base de datos administrada (plan `free`, sin costo para este proyecto).
 - `render_private_service` para el **servicio Python**: no expone URL pública, coherente con
   la sección 3 del enunciado ("el frontend no deberá acceder de forma directa al servicio
-  Python").
+  Python"). *Reemplazado el 22-11-2026 por un servicio web con clave de servicio: ver la
+  actualización más abajo.*
 - `render_web_service` (runtime Docker) para **backend** y **frontend**: cada uno usa
   directamente el `Dockerfile` que ya existe en su carpeta (sin duplicar configuración).
 
@@ -35,6 +36,25 @@ staging:
 - `terraform apply` no se ha ejecutado. Requiere una cuenta real de Render con API key,
   y aplicar cambios de infraestructura debe hacerse de forma controlada (sección 9 del
   enunciado), no como parte de esta entrega preliminar.
+
+## Actualización (2026-11-22): staging en plan gratuito y servicio Python con clave de servicio
+
+El plan gratuito de Render no ofrece servicios privados (`render_private_service` exige un plan de
+pago) y, como el objetivo de este ambiente es presentar un prototipo, se eligió no pagar. Cambios:
+
+- **Todas las instancias en plan `free`** (variable `instance_plan`, que también admite `starter`).
+  Un servicio gratuito se duerme tras 15 minutos sin tráfico y tarda cerca de un minuto en
+  despertar; antes de una demostración hay que "despertarlos" (ver `docs/pipeline-y-staging.md`).
+  La base de datos gratuita de Render caduca a los 30 días.
+- **El servicio Python pasa a `render_web_service`**, con URL pública. Para seguir cumpliendo la
+  sección 3 del enunciado (solo NestJS usa el servicio Python), este exige una **clave compartida**
+  en la cabecera `X-Service-Key` (`SERVICE_API_KEY`): sin ella responde 401 en todas las rutas salvo
+  `/health`. El frontend nunca lo llama. El backend envía la clave (`PYTHON_SERVICE_KEY`).
+- **Riesgo aceptado:** la URL de Python queda expuesta en internet y su protección depende de que
+  la clave se mantenga secreta (se compara en tiempo constante y no se escribe en los logs). Con
+  un plan de pago se vuelve a `render_private_service` y se puede quitar la clave.
+- El backend sube su timeout hacia Python (`PYTHON_TIMEOUT_MS=90000`) mientras las instancias sean
+  gratuitas, para tolerar el despertar.
 
 ## Actualización (Fase 5, 2026-11-21)
 

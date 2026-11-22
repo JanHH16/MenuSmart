@@ -161,7 +161,7 @@ curl -i -X POST http://localhost:3000/api/auth/login -H "Content-Type: applicati
 4. **Secretos:** mostrar `.env.example` (valores de ejemplo), que `.env` está en `.gitignore`, y el job de gitleaks en CI. Mostrar que los logs no contienen contraseñas ni tokens (rama `feature/observability`).
 5. **Privacidad:** `GET` y `DELETE /api/users/me` (rama `feature/seguridad`): el usuario ve y borra sus datos.
 
-**Decir:** "Contraseñas con bcrypt, JWT, validación con whitelist, consultas parametrizadas, límite de solicitudes por IP, detección de secretos en cada push y escaneo de imágenes. El servicio Python es privado en el despliegue. Las limitaciones están documentadas: no hay roles, ni recuperación de contraseña, y CORS está abierto."
+**Decir:** "Contraseñas con bcrypt, JWT, validación con whitelist, consultas parametrizadas, límite de solicitudes por IP, detección de secretos en cada push y escaneo de imágenes. El servicio Python solo responde al backend: exige una clave de servicio. Las limitaciones están documentadas: no hay roles, ni recuperación de contraseña, y CORS está abierto."
 
 **Evidencia:** `docs/seguridad-privacidad-etica.md` (rama `feature/seguridad`).
 

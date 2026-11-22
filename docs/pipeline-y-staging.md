@@ -121,10 +121,10 @@ concurrencia `staging-deploy`, de modo que dos despliegues nunca se solapan.
 | Servicio Python directo (opcional) | `<python>/health` | HTTP 200 y `status: "ok"` |
 
 Si cualquier paso falla, el job falla y el commit queda marcado en rojo. El servicio
-Python es **privado** en Render (decisión del ADR-001): GitHub no puede alcanzarlo, por
-eso su salud se verifica a través del backend, cuyo `/health` informa el estado de
-PostgreSQL y de Python. El check directo solo corre si se define `STAGING_PYTHON_URL`
-(por ejemplo, si algún día se expone por un túnel).
+Python es un servicio web con clave de servicio (ADR-001, actualización del 22-11-2026). Su salud
+se verifica a través del backend, cuyo `/health` informa el estado de PostgreSQL y de Python. El
+check directo (`<python>/health`, que no exige clave) solo corre si se define `STAGING_PYTHON_URL`,
+con el output `python_service_url` de Terraform.
 
 > **Ruta del health check del backend.** El backend excluye `health` del prefijo global
 > (`backend/src/setup-app.ts`), por lo que la ruta real es `/health` y **no**
@@ -194,9 +194,25 @@ enruta por `Host` y el destino es HTTPS.
 `infra/` define la base de datos y los tres servicios. Relaciones relevantes:
 
 - Frontend: `BACKEND_URL` = URL pública del backend; `PORT=80`.
-- Backend: `PYTHON_SERVICE_URL` = `http://<nombre-del-servicio-python>:8000` (red privada
-  de Render) y `DATABASE_URL` interna.
+- Backend: `PYTHON_SERVICE_URL` = URL pública del servicio Python, `PYTHON_SERVICE_KEY` = la
+  clave compartida (`python_service_key`), `PYTHON_TIMEOUT_MS` = 90 s con instancias gratuitas
+  y `DATABASE_URL` interna.
+- Python: `SERVICE_API_KEY` = la misma clave. Sin ella, no se exige nada.
+- `instance_plan` (por defecto `free`) fija el plan de los tres servicios. La base de datos
+  es siempre `free` y caduca a los 30 días.
 - Los `outputs` entregan las URLs y los IDs de servicio que hay que copiar a GitHub.
+
+### Servicios gratuitos: qué esperar
+
+- **Se duermen** tras 15 minutos sin tráfico y la primera visita tarda cerca de un minuto en
+  despertarlos. Una demostración en vivo se arruina si el servicio está dormido: **abre el frontend
+  y haz una lista de compras 5 a 10 minutos antes** para despertar frontend, backend y Python.
+- El deploy desde GitHub puede tardar más y el health check ya reintenta 30 veces cada 10 s.
+- Las instancias gratuitas de un workspace comparten un cupo de horas al mes (750 h); dormidas
+  no consumen.
+- Para pasar a instancias de pago basta cambiar `instance_plan = "starter"` en `terraform.tfvars`
+  y ejecutar `terraform apply`.
+- Al terminar la presentación, `terraform destroy` borra todo.
 
 El job `terraform` del CI corre `fmt -check`, `init -backend=false` y `validate`. **Nunca**
 ejecuta `plan` ni `apply`: no tiene credenciales de Render y aplicar infraestructura debe

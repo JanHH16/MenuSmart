@@ -301,6 +301,10 @@ jobs:
 
       - name: Levantar el servicio Python y correr las pruebas de integracion
         run: |
+          # El servicio se levanta con clave de servicio, como en staging: asi se prueba la
+          # autenticacion NestJS -> Python de punta a punta (el backend la envia en X-Service-Key).
+          export SERVICE_API_KEY=clave-de-integracion-ci
+          export PYTHON_SERVICE_KEY=clave-de-integracion-ci
           cd python-service
           uvicorn tests.servidor_integracion:app --host 127.0.0.1 --port 8000 > ../uvicorn.log 2>&1 &
           SERVIDOR=$!
@@ -435,8 +439,8 @@ jobs:
         run: bash .github/scripts/render-deploy.sh "$SERVICE_ID_FRONTEND" "$GITHUB_SHA"
 
       # /health del backend responde 200 aun degradado; por eso se exige
-      # status=ok, que incluye PostgreSQL y el servicio Python (privado en Render,
-      # no alcanzable desde GitHub, asi que se verifica a traves del backend).
+      # status=ok, que incluye PostgreSQL y el servicio Python (se verifica a traves del
+      # backend; en staging Python exige una clave de servicio salvo en /health).
       - name: Health check del backend (/health, con PostgreSQL y servicio Python)
         run: bash .github/scripts/health-check.sh "$BACKEND_URL/health" ok
 
