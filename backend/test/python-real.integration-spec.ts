@@ -41,8 +41,18 @@ describe('Integracion NestJS <-> servicio Python real', () => {
     ]);
     expect(respuesta.original_count).toBe(3);
     expect(respuesta.normalized_count).toBe(2);
+    // Normalizacion v2: los gramos se llevan a kg y cada linea indica las reglas aplicadas.
     expect(respuesta.items).toEqual(
-      expect.arrayContaining([{ name: 'arroz', quantity: 500, unit: 'g' }]),
+      expect.arrayContaining([
+        expect.objectContaining({
+          name: 'arroz',
+          quantity: 0.5,
+          unit: 'kg',
+          term: 'arroz',
+          merged_lines: 2,
+          rules: expect.arrayContaining(['unidad:g->kg(x0.001)']),
+        }),
+      ]),
     );
   });
 
