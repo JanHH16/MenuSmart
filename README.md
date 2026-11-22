@@ -62,12 +62,15 @@ Todo lo de esta lista existe en el código y tiene pruebas, salvo lo que se indi
 - **Comparador de precios:** mejor producto por ingrediente en cada tienda y productos idénticos en ambas, con la fecha de cada precio y aviso de precios desactualizados.
 - **Actualización de precios:** scraping de Jumbo y Santa Isabel en segundo plano, con validación, deduplicación, reintentos y respeto de `robots.txt` ([ADR-003](docs/adr/003-metodo-scraping.md)).
 - **Métricas de calidad de los datos** (`/api/prices/quality`): [`docs/calidad-de-datos.md`](docs/calidad-de-datos.md).
-- **Recomendador adaptativo de recetas** (`/api/recommendations`): ordena por costo por porción y reutilización de ingredientes, explica cada sugerencia y permite aceptar, rechazar, ajustar el peso del costo, excluir ingredientes y desactivar la adaptación. Ver [capacidad adaptativa](#capacidad-adaptativa-o-inteligente). La pantalla de sugerencias del frontend está en integración desde otra rama; este README no la describe.
+- **Recomendador adaptativo de recetas** (`/api/recommendations`, pantalla en `/tabs/plan-semanal/sugerencias`): ordena por costo por porción y reutilización de ingredientes, explica cada sugerencia y permite aceptar, rechazar, ajustar el peso del costo, excluir ingredientes y desactivar la adaptación. Ver [capacidad adaptativa](#capacidad-adaptativa-o-inteligente).
 - **Salud del sistema:** `GET /health` verifica la conexión a PostgreSQL y al servicio Python.
 - **Layout adaptable** mobile y desktop (ver más abajo).
 - **Perfil:** muestra la cuenta y cifras reales de la semana. Las opciones "Preferencias alimentarias", "Supermercados favoritos" y "Notificaciones" son solo visuales: muestran "Función disponible próximamente".
 
-En ramas de trabajo que todavía no se unen a esta (ver [Estado de las ramas](#estado-de-las-ramas)): observabilidad (logs JSON, id de solicitud, `/api/metrics`), seguridad (`GET` y `DELETE /api/users/me`, cabeceras, límite de solicitudes), PWA y proyecto Android, y el pipeline completo con staging.
+- **Observabilidad:** logs JSON con id de solicitud (`X-Request-ID`) de NestJS a Python, `GET /api/metrics` con tiempos por ruta y errores de la fuente externa.
+- **Seguridad y privacidad:** cabeceras con helmet, límite de solicitudes, redacción de contraseñas y tokens en los logs, `GET` y `DELETE /api/users/me` (eliminar la cuenta con todos sus datos). Ver [`docs/seguridad-privacidad-etica.md`](docs/seguridad-privacidad-etica.md).
+- **PWA y Android:** app instalable, comparador disponible sin conexión y proyecto Android de Capacitor ([`docs/pwa-y-android.md`](docs/pwa-y-android.md)).
+- **Pipeline y staging:** CI con pruebas, cobertura mínima, migraciones desde cero, auditoría de dependencias, Trivy y despliegue automático a staging con rollback ([`docs/pipeline-y-staging.md`](docs/pipeline-y-staging.md)).
 
 ## Capacidad adaptativa o inteligente
 
@@ -284,7 +287,7 @@ npm start
 
 ```bash
 # Backend: unitarias y e2e (las e2e necesitan PostgreSQL, ver backend/README.md)
-cd backend && npm run test && npm run test:e2e
+cd backend && npm run test && npm run test:e2e   # o todo junto con cobertura: npm run test:cobertura
 
 # Frontend
 cd frontend && npx ng test --watch=false
@@ -293,7 +296,7 @@ cd frontend && npx ng test --watch=false
 cd python-service && pytest
 ```
 
-Estado el 22-11-2026 sobre el código de esta rama, ejecutado en local: backend unitarias **140 pruebas en 13 suites en verde**, servicio Python **115 en verde**, frontend **70 en 15 archivos en verde**. Las pruebas e2e del backend (4 archivos) necesitan base de datos y no se ejecutaron para este documento.
+Estado el 22-11-2026 sobre `integration/ep2-ef`, ejecutado en local: backend **247 pruebas en verde** (191 unitarias y 56 e2e contra PostgreSQL, cobertura de 97,8% de sentencias), servicio Python **149 en verde** (96% de cobertura) y frontend **109 en verde** (58% de cobertura). Detalle por niveles, cobertura, tiempos de respuesta y limitaciones en [`docs/plan-de-pruebas.md`](docs/plan-de-pruebas.md); accesibilidad en [`docs/accesibilidad.md`](docs/accesibilidad.md).
 
 Además de las pruebas de funcionalidad hay pruebas de las partes sensibles de la entrega: contrato entre servicios, normalización de ingredientes, recuperación ante fallas del scraper, cálculo de costos y recomendador. La evaluación del recomendador se repite con `cd backend && npm run evaluar:recomendador` (reescribe `docs/evaluacion-recomendador.md`). La lista completa de evidencias por criterio de la rúbrica está en [`docs/checklist-entrega.md`](docs/checklist-entrega.md).
 
@@ -352,11 +355,11 @@ Documento: [`docs/seguridad-privacidad-etica.md`](docs/seguridad-privacidad-etic
 
 ## PWA y Android
 
-La rama `feature/pwa-android` agrega la PWA instalable (service worker y manifiesto, comparador disponible sin conexión), el proyecto Android de Capacitor y un workflow de GitHub Actions que compila un APK de depuración. Guía: [`docs/pwa-y-android.md`](docs/pwa-y-android.md). **El APK no se ha compilado ni probado en un dispositivo.**
+La app es una PWA instalable (service worker y manifiesto, comparador disponible sin conexión), incluye el proyecto Android de Capacitor y un workflow de GitHub Actions que compila un APK de depuración. Guía: [`docs/pwa-y-android.md`](docs/pwa-y-android.md). **El APK no se ha compilado ni probado en un dispositivo.**
 
 ## Estado de las ramas
 
-El trabajo de la entrega está repartido en ramas que se unen en `integration/ep2-ef` (verificada solo en local):
+El trabajo de la entrega se desarrolló en ramas por tema y se reúne en `integration/ep2-ef`, que es la que se propone unir a `develop` en una sola pull request (verificada en local; el CI en GitHub lo verá Jan):
 
 | Rama | Contenido |
 |---|---|
@@ -374,12 +377,12 @@ El trabajo de la entrega está repartido en ramas que se unen en `integration/ep
 - **APK de Android sin compilar ni probar** en un dispositivo.
 - **Dependencia de una fuente frágil:** el scraper lee el HTML de las tiendas; si cambian su estructura o su `robots.txt`, fallará (se conservan los precios anteriores con su fecha). Los términos de servicio no se analizaron jurídicamente.
 - **Actualización de precios manual:** no hay programador automático ni alertas.
-- **Normalización léxica:** el mapeo de ingredientes compara palabras y comete errores conocidos (por ejemplo, "leche condensada" se toma como "leche"). Catálogo de 31 ingredientes.
+- **Normalización léxica:** el mapeo de ingredientes compara palabras. Descarta algunos casos conocidos ("leche condensada", "harina de maíz"), pero otros nombres compuestos pueden mapearse al término más cercano ("aceite de oliva" se toma como aceite). Catálogo de 31 ingredientes.
 - **Estimación de costo aproximada:** puede elegir productos poco representativos; sirve como orden de magnitud.
 - **Recomendador:** catálogo de 25 recetas, sin restricciones alimentarias ni nutrición, sin aprendizaje (las aceptaciones no influyen en el orden). La evidencia de utilidad es una simulación; la prueba con usuarios no se ha realizado.
 - **Perfil:** preferencias, supermercados favoritos y notificaciones son solo visuales.
 - **Seguridad:** sin recuperación de contraseña, verificación de correo ni roles; CORS abierto; el límite de solicitudes vive en memoria (ver el documento de seguridad).
-- **Accesibilidad** sin auditoría completa.
+- **Accesibilidad:** auditoría automática con axe-core sin infracciones en las 9 pantallas, pero sin prueba con lector de pantalla ni Lighthouse ([`docs/accesibilidad.md`](docs/accesibilidad.md)).
 - Solo Jumbo y Santa Isabel (mismo grupo) y precios vigentes con oferta; no se modela la comuna.
 
 ## Trabajo futuro
