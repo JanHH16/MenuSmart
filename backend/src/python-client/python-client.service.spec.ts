@@ -7,6 +7,7 @@ import {
 import { Test } from '@nestjs/testing';
 import { AxiosError, AxiosResponse } from 'axios';
 import { of, throwError } from 'rxjs';
+import { conContextoDeSolicitud } from '../observability/request-context';
 import { PythonClientService } from './python-client.service';
 
 const respuestaValida = {
@@ -59,6 +60,15 @@ describe('PythonClientService.scrapeSearch', () => {
     expect(response.tienda).toBe('jumbo');
     expect(invalidos).toBe(0);
     expect(post).toHaveBeenCalledWith('/scrape/search', peticion, { timeout: 120_000 });
+  });
+
+  it('envía el id de la solicitud en curso a Python para poder seguirla entre servicios', async () => {
+    post.mockReturnValue(ok(respuestaValida));
+    await conContextoDeSolicitud('req-traza-7', () => servicio.scrapeSearch(peticion, opciones));
+    expect(post).toHaveBeenCalledWith('/scrape/search', peticion, {
+      timeout: 120_000,
+      headers: { 'X-Request-ID': 'req-traza-7' },
+    });
   });
 
   it('reintenta una vez cuando no hay respuesta y se recupera', async () => {
