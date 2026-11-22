@@ -1,10 +1,12 @@
 import { EventEmitter } from 'node:events';
+import { Logger } from '@nestjs/common';
 import type { Request, Response } from 'express';
 import { MetricsService } from './metrics.service';
 import { crearMiddlewareObservabilidad, idDeSolicitud } from './observability.middleware';
 import { obtenerRequestId } from './request-context';
+import { StructuredLogger } from './structured-logger';
 
-function simular(cabeceras: Record<string, string> = {}, status = 200) {
+function simular(cabeceras: Record<string, string> = {}, status = 200, extra: object = {}) {
   const metricas = new MetricsService();
   const middleware = crearMiddlewareObservabilidad(metricas);
   const req = {
@@ -12,6 +14,7 @@ function simular(cabeceras: Record<string, string> = {}, status = 200) {
     headers: cabeceras,
     originalUrl: '/api/prices/runs/abc?secreto=1',
     route: { path: '/api/prices/runs/:id' },
+    ...extra,
   } as unknown as Request;
   const cabecerasRespuesta: Record<string, string> = {};
   const res = Object.assign(new EventEmitter(), {
@@ -68,5 +71,43 @@ describe('middleware de observabilidad', () => {
   it('no deja el id pegado fuera de la solicitud', () => {
     simular({ 'x-request-id': 'temporal' });
     expect(obtenerRequestId()).toBeUndefined();
+  });
+
+  describe('registro sin datos sensibles', () => {
+    let salida: string[];
+
+    beforeEach(() => {
+      salida = [];
+      jest.spyOn(process.stdout, 'write').mockImplementation((texto) => {
+        salida.push(String(texto));
+        return true;
+      });
+      Logger.overrideLogger(new StructuredLogger('debug'));
+    });
+
+    afterEach(() => {
+      Logger.overrideLogger(['log', 'error', 'warn']);
+      jest.restoreAllMocks();
+    });
+
+    it('registra solo método, ruta sin query, estado y duración: ni cabeceras, ni cuerpo, ni query', () => {
+      simular(
+        {
+          authorization: 'Bearer token-super-secreto',
+          cookie: 'sid=cookie-secreta',
+          'x-request-id': 'req-9',
+        },
+        200,
+        { body: { password: 'clave-secreta-123' } },
+      );
+      const texto = salida.join('');
+      for (const secreto of ['token-super-secreto', 'cookie-secreta', 'clave-secreta-123', 'secreto=1']) {
+        expect(texto).not.toContain(secreto);
+      }
+      const linea = JSON.parse(salida[0]) as Record<string, unknown>;
+      const permitidos = ['context', 'durationMs', 'level', 'method', 'msg', 'path', 'requestId', 'service', 'status', 'time'];
+      expect(Object.keys(linea).filter((clave) => !permitidos.includes(clave))).toEqual([]);
+      expect(linea.path).toBe('/api/prices/runs/abc');
+    });
   });
 });

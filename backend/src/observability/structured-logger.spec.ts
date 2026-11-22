@@ -1,5 +1,7 @@
 import { conContextoDeSolicitud } from './request-context';
-import { StructuredLogger } from './structured-logger';
+import { redactar, StructuredLogger } from './structured-logger';
+
+const JWT_FALSO = 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIn0.firma_falsa-123';
 
 describe('StructuredLogger', () => {
   let salida: string[];
@@ -57,5 +59,84 @@ describe('StructuredLogger', () => {
   it('respeta el nivel mínimo', () => {
     new StructuredLogger('warn').log('no debería salir');
     expect(salida).toHaveLength(0);
+  });
+
+  describe('redacción de secretos', () => {
+    const salidaCompleta = () => [...salida, ...errores].join('');
+
+    it('oculta en profundidad contraseñas, tokens y cabeceras de sesión', () => {
+      new StructuredLogger('log').log({
+        msg: 'intento',
+        password: 'secreto123',
+        passwordHash: '$2b$10$abcdef',
+        accessToken: 'tok-abc',
+        Authorization: 'Bearer tok-abc',
+        usuario: { email: 'a@a.cl', cookie: 'sid=1', historial: [{ secret: 's3' }] },
+        tienda: 'jumbo',
+      });
+      const texto = salidaCompleta();
+      for (const secreto of ['secreto123', '$2b$10$abcdef', 'tok-abc', 'sid=1', 's3"']) {
+        expect(texto).not.toContain(secreto);
+      }
+      expect(JSON.parse(salida[0])).toMatchObject({
+        password: '[REDACTED]',
+        passwordHash: '[REDACTED]',
+        accessToken: '[REDACTED]',
+        Authorization: '[REDACTED]',
+        usuario: { email: 'a@a.cl', cookie: '[REDACTED]', historial: [{ secret: '[REDACTED]' }] },
+        tienda: 'jumbo',
+      });
+    });
+
+    it('oculta cada una de las claves exigidas', () => {
+      const claves = ['password', 'passwordHash', 'token', 'accessToken', 'authorization', 'secret', 'cookie'];
+      new StructuredLogger('log').log(Object.fromEntries(claves.map((c) => [c, `valor-${c}`])));
+      const linea = JSON.parse(salida[0]) as Record<string, unknown>;
+      for (const clave of claves) expect(linea[clave]).toBe('[REDACTED]');
+    });
+
+    it('tacha tokens Bearer y JWT que aparecen dentro de un texto', () => {
+      const logger = new StructuredLogger('log');
+      logger.warn(`falló con Authorization: Bearer ${JWT_FALSO} y ${JWT_FALSO}`, 'X');
+      logger.error('falló', `Error: token inválido ${JWT_FALSO}
+    at ...`, 'X');
+      expect(salidaCompleta()).not.toContain('firma_falsa');
+      expect(salidaCompleta()).toContain('[REDACTED]');
+    });
+
+    it('conserva el mensaje de un Error pero sin sus secretos', () => {
+      new StructuredLogger('log').error({ msg: 'fallo', error: new Error(`token ${JWT_FALSO}`) });
+      const linea = JSON.parse(errores[0]) as { error: { message: string } };
+      expect(linea.error.message).toBe('token [REDACTED]');
+    });
+
+    it('no falla con referencias circulares ni con objetos muy profundos', () => {
+      const circular: Record<string, unknown> = { nombre: 'a' };
+      circular.yo = circular;
+      let profundo: Record<string, unknown> = { password: 'x' };
+      for (let i = 0; i < 20; i++) profundo = { siguiente: profundo };
+      new StructuredLogger('log').log({ msg: 'raro', circular, profundo });
+      const texto = salida[0];
+      expect(texto).toContain('[Circular]');
+      expect(texto).toContain('[REDACTED]');
+    });
+  });
+});
+
+describe('redactar', () => {
+  it('no modifica el objeto original', () => {
+    const original = { a: { password: 'x' } };
+    expect(redactar(original)).toEqual({ a: { password: '[REDACTED]' } });
+    expect(original.a.password).toBe('x');
+  });
+
+  it('deja intactos los valores simples y las fechas', () => {
+    const fecha = new Date('2026-01-01T00:00:00Z');
+    expect(redactar({ n: 1, b: true, nulo: null, fecha })).toEqual({
+      n: 1,
+      b: true,
+      nulo: null,
+      fecha: fecha.toISOString(),
+    });
   });
 });

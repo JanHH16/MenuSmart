@@ -1,5 +1,6 @@
 import json
 import logging
+import sys
 from collections import Counter
 from datetime import UTC, datetime
 
@@ -12,6 +13,7 @@ from app.observability import (
     MetricsRegistry,
     id_de_solicitud,
     percentil,
+    redactar,
     request_id_var,
 )
 from app.routers.scrape import get_scraper_service
@@ -147,6 +149,75 @@ class TestJsonFormatter:
         assert salida["requestId"] == "json-1"
         assert salida["tienda"] == "jumbo"
         assert salida["service"] == "menusmart-python-service"
+
+
+JWT_FALSO = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIn0.firma_falsa-123"
+
+
+class TestRedaccionDeSecretos:
+    """Evidencia: los logs no almacenan contrasenas, tokens ni datos de autenticacion."""
+
+    def _linea(self, mensaje="hola", campos=None, exc_info=None):
+        registro = logging.LogRecord("menusmart.test", logging.INFO, "", 0, mensaje, (), exc_info)
+        registro.campos = campos or {}
+        return JsonFormatter().format(registro)
+
+    def test_oculta_los_campos_sensibles_en_profundidad(self):
+        linea = self._linea(
+            campos={
+                "password": "secreto123",
+                "passwordHash": "$2b$10$abcdef",
+                "accessToken": "tok-abc",
+                "Authorization": "Bearer tok-abc",
+                "usuario": {"email": "a@a.cl", "cookie": "sid=1", "datos": [{"secret": "s3"}]},
+                "tienda": "jumbo",
+            }
+        )
+        for secreto in ("secreto123", "$2b$10$abcdef", "tok-abc", "sid=1", "s3"):
+            assert secreto not in linea
+        salida = json.loads(linea)
+        assert salida["password"] == "[REDACTED]"
+        assert salida["usuario"]["cookie"] == "[REDACTED]"
+        assert salida["usuario"]["datos"][0]["secret"] == "[REDACTED]"
+
+    def test_conserva_los_campos_no_sensibles(self):
+        salida = json.loads(self._linea(campos={"tienda": "jumbo", "status": 200}))
+        assert salida["tienda"] == "jumbo"
+        assert salida["status"] == 200
+
+    def test_tacha_tokens_que_aparecen_dentro_de_un_mensaje(self):
+        linea = self._linea(mensaje=f"fallo con Authorization: Bearer {JWT_FALSO} y {JWT_FALSO}")
+        assert "firma_falsa" not in linea
+        assert "[REDACTED]" in linea
+
+    def test_tacha_tokens_dentro_de_la_traza_de_una_excepcion(self):
+        try:
+            raise ValueError(f"token invalido {JWT_FALSO}")
+        except ValueError:
+            linea = self._linea(exc_info=sys.exc_info())
+        assert "firma_falsa" not in linea
+
+    def test_no_modifica_el_original_y_corta_la_recursion_profunda(self):
+        original = {"a": {"password": "x"}}
+        assert redactar(original) == {"a": {"password": "[REDACTED]"}}
+        assert original["a"]["password"] == "x"
+        profundo: dict = {}
+        cursor = profundo
+        for _ in range(20):
+            cursor["siguiente"] = {}
+            cursor = cursor["siguiente"]
+        assert "[REDACTED]" in json.dumps(redactar(profundo))
+
+    def test_el_log_http_no_incluye_cabeceras_ni_query_string(self, caplog):
+        with caplog.at_level(logging.INFO, logger="menusmart.http"):
+            client.get(
+                "/no-existe?api_key=clave-secreta",
+                headers={"Authorization": f"Bearer {JWT_FALSO}", "Cookie": "sid=abc"},
+            )
+        registro = next(r for r in caplog.records if r.getMessage() == "http_request")
+        linea = JsonFormatter().format(registro)
+        for secreto in (JWT_FALSO, "sid=abc", "clave-secreta"):
+            assert secreto not in linea
 
 
 def _async(funcion):
