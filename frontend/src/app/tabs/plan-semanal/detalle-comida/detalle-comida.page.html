@@ -9,7 +9,7 @@
     <ion-content class="ms-desktop-content">
       <div class="ms-desktop-page ms-detalle-desktop">
         <button type="button" class="ms-volver-desktop ms-detalle-volver" (click)="volver()">
-          <ion-icon name="chevron-back-outline"></ion-icon>
+          <ion-icon aria-hidden="true" name="chevron-back-outline"></ion-icon>
           Volver al plan
         </button>
 
@@ -66,8 +66,8 @@
                   </button>
                 </div>
 
-                <button type="button" class="ms-detalle-subir-foto" (click)="cambiarFoto()">
-                  <ion-icon name="camera-outline"></ion-icon>
+                <button type="button" class="ms-detalle-subir-foto" aria-label="Subir foto de la comida" (click)="cambiarFoto()">
+                  <ion-icon aria-hidden="true" name="camera-outline"></ion-icon>
                   <span class="ms-detalle-subir-foto-titulo">+ subir foto</span>
                   <span class="ms-detalle-subir-foto-sub">arrastra una imagen o toma una foto</span>
                 </button>
@@ -107,7 +107,7 @@
                   aria-label="Quitar ingrediente"
                   (click)="eliminarIngrediente(ingrediente.id)"
                 >
-                  <ion-icon name="close-outline"></ion-icon>
+                  <ion-icon aria-hidden="true" name="close-outline"></ion-icon>
                 </button>
               </div>
             }
@@ -124,7 +124,7 @@
       <ion-toolbar>
         <ion-buttons slot="start">
           <ion-button (click)="volver()">
-            <ion-icon slot="start" name="chevron-back-outline"></ion-icon>
+            <ion-icon aria-hidden="true" slot="start" name="chevron-back-outline"></ion-icon>
             Volver
           </ion-button>
         </ion-buttons>
@@ -139,12 +139,12 @@
             <img [src]="comida.foto" class="ms-polaroid-foto-img" alt="Foto de la comida" />
           } @else {
             <div class="ms-polaroid-foto">
-              <ion-icon name="restaurant-outline"></ion-icon>
+              <ion-icon aria-hidden="true" name="restaurant-outline"></ion-icon>
             </div>
           }
           <p class="ms-polaroid-caption">{{ comida.nombre | lowercase }}</p>
-          <button class="ms-polaroid-camara" type="button" (click)="cambiarFoto(); $event.stopPropagation()">
-            <ion-icon name="camera-outline"></ion-icon>
+          <button class="ms-polaroid-camara" type="button" aria-label="Cambiar la foto de la comida" (click)="cambiarFoto(); $event.stopPropagation()">
+            <ion-icon aria-hidden="true" name="camera-outline"></ion-icon>
           </button>
         </div>
 
@@ -175,16 +175,17 @@
                 fill="clear"
                 color="danger"
                 slot="end"
+                [attr.aria-label]="'Quitar ' + ingrediente.nombre"
                 (click)="eliminarIngrediente(ingrediente.id)"
               >
-                <ion-icon slot="icon-only" name="close-circle-outline"></ion-icon>
+                <ion-icon aria-hidden="true" slot="icon-only" name="close-circle-outline"></ion-icon>
               </ion-button>
             </ion-item>
           }
         </ion-list>
 
         <ion-button expand="block" fill="outline" class="ms-agregar-ingrediente" (click)="agregarIngrediente()">
-          <ion-icon slot="start" name="add-outline"></ion-icon>
+          <ion-icon aria-hidden="true" slot="start" name="add-outline"></ion-icon>
           Agregar ingrediente
         </ion-button>
       </div>

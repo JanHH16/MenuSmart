@@ -142,7 +142,7 @@
 
         @for (item of categoria.items; track item.id) {
           <label class="ms-item-row">
-            <ion-checkbox [checked]="item.comprado" (ionChange)="alternar(item.id)"></ion-checkbox>
+            <ion-checkbox [checked]="item.comprado" [attr.aria-label]="item.nombre" (ionChange)="alternar(item.id)"></ion-checkbox>
             <span class="ms-item-nombre" [class.ms-item-comprado]="item.comprado">
               {{ item.nombre }}
             </span>
@@ -153,7 +153,7 @@
 
       <ion-button expand="block" class="ms-btn-primary" (click)="irAComparador()">
         Comparar precios
-        <ion-icon slot="end" name="arrow-forward-outline"></ion-icon>
+        <ion-icon slot="end" name="arrow-forward-outline" aria-hidden="true"></ion-icon>
       </ion-button>
     </div>
     } @else {

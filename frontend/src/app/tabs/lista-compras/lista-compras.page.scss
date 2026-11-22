@@ -32,7 +32,7 @@
   margin: 20px 0 6px;
   font-size: 0.75rem;
   letter-spacing: 0.05em;
-  color: var(--ms-margen-rojo);
+  color: var(--ion-color-danger);
 
   &:first-child {
     margin-top: 0;
@@ -61,7 +61,7 @@
 
 .ms-item-comprado {
   text-decoration: line-through;
-  color: var(--ms-lapiz);
+  color: var(--ms-texto-suave);
 }
 
 .ms-item-cantidad {
@@ -141,7 +141,7 @@
   line-height: 15px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--ms-margen-rojo);
+  color: var(--ion-color-danger);
 }
 
 // Filas de 40px desde y=96 (checkbox en x=20, nombre en x=50, cantidad
@@ -166,7 +166,7 @@
   text-overflow: ellipsis;
 
   &--comprado {
-    color: var(--ms-lapiz);
+    color: var(--ms-texto-suave);
     text-decoration: line-through;
   }
 }
@@ -175,7 +175,7 @@
   flex-shrink: 0;
   font-family: var(--ms-font-boleta);
   font-size: 11px;
-  color: var(--ms-lapiz);
+  color: var(--ms-texto-suave);
 }
 
 // Tarjeta de progreso (CW × 96, blanca) en y=660: barra en x=320.
@@ -238,11 +238,11 @@
 }
 
 .ms-lista-aviso {
-  color: var(--ms-margen-rojo);
+  color: var(--ion-color-danger);
 }
 
 .ms-lista-costo-nota {
-  color: var(--ms-lapiz);
+  color: var(--ms-texto-suave);
   font-size: 0.8rem;
 }
 

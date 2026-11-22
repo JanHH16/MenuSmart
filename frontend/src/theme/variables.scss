@@ -13,6 +13,8 @@
   --ms-margen-rojo: #e0624f;
   --ms-timbre-verde: #2f7d55;
   --ms-lapiz: #8a8fa3;
+  // Texto secundario con contraste suficiente (WCAG AA, 4,5:1) sobre el papel; --ms-lapiz solo para bordes y detalles.
+  --ms-texto-suave: #5b6075;
   --ms-papel: #f3ecda;
   --ms-papel-oscuro: #e7dcc0;
   // Las tarjetas "hoja de libreta" deben leerse como una hoja de papel
@@ -54,12 +56,14 @@
   --ion-color-secondary-shade: #296e4b;
   --ion-color-secondary-tint: #438a66;
 
-  --ion-color-danger: var(--ms-margen-rojo);
-  --ion-color-danger-rgb: 224, 98, 79;
+  // Rojo más oscuro que el del margen de la libreta (--ms-margen-rojo) para que el texto y los
+  // botones de peligro alcancen el contraste AA (4,5:1) sobre el papel.
+  --ion-color-danger: #b23a2b;
+  --ion-color-danger-rgb: 178, 58, 43;
   --ion-color-danger-contrast: #ffffff;
   --ion-color-danger-contrast-rgb: 255, 255, 255;
-  --ion-color-danger-shade: #c55646;
-  --ion-color-danger-tint: #e37262;
+  --ion-color-danger-shade: #9d3326;
+  --ion-color-danger-tint: #bb4e40;
 
   --ion-color-warning: var(--ms-marcador);
   --ion-color-warning-rgb: 255, 228, 92;
@@ -69,7 +73,7 @@
   --ion-color-warning-tint: #ffe76d;
 
   --ion-color-dark: var(--ms-tinta-oscura);
-  --ion-color-medium: var(--ms-lapiz);
+  --ion-color-medium: var(--ms-texto-suave);
 
   --ion-background-color: var(--ms-papel);
   --ion-background-color-rgb: 243, 236, 218;

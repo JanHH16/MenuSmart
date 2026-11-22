@@ -48,7 +48,7 @@
   margin: 0;
   font-size: 12px;
   line-height: 17px;
-  color: var(--ms-lapiz);
+  color: var(--ms-texto-suave);
 }
 
 // Interruptor accesible: es un checkbox nativo con role="switch".
@@ -118,7 +118,7 @@
   gap: 8px;
   font-family: var(--ms-font-boleta);
   font-size: 10px;
-  color: var(--ms-lapiz);
+  color: var(--ms-texto-suave);
 }
 
 .ms-sug-chips {
@@ -222,7 +222,7 @@ details[open] > .ms-sug-como-resumen::after {
     font-size: 11px;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: var(--ms-lapiz);
+    color: var(--ms-texto-suave);
   }
 
   p {
@@ -269,7 +269,7 @@ details[open] > .ms-sug-como-resumen::after {
 .ms-sug-estado {
   margin: 0 0 12px;
   font-size: 14px;
-  color: var(--ms-lapiz);
+  color: var(--ms-texto-suave);
 
   p {
     margin: 0 0 12px;
@@ -280,7 +280,7 @@ details[open] > .ms-sug-como-resumen::after {
   margin: 0 0 10px;
   font-size: 12px;
   line-height: 18px;
-  color: var(--ms-lapiz);
+  color: var(--ms-texto-suave);
 }
 
 // ---------------------------------------------------------------------------
@@ -329,7 +329,7 @@ details[open] > .ms-sug-como-resumen::after {
   margin: 2px 0 0;
   font-family: var(--ms-font-boleta);
   font-size: 11px;
-  color: var(--ms-lapiz);
+  color: var(--ms-texto-suave);
 }
 
 .ms-sug-tag-plan {
@@ -358,7 +358,7 @@ details[open] > .ms-sug-como-resumen::after {
   font-size: 10px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--ms-lapiz);
+  color: var(--ms-texto-suave);
 }
 
 .ms-sug-tiendas {
@@ -375,7 +375,7 @@ details[open] > .ms-sug-como-resumen::after {
   font-size: 10px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--ms-lapiz);
+  color: var(--ms-texto-suave);
 }
 
 .ms-sug-porque {

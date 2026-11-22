@@ -7,7 +7,7 @@
   <ion-content class="ms-desktop-content">
     <div class="ms-desktop-page ms-agregar-desktop">
       <button type="button" class="ms-volver-desktop ms-agregar-volver" (click)="volver()">
-        <ion-icon name="chevron-back-outline"></ion-icon>
+        <ion-icon aria-hidden="true" name="chevron-back-outline"></ion-icon>
         Volver al plan
       </button>
 
@@ -100,7 +100,7 @@
                       @if (foto) {
                         <img [src]="foto" alt="Foto de la comida" />
                       } @else {
-                        <ion-icon name="camera-outline"></ion-icon>
+                        <ion-icon aria-hidden="true" name="camera-outline"></ion-icon>
                       }
                     </span>
                     <span class="ms-agregar-polaroid-caption">{{ foto ? 'cambiar foto' : 'agregar foto' }}</span>
@@ -108,7 +108,7 @@
                 </div>
 
                 <button type="button" class="ms-agregar-subir-foto" (click)="elegirFoto()">
-                  <ion-icon name="camera-outline"></ion-icon>
+                  <ion-icon aria-hidden="true" name="camera-outline"></ion-icon>
                   <span class="ms-agregar-subir-foto-titulo">+ subir foto</span>
                   <span class="ms-agregar-subir-foto-sub">arrastra una imagen o toma una foto</span>
                 </button>
@@ -151,7 +151,7 @@
                     aria-label="Quitar ingrediente"
                     (click)="eliminarIngrediente($index)"
                   >
-                    <ion-icon name="close-outline"></ion-icon>
+                    <ion-icon aria-hidden="true" name="close-outline"></ion-icon>
                   </button>
                 </div>
               }
@@ -221,7 +221,7 @@
                         <span class="ms-guardada-ingredientes">{{ nombresIngredientes(guardada) }}</span>
                       }
                     </div>
-                    <ion-icon name="chevron-forward-outline" color="medium"></ion-icon>
+                    <ion-icon aria-hidden="true" name="chevron-forward-outline" color="medium"></ion-icon>
                   </button>
                 }
               </div>
@@ -236,7 +236,7 @@
     <ion-toolbar>
       <ion-buttons slot="start">
         <ion-button (click)="volver()">
-          <ion-icon slot="start" name="chevron-back-outline"></ion-icon>
+          <ion-icon aria-hidden="true" slot="start" name="chevron-back-outline"></ion-icon>
           Volver
         </ion-button>
       </ion-buttons>
@@ -271,12 +271,12 @@
             <img [src]="foto" class="ms-polaroid-foto-img" alt="Foto de la comida" />
           } @else {
             <div class="ms-polaroid-foto">
-              <ion-icon name="camera-outline"></ion-icon>
+              <ion-icon aria-hidden="true" name="camera-outline"></ion-icon>
             </div>
           }
           <p class="ms-polaroid-caption">{{ foto ? 'cambiar foto' : 'agregar foto' }}</p>
-          <button class="ms-polaroid-camara" type="button" (click)="elegirFoto(); $event.stopPropagation()">
-            <ion-icon name="camera-outline"></ion-icon>
+          <button class="ms-polaroid-camara" type="button" aria-label="Elegir una foto de la comida" (click)="elegirFoto(); $event.stopPropagation()">
+            <ion-icon aria-hidden="true" name="camera-outline"></ion-icon>
           </button>
         </div>
 
@@ -291,7 +291,7 @@
       </div>
     } @else {
       <ion-item lines="full" class="ms-buscar-item">
-        <ion-icon slot="start" name="search-outline" color="medium"></ion-icon>
+        <ion-icon aria-hidden="true" slot="start" name="search-outline" color="medium"></ion-icon>
         <ion-input [(ngModel)]="busqueda" placeholder="Ej: arroz con pollo"></ion-input>
       </ion-item>
     }
@@ -341,8 +341,14 @@
               <ion-item>
                 <ion-label class="ms-ingrediente-nombre">{{ ingrediente.nombre }}</ion-label>
                 <span class="ms-mono ms-text-secondary" slot="end">{{ ingrediente.cantidad }}</span>
-                <ion-button fill="clear" color="danger" slot="end" (click)="eliminarIngrediente($index)">
-                  <ion-icon slot="icon-only" name="close-circle-outline"></ion-icon>
+                <ion-button
+                  fill="clear"
+                  color="danger"
+                  slot="end"
+                  [attr.aria-label]="'Quitar ' + ingrediente.nombre"
+                  (click)="eliminarIngrediente($index)"
+                >
+                  <ion-icon aria-hidden="true" slot="icon-only" name="close-circle-outline"></ion-icon>
                 </ion-button>
               </ion-item>
             }
@@ -350,7 +356,7 @@
         }
 
         <ion-button expand="block" fill="outline" class="ms-agregar-ingrediente" (click)="agregarIngrediente()">
-          <ion-icon slot="start" name="add-outline"></ion-icon>
+          <ion-icon aria-hidden="true" slot="start" name="add-outline"></ion-icon>
           Agregar ingrediente
         </ion-button>
       </div>
@@ -393,7 +399,7 @@
                   <span class="ms-guardada-ingredientes">{{ nombresIngredientes(guardada) }}</span>
                 }
               </div>
-              <ion-icon name="chevron-forward-outline" color="medium"></ion-icon>
+              <ion-icon aria-hidden="true" name="chevron-forward-outline" color="medium"></ion-icon>
             </button>
           }
         </div>

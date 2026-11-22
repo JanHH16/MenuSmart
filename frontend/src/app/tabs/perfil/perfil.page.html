@@ -94,7 +94,7 @@
     <ion-list class="ms-perfil-lista" lines="full">
       @for (opcion of opciones; track opcion.label) {
         <ion-item button detail="false" (click)="proximamente()">
-          <ion-icon [name]="opcion.icon" slot="start" color="primary"></ion-icon>
+          <ion-icon [name]="opcion.icon" slot="start" color="primary" aria-hidden="true"></ion-icon>
           <ion-label>{{ opcion.label }}</ion-label>
           <span class="ms-label-secundario" slot="end">Pronto</span>
         </ion-item>
