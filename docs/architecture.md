@@ -104,7 +104,7 @@ flowchart TB
 
     Internet["Internet"] --> FrontendSvc
     Internet --> BackendSvc
-    FrontendSvc -.->|"pendiente: parametrizar nginx.conf<br/>(ver ADR-001)"| BackendSvc
+    FrontendSvc -.->|"proxy /api/ a BACKEND_URL<br/>(URL publica del backend)"| BackendSvc
     BackendSvc -->|"DATABASE_URL"| PostgresSvc
     BackendSvc -->|"PYTHON_SERVICE_URL"| PythonSvc
 ```

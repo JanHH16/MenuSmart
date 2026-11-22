@@ -58,6 +58,9 @@ services:
   frontend:
     build:
       context: ./frontend
+    environment:
+      # Destino del proxy /api/ de nginx (en Render es la URL publica del backend).
+      BACKEND_URL: http://backend:3000
     ports:
       - "8080:80"
     depends_on:
