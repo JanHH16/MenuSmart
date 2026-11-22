@@ -1,0 +1,31 @@
+// Aviso global de "sin conexión". Va en el flujo normal, encima del router
+// outlet, para que el contenido no quede tapado. Cuando hay conexión el
+// contenedor está vacío (mide 0) y no se toca nada del layout: el router
+// outlet sigue absoluto y el layout (mobile con tabs abajo, desktop con
+// sidebar) queda exactamente como antes.
+.ms-aviso-conexion {
+  flex: 0 0 auto;
+  position: relative;
+  z-index: 10;
+}
+
+.ms-aviso-conexion__texto {
+  margin: 0;
+  // La safe area solo importa en pantallas con muesca; en el resto vale 0.
+  padding: calc(env(safe-area-inset-top, 0px) + 6px) 12px 6px;
+  background: var(--ms-tinta-oscura);
+  color: var(--ms-papel-hoja);
+  font-family: var(--ms-font-boleta);
+  font-size: 0.75rem;
+  line-height: 1.3;
+  text-align: center;
+}
+
+// Solo mientras el aviso está visible, el router outlet pasa de absoluto a
+// ocupar el espacio que deja el aviso dentro de ion-app (flex en columna).
+// Sus páginas siguen posicionadas contra él, así que tabs y sidebar no cambian.
+.ms-sin-conexion ion-router-outlet {
+  position: relative;
+  flex: 1 1 0;
+  min-height: 0;
+}
