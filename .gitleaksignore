@@ -1,0 +1,9 @@
+# Falsos positivos revisados a mano (huella: commit:archivo:regla:linea).
+#
+# Clave de prueba escrita como texto fijo en python-service/tests/test_seguridad.py. No es un
+# secreto real: era un valor inventado para probar la cabecera X-Service-Key. En el commit
+# siguiente la prueba pasa a generar la clave al azar en cada ejecucion (secrets.token_urlsafe),
+# asi que ya no queda ninguna clave escrita en el codigo actual.
+80938431d6dedde692161a75869dd2e3c95445a7:python-service/tests/test_seguridad.py:generic-api-key:37
+80938431d6dedde692161a75869dd2e3c95445a7:python-service/tests/test_seguridad.py:generic-api-key:53
+80938431d6dedde692161a75869dd2e3c95445a7:python-service/tests/test_seguridad.py:generic-api-key:59

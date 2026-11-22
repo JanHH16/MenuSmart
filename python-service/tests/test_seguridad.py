@@ -1,9 +1,14 @@
+import secrets
+
 import pytest
 from fastapi.testclient import TestClient
 
 from app.main import app
 
 client = TestClient(app)
+
+# Se genera al azar en cada ejecucion: nunca hay una clave escrita en el repositorio.
+CLAVE = secrets.token_urlsafe(24)
 
 CUERPO_NORMALIZAR = {"ingredients": [{"name": "Arroz", "quantity": 1, "unit": "kg"}]}
 RUTAS_PROTEGIDAS = [
@@ -34,7 +39,7 @@ class TestSinClaveConfigurada:
 class TestConClaveConfigurada:
     @pytest.fixture(autouse=True)
     def _activar_clave(self, monkeypatch):
-        monkeypatch.setenv("SERVICE_API_KEY", "clave-de-prueba-123")
+        monkeypatch.setenv("SERVICE_API_KEY", CLAVE)
 
     @pytest.mark.parametrize(("metodo", "ruta", "cuerpo"), RUTAS_PROTEGIDAS)
     def test_rechaza_sin_cabecera(self, metodo, ruta, cuerpo):
@@ -44,19 +49,19 @@ class TestConClaveConfigurada:
     def test_rechaza_clave_incorrecta(self, metodo, ruta, cuerpo):
         respuesta = _llamar(metodo, ruta, cuerpo, {"X-Service-Key": "otra-clave"})
         assert respuesta.status_code == 401
-        assert "clave-de-prueba-123" not in respuesta.text
+        assert CLAVE not in respuesta.text
 
     def test_acepta_la_clave_correcta(self):
         respuesta = client.post(
             "/ingredients/normalize",
             json=CUERPO_NORMALIZAR,
-            headers={"X-Service-Key": "clave-de-prueba-123"},
+            headers={"X-Service-Key": CLAVE},
         )
         assert respuesta.status_code == 200
         assert respuesta.json()["items"][0]["name"] == "arroz"
 
     def test_metricas_con_la_clave_correcta(self):
-        respuesta = client.get("/metrics", headers={"X-Service-Key": "clave-de-prueba-123"})
+        respuesta = client.get("/metrics", headers={"X-Service-Key": CLAVE})
         assert respuesta.status_code == 200
 
     def test_health_sigue_abierto(self):
