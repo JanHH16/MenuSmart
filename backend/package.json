@@ -25,7 +25,8 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "evaluar:recomendador": "ts-node scripts/evaluar-recomendador.ts",
-    "test:cobertura": "jest --config ./test/jest-cobertura.json --runInBand --coverage"
+    "test:cobertura": "jest --config ./test/jest-cobertura.json --runInBand --coverage",
+    "medir:latencia": "node scripts/medir-latencia.mjs"
   },
   "dependencies": {
     "@nestjs/axios": "^4.0.1",
