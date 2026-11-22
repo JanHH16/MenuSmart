@@ -6,7 +6,7 @@ Medido el 22-11-2026 sobre la rama de integración. Cada número de este documen
 
 | Nivel | Qué verifica | Herramienta | Cantidad | Dónde corre |
 |---|---|---|---|---|
-| Unitarias | Reglas puras: normalización de ingredientes, conversión de unidades, costos, puntaje del recomendador, semana, validación de DTO, logger, métricas | Jest (backend), pytest (Python), Vitest (frontend) | 189 backend + 140 Python + 77 frontend | Job de cada servicio en CI |
+| Unitarias | Reglas puras: normalización de ingredientes, conversión de unidades, costos, puntaje del recomendador, semana, validación de DTO, logger, métricas | Jest (backend), pytest (Python), Vitest (frontend) | 191 backend + 149 Python + 109 frontend | Job de cada servicio en CI |
 | Integración con la base | API completa contra PostgreSQL real: autenticación, plan semanal, lista de compras, precios, recomendador, cuenta de usuario, aislamiento entre usuarios | Jest + Supertest | 56 e2e | Job `backend` (servicio postgres) |
 | Integración entre servicios | NestJS llamando al servicio Python real (HTTP real, sin internet, con fixtures de las tiendas) | Jest + uvicorn | 8 (`backend/test/python-real.integration-spec.ts`) | Job `integracion-python` |
 | Contrato | La respuesta de Python se valida otra vez en NestJS (`parseScrapeResponse`) y los DTO rechazan entradas inválidas | Jest, Pydantic | incluidas arriba | Jobs `backend` y `python-service` |
@@ -15,23 +15,24 @@ Medido el 22-11-2026 sobre la rama de integración. Cada número de este documen
 | Estructura de la base | Todas las migraciones desde una base vacía y cero deriva con las entidades | `migration:run` + `migration:generate --check` | 5 migraciones | Job `migraciones` |
 | Imágenes y dependencias | Vulnerabilidades altas o críticas en dependencias e imágenes Docker, secretos en el repo | npm audit, pip-audit, Trivy, gitleaks | n/a | Jobs `backend`, `frontend`, `python-service`, `docker-images`, `secrets-scan` |
 | Infraestructura | Sintaxis y validez de Terraform y de los workflows | terraform validate, actionlint | n/a | Job `terraform`, revisión local |
+| Accesibilidad | Infracciones WCAG 2.0 y 2.1 A y AA en 9 pantallas, en escritorio y móvil | axe-core | 18 revisiones | Manual (ver `docs/accesibilidad.md`) |
 | Evaluación de la adaptación | El recomendador contra versiones base con precios reales | `npm run evaluar:recomendador` | 3 escenarios x 5 estrategias | Manual (ver `docs/evaluacion-recomendador.md`) |
 | No funcionales | Tiempos de respuesta, disponibilidad | `npm run medir:latencia`, `/health`, `/api/metrics` | ver sección 3 | Manual y en producción |
 
-Total de pruebas automáticas: **462** (245 de backend entre unitarias y e2e, 140 de Python y 77 de frontend).
+Total de pruebas automáticas: **505** (247 de backend: 191 unitarias y 56 e2e; 149 de Python y 109 de frontend).
 
 ## 2. Cobertura
 
 | Componente | Sentencias | Ramas | Funciones | Cómo se repite | Umbral en CI |
 |---|---|---|---|---|---|
-| Backend (unitarias y e2e juntas, en serie) | 97,7% | 81,4% | 97,3% | `cd backend; npm run test:cobertura` | 90% sentencias, 70% ramas (falla si baja) |
+| Backend (unitarias y e2e juntas, en serie) | 97,8% | 81,4% | 97,3% | `cd backend; npm run test:cobertura` | 90% sentencias, 70% ramas (falla si baja) |
 | Servicio Python | 96% | n/a | n/a | `cd python-service; pytest --cov=app` | 90% (falla si baja) |
-| Frontend (Angular) | 48,3% | 58,4% | 52,0% | `cd frontend; npx ng test --watch=false --coverage` | Solo informe |
+| Frontend (Angular) | 57,7% | 64,1% | 59,3% | `cd frontend; npx ng test --watch=false --coverage` | Solo informe |
 
 Lectura honesta:
 
 - El backend y el servicio Python están bien cubiertos porque ahí vive la lógica del negocio.
-- **El frontend está subcubierto (48%).** Las páginas con más lógica (servicios del plan, lista y comparador) sí tienen pruebas; las plantillas y la mayor parte de los estilos y componentes de presentación no. No hay pruebas de interfaz de punta a punta en un navegador (por ejemplo con Playwright): la navegación se verificó a mano en el navegador integrado y en Edge para la PWA.
+- **El frontend está menos cubierto (58%).** Las páginas con más lógica (servicios del plan, lista y comparador) sí tienen pruebas; las plantillas y la mayor parte de los estilos y componentes de presentación no. No hay pruebas de interfaz de punta a punta en un navegador (por ejemplo con Playwright): la navegación se verificó a mano en el navegador integrado y en Edge para la PWA.
 - La cobertura del backend excluye `main.ts`, `data-source.ts` y las migraciones (las migraciones se verifican con el job `migraciones`).
 
 ## 3. Tiempos de respuesta
@@ -85,6 +86,6 @@ Se compara el recomendador con una versión base (orden alfabético y selección
 
 - Pruebas de interfaz de punta a punta en navegador y en la app Android (el APK se compila en CI; no se ha probado en un dispositivo).
 - Prueba de carga y de resistencia.
-- Accesibilidad automatizada completa (Lighthouse/axe): solo se revisó el shell de la app (etiquetas, foco, contraste base, `prefers-reduced-motion`).
+- Accesibilidad: solo se corrió axe-core (detecta alrededor de un tercio de los problemas); no hay prueba con lector de pantalla ni Lighthouse (ver `docs/accesibilidad.md`).
 - `migration:revert` y los `down` de las migraciones.
 - El despliegue real en Render y la ejecución del pipeline en GitHub Actions: se validaron los pasos en local (ver `docs/pipeline-y-staging.md`), no el resultado en la nube.

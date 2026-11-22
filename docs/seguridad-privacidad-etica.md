@@ -49,8 +49,9 @@ Hay un solo rol: usuario autenticado. No existe rol administrador.
 | Servicio Python (`/scrape/search`, `/ingredients/normalize`, `/metrics`) | Solo el backend | En Render es un servicio privado (`infra/services.tf`, `render_private_service`); no tiene autenticación propia |
 
 Principio para los recursos del usuario (comidas, listas): toda consulta debe filtrar por el
-`usuarioId` del token. Hoy `GET/DELETE /api/users/me` lo cumple; los CRUD de comidas y listas
-deben seguir la misma regla al implementarse.
+`usuarioId` del token. Lo cumplen `GET/DELETE /api/users/me`, el CRUD de comidas, la lista de
+compras y el recomendador (`backend/src/meals`, `shopping-lists`, `recommendations`); lo ajeno
+responde 404 y hay pruebas e2e con dos usuarios (`test/domain.e2e-spec.ts`).
 
 Test: `backend/test/prices.e2e-spec.ts` ("exige autenticación en todas las rutas") y
 `backend/test/users.e2e-spec.ts` ("exige autenticación").
@@ -225,9 +226,10 @@ Decisiones y evidencia en [ADR-002](adr/002-fuentes-datos-web.md) y
   quedar fuera de la comparación aunque sea más barato.
 - **Precio vigente con oferta:** no se distingue el precio normal del de oferta, que puede ser
   temporal.
-- **Normalización de ingredientes:** el servicio Python solo une ingredientes con el mismo
-  nombre y unidad (ignorando mayúsculas y espacios). No reconoce sinónimos ni nombres regionales
-  ("palta" y "aguacate" quedan separados), así que la lista de compra puede repetir un producto.
+- **Normalización de ingredientes:** el servicio Python limpia el nombre, lo mapea a un término
+  del catálogo (con sinónimos y plurales, "palta" y "aguacate" son lo mismo) y convierte unidades
+  (`docs/normalizacion-de-ingredientes.md`). El mapeo es léxico: un nombre que no esté en el
+  catálogo queda sin término y no se valoriza, y hay casos ambiguos que pueden mapearse mal.
 - **Disponibilidad geográfica:** los precios y la disponibilidad pueden variar por comuna y no se
   modelan.
 

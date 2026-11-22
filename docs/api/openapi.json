@@ -17,13 +17,42 @@
             }
           }
         },
+        "summary": "Mensaje de bienvenida de la API (sin autenticaciÃ³n)",
         "tags": [
-          "App"
+          "observabilidad"
+        ]
+      }
+    },
+    "/api/metrics": {
+      "get": {
+        "description": "Valores desde el Ãºltimo arranque del servicio (viven en memoria).",
+        "operationId": "MetricsController_obtener",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "description": "Los datos enviados no son vÃ¡lidos"
+          },
+          "401": {
+            "description": "Falta el token de acceso o no es vÃ¡lido"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Tiempos de respuesta por ruta y resultado de las actualizaciones de precios",
+        "tags": [
+          "observabilidad"
         ]
       }
     },
     "/health": {
       "get": {
+        "description": "Informa la base de datos y el servicio Python. `status` es `degraded` si alguna falla.",
         "operationId": "HealthController_check",
         "parameters": [],
         "responses": {
@@ -31,8 +60,81 @@
             "description": ""
           }
         },
+        "summary": "Estado del servicio y de sus dependencias",
         "tags": [
-          "Health"
+          "observabilidad"
+        ]
+      }
+    },
+    "/api/users/me": {
+      "get": {
+        "description": "Correo, nombre y fecha de alta. Nunca incluye la contraseÃ±a ni su hash.",
+        "operationId": "UsersController_me",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Los datos enviados no son vÃ¡lidos"
+          },
+          "401": {
+            "description": "Falta el token de acceso o no es vÃ¡lido"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Datos personales que MenuSmart guarda de la cuenta",
+        "tags": [
+          "users"
+        ]
+      },
+      "delete": {
+        "description": "Exige la contraseÃ±a actual. Borra el usuario y, en cascada, sus comidas, ingredientes y listas de compra. No se puede deshacer; el token deja de servir de inmediato.",
+        "operationId": "UsersController_eliminar",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteAccountDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "400": {
+            "description": "Los datos enviados no son vÃ¡lidos"
+          },
+          "401": {
+            "description": "Falta el token de acceso o no es vÃ¡lido"
+          },
+          "403": {
+            "description": "La contraseÃ±a no coincide"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Elimina la cuenta y todos sus datos",
+        "tags": [
+          "users"
         ]
       }
     },
@@ -53,10 +155,20 @@
         "responses": {
           "201": {
             "description": ""
+          },
+          "400": {
+            "description": "Datos invÃ¡lidos (contraseÃ±a de 8 a 72 caracteres con letra y nÃºmero)"
+          },
+          "409": {
+            "description": "Ya existe una cuenta con ese correo"
+          },
+          "429": {
+            "description": "Demasiados registros desde la misma direcciÃ³n"
           }
         },
+        "summary": "Crea una cuenta y entrega un token de acceso",
         "tags": [
-          "Auth"
+          "auth"
         ]
       }
     },
@@ -77,15 +189,23 @@
         "responses": {
           "200": {
             "description": ""
+          },
+          "401": {
+            "description": "Correo o contraseÃ±a incorrectos"
+          },
+          "429": {
+            "description": "Demasiados intentos desde la misma direcciÃ³n"
           }
         },
+        "summary": "Inicia sesiÃ³n y entrega un token de acceso",
         "tags": [
-          "Auth"
+          "auth"
         ]
       }
     },
     "/api/ingredients/normalize": {
       "post": {
+        "description": "Limpia el nombre, lo mapea a un tÃ©rmino del catÃ¡logo de precios, convierte las cantidades a kg, l o un y une las lÃ­neas repetidas. Cada Ã­tem informa las reglas aplicadas. Lo resuelve el servicio Python.",
         "operationId": "IngredientsController_normalize",
         "parameters": [],
         "requestBody": {
@@ -108,10 +228,22 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Los datos enviados no son vÃ¡lidos"
+          },
+          "401": {
+            "description": "Falta el token de acceso o no es vÃ¡lido"
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Normaliza ingredientes escritos libremente",
         "tags": [
-          "Ingredients"
+          "ingredients"
         ]
       }
     },
@@ -143,6 +275,12 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Los datos enviados no son vÃ¡lidos"
+          },
+          "401": {
+            "description": "Falta el token de acceso o no es vÃ¡lido"
           }
         },
         "security": [
@@ -178,6 +316,12 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Los datos enviados no son vÃ¡lidos"
+          },
+          "401": {
+            "description": "Falta el token de acceso o no es vÃ¡lido"
           }
         },
         "security": [
@@ -214,6 +358,12 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Los datos enviados no son vÃ¡lidos"
+          },
+          "401": {
+            "description": "Falta el token de acceso o no es vÃ¡lido"
           }
         },
         "security": [
@@ -259,6 +409,12 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Los datos enviados no son vÃ¡lidos"
+          },
+          "401": {
+            "description": "Falta el token de acceso o no es vÃ¡lido"
           }
         },
         "security": [
@@ -286,6 +442,12 @@
         "responses": {
           "204": {
             "description": ""
+          },
+          "400": {
+            "description": "Los datos enviados no son vÃ¡lidos"
+          },
+          "401": {
+            "description": "Falta el token de acceso o no es vÃ¡lido"
           }
         },
         "security": [
@@ -324,6 +486,12 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Los datos enviados no son vÃ¡lidos"
+          },
+          "401": {
+            "description": "Falta el token de acceso o no es vÃ¡lido"
           }
         },
         "security": [
@@ -362,6 +530,12 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Los datos enviados no son vÃ¡lidos"
+          },
+          "401": {
+            "description": "Falta el token de acceso o no es vÃ¡lido"
           }
         },
         "security": [
@@ -401,6 +575,12 @@
         "responses": {
           "204": {
             "description": ""
+          },
+          "400": {
+            "description": "Los datos enviados no son vÃ¡lidos"
+          },
+          "401": {
+            "description": "Falta el token de acceso o no es vÃ¡lido"
           }
         },
         "security": [
@@ -421,6 +601,12 @@
         "responses": {
           "200": {
             "description": ""
+          },
+          "400": {
+            "description": "Los datos enviados no son vÃ¡lidos"
+          },
+          "401": {
+            "description": "Falta el token de acceso o no es vÃ¡lido"
           }
         },
         "security": [
@@ -462,6 +648,12 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Los datos enviados no son vÃ¡lidos"
+          },
+          "401": {
+            "description": "Falta el token de acceso o no es vÃ¡lido"
           }
         },
         "security": [
@@ -503,6 +695,12 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Los datos enviados no son vÃ¡lidos"
+          },
+          "401": {
+            "description": "Falta el token de acceso o no es vÃ¡lido"
           }
         },
         "security": [
@@ -539,6 +737,12 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Los datos enviados no son vÃ¡lidos"
+          },
+          "401": {
+            "description": "Falta el token de acceso o no es vÃ¡lido"
           }
         },
         "security": [
@@ -624,6 +828,12 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Los datos enviados no son vÃ¡lidos"
+          },
+          "401": {
+            "description": "Falta el token de acceso o no es vÃ¡lido"
           }
         },
         "security": [
@@ -652,6 +862,12 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Los datos enviados no son vÃ¡lidos"
+          },
+          "401": {
+            "description": "Falta el token de acceso o no es vÃ¡lido"
           }
         },
         "security": [
@@ -775,6 +991,12 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Los datos enviados no son vÃ¡lidos"
+          },
+          "401": {
+            "description": "Falta el token de acceso o no es vÃ¡lido"
           }
         },
         "security": [
@@ -812,6 +1034,12 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Los datos enviados no son vÃ¡lidos"
+          },
+          "401": {
+            "description": "Falta el token de acceso o no es vÃ¡lido"
           }
         },
         "security": [
@@ -842,6 +1070,12 @@
         "responses": {
           "204": {
             "description": ""
+          },
+          "400": {
+            "description": "Los datos enviados no son vÃ¡lidos"
+          },
+          "401": {
+            "description": "Falta el token de acceso o no es vÃ¡lido"
           }
         },
         "security": [
@@ -862,6 +1096,12 @@
         "responses": {
           "204": {
             "description": ""
+          },
+          "400": {
+            "description": "Los datos enviados no son vÃ¡lidos"
+          },
+          "401": {
+            "description": "Falta el token de acceso o no es vÃ¡lido"
           }
         },
         "security": [
@@ -893,20 +1133,65 @@
       }
     },
     "schemas": {
+      "ProfileDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "name",
+          "createdAt"
+        ]
+      },
+      "DeleteAccountDto": {
+        "type": "object",
+        "properties": {
+          "password": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 72,
+            "description": "ContraseÃ±a actual: confirma que quien borra la cuenta es su dueÃ±o"
+          }
+        },
+        "required": [
+          "password"
+        ]
+      },
       "RegisterDto": {
         "type": "object",
         "properties": {
           "email": {
             "type": "string",
-            "format": "email"
+            "maxLength": 254,
+            "format": "email",
+            "example": "ana@correo.cl"
           },
           "password": {
             "type": "string",
-            "minLength": 6
+            "minLength": 8,
+            "maxLength": 72,
+            "pattern": "[A-Za-z]",
+            "description": "Entre 8 y 72 caracteres, con al menos una letra y un nÃºmero"
           },
           "name": {
             "type": "string",
-            "minLength": 2
+            "minLength": 2,
+            "maxLength": 100,
+            "example": "Ana"
           }
         },
         "required": [
@@ -920,10 +1205,14 @@
         "properties": {
           "email": {
             "type": "string",
-            "format": "email"
+            "maxLength": 254,
+            "format": "email",
+            "example": "ana@correo.cl"
           },
           "password": {
-            "type": "string"
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 72
           }
         },
         "required": [

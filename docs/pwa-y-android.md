@@ -87,12 +87,10 @@ Las acciones están fijadas por SHA de commit, con la versión en un comentario.
 
 ## Pasos manuales pendientes
 
-1. **URL de la API en Android.** En producción `environment.apiUrl` vale `/api` (mismo origen). Dentro de la app nativa el origen es `https://localhost`, así que `/api` no llega al backend. Hay que compilar con la URL absoluta y HTTPS del backend desplegado (por ejemplo con una configuración de build `android` que reemplace `environment.prod.ts`). Sin esto el APK abre pero no puede iniciar sesión.
-2. **CORS en el backend.** Con la URL absoluta la app nativa hace peticiones entre orígenes. El backend (`backend/src/main.ts`) no habilita CORS hoy: hay que permitir al menos `https://localhost`.
-3. **Cabeceras de caché en nginx.** Conviene servir `ngsw.json`, `ngsw-worker.js` y `index.html` con `Cache-Control: no-cache` para que las actualizaciones se detecten rápido.
-4. **Probar en un dispositivo real** (o emulador) y comprobar el modo sin conexión, la cámara y la galería.
-5. **Firma de release.** El workflow solo genera un APK de depuración. Para publicar en Play Store hace falta un keystore propio, guardado como secreto de GitHub y fuera del repositorio, y un `assembleRelease` o `bundleRelease`.
-6. **Auditoría Lighthouse** (PWA y accesibilidad) sobre el build servido por nginx, para dejar evidencia en la entrega.
+1. **URL de la API en Android.** Definir la variable de GitHub `STAGING_BACKEND_URL` (la misma del despliegue a staging): el workflow `android.yml` la usa para compilar con la configuración `android` (ver la sección "URL del backend en la app Android" más abajo). Sin ella el APK se compila pero no puede conectarse a ningún backend.
+2. **Probar en un dispositivo real** (o emulador) y comprobar el modo sin conexión, la cámara y la galería.
+3. **Firma de release.** El workflow solo genera un APK de depuración. Para publicar en Play Store hace falta un keystore propio, guardado como secreto de GitHub y fuera del repositorio, y un `assembleRelease` o `bundleRelease`.
+4. **Auditoría Lighthouse** (PWA y accesibilidad) sobre el build servido por nginx, para dejar evidencia en la entrega.
 
 ## URL del backend en la app Android
 

@@ -58,9 +58,9 @@ nuevo tag y cambiar ambos.
 
 ### Pruebas que exige la entrega
 
-**1. Pruebas de Python.** El job `python-service` corre `pytest` completo (76 pruebas:
+**1. Pruebas de Python.** El job `python-service` corre `pytest` completo (más de 140 pruebas:
 salud, normalización de ingredientes, endpoint `/scrape/search`, parser, normalizador,
-robots.txt y servicio del scraper).
+robots.txt, servicio del scraper, observabilidad), con un mínimo de 90% de cobertura.
 
 **2. Integración NestJS y FastAPI.** El job `integracion-python` levanta el servicio
 Python real con `uvicorn tests.servidor_integracion:app` y ejecuta
