@@ -179,6 +179,27 @@ describe('RecomendacionesService', () => {
     });
   });
 
+  describe('cargarTrasPausa()', () => {
+    afterEach(() => vi.useRealTimers());
+
+    it('junta varios cambios seguidos del deslizador en una sola consulta', async () => {
+      vi.useFakeTimers();
+      servicio.fijarPesoCosto(55);
+      servicio.cargarTrasPausa();
+      vi.advanceTimersByTime(100);
+      servicio.fijarPesoCosto(50);
+      servicio.cargarTrasPausa();
+      vi.advanceTimersByTime(100);
+      http.expectNone(esLista);
+
+      vi.advanceTimersByTime(300);
+      const peticion = http.expectOne(esLista);
+      expect(peticion.request.params.get('pesoCosto')).toBe('50');
+      peticion.flush(respuesta());
+      await vi.waitFor(() => expect(servicio.estado()).toBe('listo'));
+    });
+  });
+
   describe('aceptar()', () => {
     it('envía receta, día y semana, recarga el plan y vuelve a pedir las sugerencias', async () => {
       const primera = servicio.cargar();

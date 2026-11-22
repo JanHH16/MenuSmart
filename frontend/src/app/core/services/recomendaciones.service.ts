@@ -98,6 +98,7 @@ export const PESO_COSTO_INICIAL = 60;
 export const LIMITE_INICIAL = 12;
 export const LIMITE_MAXIMO = 30;
 const PASO_LIMITE = 12;
+const PAUSA_PESO_MS = 250;
 
 interface IngredienteApi {
   termino: string;
@@ -169,6 +170,7 @@ export class RecomendacionesService {
 
   private claveCargada: string | null = null;
   private consulta = 0;
+  private pausaPeso: ReturnType<typeof setTimeout> | undefined;
 
   readonly sugerencias = this._sugerencias.asReadonly();
   readonly resumen = this._resumen.asReadonly();
@@ -227,6 +229,15 @@ export class RecomendacionesService {
     const entero = Math.round(Number(valor));
     this._pesoCosto.set(Number.isFinite(entero) ? Math.min(100, Math.max(0, entero)) : PESO_COSTO_INICIAL);
     this.guardarComodidades();
+  }
+
+  /**
+   * Consulta con el peso ya elegido, pero tras una pausa corta: con las flechas del teclado cada
+   * paso del deslizador dispara este método y solo interesa la última posición.
+   */
+  cargarTrasPausa(): void {
+    clearTimeout(this.pausaPeso);
+    this.pausaPeso = setTimeout(() => void this.cargar(), PAUSA_PESO_MS);
   }
 
   async activarAdaptacion(activa: boolean): Promise<void> {
@@ -303,6 +314,7 @@ export class RecomendacionesService {
     if (this._ocupada()) {
       return false;
     }
+    const nombre = this._sugerencias().find((s) => s.recetaId === recetaId)?.nombre;
     this._ocupada.set(recetaId);
     this._mensaje.set(null);
     try {
@@ -313,6 +325,10 @@ export class RecomendacionesService {
       return false;
     }
     this._sugerencias.update((lista) => lista.filter((s) => s.recetaId !== recetaId));
+    this._mensaje.set({
+      tipo: 'ok',
+      texto: `Descartamos "${nombre ?? 'la receta'}". No te la volveremos a sugerir.`,
+    });
     await this.cargar();
     this._ocupada.set(null);
     return true;
