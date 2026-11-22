@@ -17,6 +17,11 @@ const routes: Routes = [
     path: 'nueva',
     loadChildren: () =>
       import('./agregar-comida/agregar-comida.module').then((m) => m.AgregarComidaPageModule),
+  },
+  {
+    path: 'sugerencias',
+    loadChildren: () =>
+      import('./sugerencias/sugerencias.module').then((m) => m.SugerenciasPageModule),
   }
 ];
 

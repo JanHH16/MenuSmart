@@ -1,18 +1,26 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 
 <head>
   <meta charset="utf-8" />
-  <title>Ionic App</title>
+  <title>MenuSmart</title>
 
   <base href="/" />
 
   <meta name="color-scheme" content="light dark" />
-  <meta name="viewport" content="viewport-fit=cover, width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <!-- Sin maximum-scale ni user-scalable=no: el usuario debe poder ampliar la
+       pagina (WCAG 1.4.4 Cambio de tamano del texto). -->
+  <meta name="viewport" content="viewport-fit=cover, width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Planifica tus comidas, arma la lista de compras y compara precios de supermercados." />
   <meta name="format-detection" content="telephone=no" />
   <meta name="msapplication-tap-highlight" content="no" />
 
   <link rel="icon" type="image/png" href="assets/icon/favicon.png" />
+
+  <!-- PWA: manifiesto, color de la barra del navegador e icono para iOS -->
+  <link rel="manifest" href="manifest.webmanifest" />
+  <meta name="theme-color" content="#1f3a93" />
+  <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png" />
 
   <!-- Tipografia del sistema de diseño: Caveat (contenido "escrito a mano" por
        el usuario) y Space Mono (datos/precios con look de boleta impresa) -->
@@ -23,13 +31,16 @@
     rel="stylesheet"
   />
 
-  <!-- add to homescreen for ios -->
+  <!-- Agregar a la pantalla de inicio (iOS y Android) -->
   <meta name="mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="MenuSmart" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
 </head>
 
 <body>
   <app-root></app-root>
+  <noscript>MenuSmart necesita JavaScript para funcionar.</noscript>
 </body>
 
 </html>

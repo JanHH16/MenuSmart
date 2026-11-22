@@ -1,3 +1,61 @@
+<!-- Avisos, generar/regenerar y costo estimado. Se reutiliza en desktop y mobile. -->
+<ng-template #acciones>
+  <div class="ms-lista-acciones">
+    @if (mensaje()) {
+      <p class="ms-lista-aviso" role="alert">{{ mensaje() }}</p>
+    }
+    @if (estado() === 'listo') {
+      @if (resumen(); as r) {
+        <div class="ms-lista-costo" role="status">
+          @if (r.itemsComparables > 0) {
+            <p>
+              Costo estimado: Jumbo {{ formatPrecio(r.totalJumbo) }} · Santa Isabel
+              {{ formatPrecio(r.totalSantaIsabel) }}
+              @if (r.masBarata) {
+                · conviene {{ r.masBarata }}, ahorras {{ formatPrecio(r.ahorro) }}
+              } @else {
+                · las dos tiendas salen igual
+              }
+            </p>
+            <p class="ms-lista-costo-nota">
+              Solo suma los {{ r.itemsComparables }} de {{ r.itemsTotal }} productos con precio en ambas
+              tiendas.
+            </p>
+          } @else {
+            <p class="ms-lista-costo-nota">
+              Todavía no hay precios para estimar el costo. Actualízalos en el comparador.
+            </p>
+          }
+        </div>
+      }
+      <button type="button" class="ms-lista-regenerar" [disabled]="generando()" (click)="generar()">
+        {{ generando() ? 'Actualizando lista...' : 'Volver a generar desde mi plan' }}
+      </button>
+    }
+  </div>
+</ng-template>
+
+<!-- Lo que se muestra mientras no hay lista: cargando, error o aún sin generar. -->
+<ng-template #sinLista>
+  <div class="ms-lista-vacia">
+    @if (estado() === 'cargando') {
+      <p role="status">Cargando tu lista...</p>
+    } @else if (estado() === 'error') {
+      <p role="alert">No se pudo cargar la lista de compras.</p>
+      <button type="button" class="ms-lista-regenerar" (click)="reintentar()">Reintentar</button>
+    } @else {
+      <p>
+        Todavía no generaste la lista de esta semana. Se arma sola con los ingredientes de tus comidas
+        ({{ totalComidas() }} planeadas).
+      </p>
+      <button type="button" class="ms-lista-regenerar" [disabled]="generando()" (click)="generar()">
+        {{ generando() ? 'Generando...' : 'Generar lista desde mi plan' }}
+      </button>
+      <button type="button" class="ms-lista-regenerar" (click)="irAlPlan()">Ir a mi plan semanal</button>
+    }
+  </div>
+</ng-template>
+
 @if (esDesktop$ | async) {
   <!-- Desktop (Figma "D5. Lista de compras"): columnas por categoría (look
        "nota arrancada", ligeramente rotadas) + barra de progreso abajo — NO
@@ -8,7 +66,7 @@
         <div>
           <h1 class="ms-titulo-desktop">lista de esta semana</h1>
           <p class="ms-subtitulo-desktop">
-            Generada desde {{ totalComidas }} comidas · {{ totalItems }} productos · sin ingredientes duplicados
+            Generada desde {{ totalComidas() }} comidas · {{ totalItems() }} productos · sin ingredientes duplicados
           </p>
         </div>
         <button type="button" class="ms-btn-figma ms-btn-figma--primario ms-lista-comparar" (click)="irAComparador()">
@@ -16,8 +74,11 @@
         </button>
       </header>
 
+      <ng-container *ngTemplateOutlet="acciones"></ng-container>
+
+      @if (estado() === 'listo') {
       <div class="ms-lista-columnas">
-        @for (categoria of categorias; track categoria.nombre; let i = $index) {
+        @for (categoria of categorias(); track categoria.nombre; let i = $index) {
           <div class="ms-lista-grupo-wrap">
             <span class="ms-cinta ms-lista-grupo-cinta" [style.transform]="'rotate(' + rotaciones[i % 4] * 3 + 'deg)'"></span>
             <div class="ms-card-desktop ms-lista-grupo" [style.transform]="'rotate(' + rotaciones[i % 4] + 'deg)'">
@@ -26,7 +87,7 @@
 
               @for (item of categoria.items; track item.id) {
                 <label class="ms-lista-item">
-                  <input type="checkbox" class="ms-checkbox-figma" [(ngModel)]="item.comprado" />
+                  <input type="checkbox" class="ms-checkbox-figma" [checked]="item.comprado" (change)="alternar(item.id)" />
                   <span class="ms-lista-item-nombre" [class.ms-lista-item-nombre--comprado]="item.comprado">
                     {{ item.nombre }}
                   </span>
@@ -41,12 +102,15 @@
       <div class="ms-card-desktop ms-lista-progreso">
         <div>
           <span class="ms-label-desktop">En el carro</span>
-          <p class="ms-lista-progreso-valor">{{ itemsComprados }} de {{ totalItems }} productos</p>
+          <p class="ms-lista-progreso-valor">{{ itemsComprados() }} de {{ totalItems() }} productos</p>
         </div>
         <div class="ms-lista-progreso-fondo">
-          <div class="ms-lista-progreso-barra" [style.width.%]="progresoPorcentaje"></div>
+          <div class="ms-lista-progreso-barra" [style.width.%]="progresoPorcentaje()"></div>
         </div>
       </div>
+      } @else {
+        <ng-container *ngTemplateOutlet="sinLista"></ng-container>
+      }
     </div>
   </ion-content>
 } @else {
@@ -59,23 +123,26 @@
   <ion-content class="ion-padding">
     <!-- Mismo "En el carro" que la tarjeta de progreso desktop, en vez del
          resumen "N comidas · N productos". -->
+    <ng-container *ngTemplateOutlet="acciones"></ng-container>
+
+    @if (estado() === 'listo') {
     <div class="ms-lista-progreso-mobile">
       <div class="ms-lista-progreso-mobile-textos">
         <span class="ms-label-secundario">En el carro</span>
-        <span class="ms-lista-progreso-mobile-valor">{{ itemsComprados }} de {{ totalItems }} productos</span>
+        <span class="ms-lista-progreso-mobile-valor">{{ itemsComprados() }} de {{ totalItems() }} productos</span>
       </div>
       <div class="ms-lista-progreso-fondo ms-lista-progreso-fondo--mobile">
-        <div class="ms-lista-progreso-barra" [style.width.%]="progresoPorcentaje"></div>
+        <div class="ms-lista-progreso-barra" [style.width.%]="progresoPorcentaje()"></div>
       </div>
     </div>
 
     <div class="ms-card-libreta ms-lista-hoja">
-      @for (categoria of categorias; track categoria.nombre) {
+      @for (categoria of categorias(); track categoria.nombre) {
         <h2 class="ms-categoria-titulo">{{ categoria.nombre | uppercase }}</h2>
 
         @for (item of categoria.items; track item.id) {
           <label class="ms-item-row">
-            <ion-checkbox [(ngModel)]="item.comprado"></ion-checkbox>
+            <ion-checkbox [checked]="item.comprado" [attr.aria-label]="item.nombre" (ionChange)="alternar(item.id)"></ion-checkbox>
             <span class="ms-item-nombre" [class.ms-item-comprado]="item.comprado">
               {{ item.nombre }}
             </span>
@@ -86,8 +153,11 @@
 
       <ion-button expand="block" class="ms-btn-primary" (click)="irAComparador()">
         Comparar precios
-        <ion-icon slot="end" name="arrow-forward-outline"></ion-icon>
+        <ion-icon slot="end" name="arrow-forward-outline" aria-hidden="true"></ion-icon>
       </ion-button>
     </div>
+    } @else {
+      <ng-container *ngTemplateOutlet="sinLista"></ng-container>
+    }
   </ion-content>
 }

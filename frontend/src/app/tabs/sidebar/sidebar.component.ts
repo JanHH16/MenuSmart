@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { AuthService } from '../../core/services/auth.service';
 
 type SidebarIcono = 'plan' | 'list' | 'receipt' | 'user';
 
@@ -21,6 +22,12 @@ interface SidebarItem {
   standalone: false,
 })
 export class SidebarComponent {
+  private readonly authService = inject(AuthService);
+
+  // Se muestra a partir del correo del token, igual que en el perfil.
+  readonly nombre = this.authService.getEmail()?.split('@')[0] ?? 'Tu cuenta';
+  readonly iniciales = this.nombre.slice(0, 2).toUpperCase();
+
   readonly items: SidebarItem[] = [
     { label: 'Plan semanal', icono: 'plan', href: '/tabs/plan-semanal' },
     { label: 'Lista de compras', icono: 'list', href: '/tabs/lista-compras' },

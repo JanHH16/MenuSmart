@@ -1,33 +1,38 @@
 from fastapi import APIRouter
 
+from app.normalizacion import IngredienteEntrada, normalizar_ingredientes
 from app.schemas import NormalizedIngredient, NormalizeRequest, NormalizeResponse
 
 router = APIRouter(prefix="/ingredients", tags=["ingredients"])
 
 
-def _normalize_name(name: str) -> str:
-    return " ".join(name.strip().lower().split())
-
-
 @router.post("/normalize", response_model=NormalizeResponse)
 def normalize_ingredients(payload: NormalizeRequest) -> NormalizeResponse:
-    """Combina ingredientes repetidos (mismo nombre + unidad) sumando sus cantidades.
+    """Normaliza ingredientes escritos por el usuario para poder sumarlos y valorizarlos.
 
-    Esto es lo que permite generar una lista de compras sin ingredientes duplicados
-    cuando el mismo producto aparece en varias comidas de la semana.
+    Limpia el nombre, lo mapea a un termino del catalogo de precios (por nombre exacto,
+    singular o sinonimo), convierte las cantidades a kg, l o un y une las lineas repetidas.
+    Cada item informa las reglas aplicadas para poder explicar el resultado. Es lo que permite
+    generar la lista de compras y estimar su costo en cada supermercado.
     """
-    merged: dict[tuple[str, str], float] = {}
-    for item in payload.ingredients:
-        key = (_normalize_name(item.name), item.unit.strip().lower())
-        merged[key] = merged.get(key, 0) + item.quantity
-
-    normalized = [
-        NormalizedIngredient(name=name, quantity=round(quantity, 3), unit=unit)
-        for (name, unit), quantity in merged.items()
+    normalizados = normalizar_ingredientes(
+        [IngredienteEntrada(i.name, i.quantity, i.unit) for i in payload.ingredients]
+    )
+    items = [
+        NormalizedIngredient(
+            name=n.nombre,
+            quantity=n.cantidad,
+            unit=n.unidad,
+            term=n.termino,
+            category=n.categoria,
+            rules=n.reglas,
+            original_names=n.nombres_originales,
+            merged_lines=n.lineas_unidas,
+        )
+        for n in normalizados
     ]
-
     return NormalizeResponse(
-        items=normalized,
+        items=items,
         original_count=len(payload.ingredients),
-        normalized_count=len(normalized),
+        normalized_count=len(items),
     )

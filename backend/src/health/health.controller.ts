@@ -1,4 +1,6 @@
 import { Controller, Get, Logger } from '@nestjs/common';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { SkipThrottle } from '@nestjs/throttler';
 import { HttpService } from '@nestjs/axios';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
@@ -9,6 +11,9 @@ interface DependencyStatus {
   message?: string;
 }
 
+// Orquestadores y monitores lo consultan seguido: no debe contar para el limite.
+@SkipThrottle()
+@ApiTags('observabilidad')
 @Controller('health')
 export class HealthController {
   private readonly logger = new Logger(HealthController.name);
@@ -19,6 +24,10 @@ export class HealthController {
   ) {}
 
   @Get()
+  @ApiOperation({
+    summary: 'Estado del servicio y de sus dependencias',
+    description: 'Informa la base de datos y el servicio Python. `status` es `degraded` si alguna falla.',
+  })
   async check() {
     const [database, pythonService] = await Promise.all([
       this.checkDatabase(),

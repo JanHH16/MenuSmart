@@ -4,6 +4,11 @@ import * as bcrypt from 'bcrypt';
 import { UsersService } from '../users/users.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { BCRYPT_RONDAS } from './auth.constants';
+
+// Hash de una contraseña inexistente: sirve para gastar el mismo tiempo cuando el correo no
+// existe y asi el tiempo de respuesta no delata que cuentas estan registradas.
+const HASH_SENUELO = bcrypt.hashSync('contraseña-senuelo-sin-uso', BCRYPT_RONDAS);
 
 @Injectable()
 export class AuthService {
@@ -17,7 +22,7 @@ export class AuthService {
     if (existing) {
       throw new ConflictException('El email ya está registrado');
     }
-    const passwordHash = await bcrypt.hash(dto.password, 10);
+    const passwordHash = await bcrypt.hash(dto.password, BCRYPT_RONDAS);
     const user = await this.usersService.create({
       email: dto.email,
       passwordHash,
@@ -28,11 +33,9 @@ export class AuthService {
 
   async login(dto: LoginDto) {
     const user = await this.usersService.findByEmail(dto.email);
-    if (!user) {
-      throw new UnauthorizedException('Credenciales inválidas');
-    }
-    const passwordMatches = await bcrypt.compare(dto.password, user.passwordHash);
-    if (!passwordMatches) {
+    // Siempre se compara, exista o no el usuario, y el mensaje es el mismo en ambos casos.
+    const passwordMatches = await bcrypt.compare(dto.password, user?.passwordHash ?? HASH_SENUELO);
+    if (!user || !passwordMatches) {
       throw new UnauthorizedException('Credenciales inválidas');
     }
     return this.buildToken(user.id, user.email);

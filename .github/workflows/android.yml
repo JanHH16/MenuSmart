@@ -1,0 +1,75 @@
+name: Android
+
+# Compila el APK de depuracion del proyecto Capacitor (frontend/android) y lo
+# sube como artefacto. Es independiente de ci.yml: no lo reemplaza ni lo
+# modifica.
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  apk-debug:
+    name: APK de depuracion
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Obtener el codigo fuente
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Configurar Java 21
+        uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6.3.0
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: gradle
+
+      - name: Instalar dependencias (reproducible)
+        working-directory: frontend
+        run: npm ci
+
+      - name: Configurar la URL del backend para la app nativa
+        working-directory: frontend
+        env:
+          BACKEND_URL: ${{ vars.STAGING_BACKEND_URL }}
+        run: |
+          if [ -z "$BACKEND_URL" ]; then
+            echo "::warning::STAGING_BACKEND_URL no esta definida: el APK se compila pero no podra conectarse a ningun backend."
+          else
+            sed -i "s#https://URL_DEL_BACKEND_NO_CONFIGURADA#${BACKEND_URL%/}#" src/environments/environment.android.ts
+          fi
+
+      - name: Build de la aplicacion web (configuracion android)
+        working-directory: frontend
+        run: npx ng build --configuration android
+
+      - name: Sincronizar el proyecto Android (Capacitor)
+        working-directory: frontend
+        run: npx cap sync android
+
+      - name: Compilar APK de depuracion
+        working-directory: frontend/android
+        run: |
+          chmod +x ./gradlew
+          ./gradlew assembleDebug --no-daemon
+
+      - name: Subir APK como artefacto
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: menusmart-debug-apk
+          path: frontend/android/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
+          retention-days: 14

@@ -23,6 +23,24 @@ export class ListaCompraItem {
   @Column()
   unidad: string;
 
+  /** Termino del catalogo de precios al que se mapeo el ingrediente (null si no hubo). */
+  @Column({ type: 'varchar', nullable: true })
+  terminoCatalogo: string | null;
+
+  @Column({ type: 'varchar', nullable: true })
+  categoria: string | null;
+
+  @Column({ default: false })
+  comprado: boolean;
+
+  /** Reglas de normalizacion aplicadas, para explicarle al usuario como se llego a la cantidad. */
+  @Column({ type: 'jsonb', default: () => "'[]'" })
+  reglas: string[];
+
+  /** Nombres tal como los escribio el usuario en cada comida. */
+  @Column({ type: 'jsonb', default: () => "'[]'" })
+  nombresOriginales: string[];
+
   @ManyToOne(() => Producto, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'productoId' })
   producto: Producto | null;

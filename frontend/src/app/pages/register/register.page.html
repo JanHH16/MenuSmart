@@ -4,6 +4,10 @@
      (eso abortaba la navegación a /register). Por eso van repetidos dentro
      de cada formulario; este template solo tiene errores y botón. -->
 <ng-template #erroresYSubmit>
+  @if (form.get('password')?.dirty && form.get('password')?.invalid) {
+    <p class="ms-error">✕ La contraseña debe tener entre 8 y 72 caracteres, con letras y números</p>
+  }
+
   @if (form.get('confirmarContrasena')?.touched && form.hasError('passwordsNoCoinciden')) {
     <p class="ms-error">✕ Las contraseñas no coinciden</p>
   }
@@ -25,7 +29,7 @@
     <ion-toolbar>
       <ion-buttons slot="start">
         <ion-button fill="clear" class="ms-back-link" routerLink="/login">
-          <ion-icon name="chevron-back-outline" slot="start"></ion-icon>
+          <ion-icon name="chevron-back-outline" slot="start" aria-hidden="true"></ion-icon>
           Volver
         </ion-button>
       </ion-buttons>
@@ -106,7 +110,7 @@
 
       <div class="ms-auth-desktop-panel">
         <ion-button fill="clear" class="ms-back-link ms-auth-back-desktop" routerLink="/login">
-          <ion-icon name="chevron-back-outline" slot="start"></ion-icon>
+          <ion-icon name="chevron-back-outline" slot="start" aria-hidden="true"></ion-icon>
           Volver
         </ion-button>
 

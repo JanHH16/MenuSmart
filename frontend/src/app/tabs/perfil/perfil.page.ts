@@ -1,8 +1,10 @@
-import { Component, inject } from '@angular/core';
+import { Component, OnInit, computed, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { ToastController } from '@ionic/angular/lazy';
 import { AuthService } from '../../core/services/auth.service';
 import { LayoutService } from '../../core/services/layout.service';
+import { ListaComprasService } from '../../core/services/lista-compras.service';
+import { PlanSemanalService } from '../../core/services/plan-semanal.service';
 
 interface PerfilOpcion {
   label: string;
@@ -15,20 +17,27 @@ interface PerfilOpcion {
   styleUrls: ['./perfil.page.scss'],
   standalone: false,
 })
-export class PerfilPage {
+export class PerfilPage implements OnInit {
   private readonly layoutService = inject(LayoutService);
+  private readonly planSemanalService = inject(PlanSemanalService);
+  private readonly listaComprasService = inject(ListaComprasService);
 
   readonly esDesktop$ = this.layoutService.esDesktop$;
 
-  // TODO: reemplazar por datos reales cuando exista un endpoint de perfil
-  // en el backend (GET /api/users/me). Por ahora es solo la vista.
-  readonly semanasPlaneadas = 12;
-  readonly nombre = 'Usuario Demo';
-  readonly email = 'usuario@correo.cl';
-  // Estadísticas y preferencias que muestra la tarjeta desktop de Figma
-  // ("D7. Perfil"); también mock hasta que exista el endpoint de perfil.
-  readonly comidasPlaneadas = 12;
-  readonly formatoAhorro = '$4.850';
+  private readonly authService = inject(AuthService);
+
+  // El correo sale del token; el nombre se muestra a partir de él hasta que el perfil se lea
+  // de GET /api/users/me.
+  readonly email = this.authService.getEmail() ?? '';
+  readonly nombre = this.email ? this.email.split('@')[0] : 'Tu cuenta';
+  readonly iniciales = this.nombre.slice(0, 2).toUpperCase();
+
+  // Cifras reales de la semana que se está viendo.
+  readonly comidasPlaneadas = this.planSemanalService.totalComidas;
+  readonly ahorroEstimado = computed(() => {
+    const ahorro = this.listaComprasService.resumen()?.ahorro ?? 0;
+    return ahorro > 0 ? `$${ahorro.toLocaleString('es-CL')}` : '-';
+  });
   readonly preferenciasDesktop = ['Preferencias alimentarias', 'Supermercados favoritos', 'Presupuesto semanal'];
 
   readonly opciones: PerfilOpcion[] = [
@@ -37,9 +46,13 @@ export class PerfilPage {
     { label: 'Notificaciones', icon: 'notifications-outline' },
   ];
 
-  private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly toastCtrl = inject(ToastController);
+
+  ngOnInit(): void {
+    void this.planSemanalService.cargar();
+    void this.listaComprasService.cargar();
+  }
 
   logout(): void {
     this.authService.logout();

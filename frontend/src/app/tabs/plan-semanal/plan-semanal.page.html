@@ -1,3 +1,15 @@
+<!-- Estado de carga del plan: se reutiliza en desktop y mobile. -->
+<ng-template #estadoSemana>
+  @if (estado() === 'cargando') {
+    <p class="ms-plan-estado" role="status">Cargando tu semana...</p>
+  } @else if (estado() === 'error') {
+    <p class="ms-plan-estado" role="alert">
+      No se pudo cargar tu semana.
+      <button type="button" class="ms-plan-estado-reintentar" (click)="reintentar()">Reintentar</button>
+    </p>
+  }
+</ng-template>
+
 @if (esDesktop$ | async) {
   <!-- Desktop (Figma "D3. Plan semanal"): 7 columnas lado a lado (una por
        día), con "+ agregar comida" y el selector de semana arriba — NO la
@@ -7,17 +19,22 @@
       <header class="ms-plan-desktop-header">
         <div>
           <h1 class="ms-titulo-desktop">tu semana</h1>
-          <p class="ms-subtitulo-desktop">Toca una comida para editarla</p>
+          <div class="ms-plan-desktop-subtitulo">
+            <p class="ms-subtitulo-desktop">Toca una comida para editarla</p>
+            <button type="button" class="ms-btn-figma ms-btn-figma--secundario ms-plan-sugerencias" (click)="verSugerencias()">
+              Sugerencias
+            </button>
+          </div>
         </div>
 
         <div class="ms-plan-desktop-header-actions">
           <div class="ms-semana-selector">
-            <button type="button" class="ms-icon-btn" aria-label="Semana anterior">
-              <ion-icon name="chevron-back-outline"></ion-icon>
+            <button type="button" class="ms-icon-btn" aria-label="Semana anterior" (click)="cambiarSemana(-1)">
+              <ion-icon aria-hidden="true" name="chevron-back-outline"></ion-icon>
             </button>
-            <span class="ms-semana-selector-rango">{{ rangoSemana }}</span>
-            <button type="button" class="ms-icon-btn" aria-label="Semana siguiente">
-              <ion-icon name="chevron-forward-outline"></ion-icon>
+            <span class="ms-semana-selector-rango">{{ rangoSemana() }}</span>
+            <button type="button" class="ms-icon-btn" aria-label="Semana siguiente" (click)="cambiarSemana(1)">
+              <ion-icon aria-hidden="true" name="chevron-forward-outline"></ion-icon>
             </button>
           </div>
 
@@ -27,8 +44,10 @@
         </div>
       </header>
 
+      <ng-container *ngTemplateOutlet="estadoSemana"></ng-container>
+
       <div class="ms-plan-columnas">
-        @for (dia of semana; track dia.numero) {
+        @for (dia of semana(); track dia.numero) {
           <div class="ms-dia-columna" [class.ms-dia-columna--hoy]="dia.esHoy">
             <span class="ms-dia-columna-nombre">{{ dia.nombre }}</span>
             <span class="ms-dia-columna-numero">{{ dia.numero }}</span>
@@ -85,16 +104,18 @@
       </header>
 
       <div class="ms-semana-selector ms-plan-mobile-semana">
-        <button type="button" class="ms-icon-btn" aria-label="Semana anterior">
-          <ion-icon name="chevron-back-outline"></ion-icon>
+        <button type="button" class="ms-icon-btn" aria-label="Semana anterior" (click)="cambiarSemana(-1)">
+          <ion-icon aria-hidden="true" name="chevron-back-outline"></ion-icon>
         </button>
-        <span class="ms-semana-selector-rango">{{ rangoSemana }}</span>
-        <button type="button" class="ms-icon-btn" aria-label="Semana siguiente">
-          <ion-icon name="chevron-forward-outline"></ion-icon>
+        <span class="ms-semana-selector-rango">{{ rangoSemana() }}</span>
+        <button type="button" class="ms-icon-btn" aria-label="Semana siguiente" (click)="cambiarSemana(1)">
+          <ion-icon aria-hidden="true" name="chevron-forward-outline"></ion-icon>
         </button>
       </div>
 
-      @for (dia of semana; track dia.numero) {
+      <ng-container *ngTemplateOutlet="estadoSemana"></ng-container>
+
+      @for (dia of semana(); track dia.numero) {
         <div class="ms-plan-dia" [class.ms-plan-dia--hoy]="dia.esHoy">
           <div class="ms-plan-dia-fecha">
             <span class="ms-plan-dia-corto">{{ dia.nombre.slice(0, 3) }}</span>
@@ -123,6 +144,15 @@
          derecha, en vez de un FAB circular. -->
     <button slot="fixed" type="button" class="ms-nota-adhesiva ms-plan-mobile-agregar" (click)="agregarComida()">
       + agregar comida
+    </button>
+
+    <button
+      slot="fixed"
+      type="button"
+      class="ms-btn-figma ms-btn-figma--secundario ms-plan-mobile-sugerencias"
+      (click)="verSugerencias()"
+    >
+      Sugerencias
     </button>
   </ion-content>
 }

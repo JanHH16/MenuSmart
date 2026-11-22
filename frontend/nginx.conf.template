@@ -1,0 +1,43 @@
+# Plantilla de nginx: la imagen oficial (nginx:alpine) ejecuta envsubst sobre
+# /etc/nginx/templates/*.template al arrancar y escribe el resultado en
+# /etc/nginx/conf.d/. Solo se sustituye BACKEND_URL (ver NGINX_ENVSUBST_FILTER
+# en el Dockerfile); las variables propias de nginx ($host, $scheme, etc.) quedan
+# intactas.
+#
+# BACKEND_URL: origen del backend NestJS, sin barra final y sin el prefijo /api.
+#   Docker Compose: http://backend:3000 (valor por defecto, nombre del servicio)
+#   Render:         https://<servicio-backend>.onrender.com (URL publica)
+server {
+    listen 80;
+    server_name _;
+
+    root /usr/share/nginx/html;
+    index index.html;
+
+    # Proxy hacia el backend NestJS.
+    location /api/ {
+        proxy_pass ${BACKEND_URL}/api/;
+
+        # Host del destino ($proxy_host) y no el del cliente: Render enruta por
+        # Host, y con el del frontend la peticion no llegaria al backend.
+        proxy_set_header Host $proxy_host;
+        # SNI para destinos https (en http no tiene efecto).
+        proxy_ssl_server_name on;
+
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # El service worker y los archivos que lo describen deben revalidarse siempre: si el
+    # navegador los guarda en cache, una version nueva de la app tarda dias en llegar.
+    location ~* ^/(ngsw\.json|ngsw-worker\.js|safety-worker\.js|worker-basic\.min\.js|index\.html|manifest\.webmanifest)$ {
+        add_header Cache-Control "no-cache";
+        try_files $uri =404;
+    }
+
+    # SPA de Angular: cualquier ruta no encontrada cae en index.html
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}

@@ -98,7 +98,7 @@
 }
 
 .ms-text-secondary {
-  color: var(--ms-lapiz);
+  color: var(--ms-texto-suave);
 }
 
 // Etiqueta pequeña en mayúsculas (nombres de sección, "N items", etc.)
@@ -106,7 +106,7 @@
   text-transform: uppercase;
   font-size: 0.75rem;
   letter-spacing: 0.05em;
-  color: var(--ms-lapiz);
+  color: var(--ms-texto-suave);
 }
 
 // Título de página chico puesto al lado (no como slot de ion-title) en
@@ -117,7 +117,7 @@
   text-transform: uppercase;
   font-size: 0.75rem;
   letter-spacing: 0.05em;
-  color: var(--ms-lapiz);
+  color: var(--ms-texto-suave);
 }
 
 .ms-text-ahorro {
@@ -229,12 +229,12 @@
     text-transform: uppercase;
     font-size: 0.75rem;
     letter-spacing: 0.05em;
-    color: var(--ms-lapiz);
+    color: var(--ms-texto-suave);
   }
 }
 
 .ms-error {
-  color: var(--ms-margen-rojo);
+  color: var(--ion-color-danger);
   font-size: 0.9rem;
   margin: 4px 0 12px;
 }
@@ -638,7 +638,7 @@
   margin: 4px 0 0;
   font-family: var(--ms-font-boleta);
   font-size: 12px;
-  color: var(--ms-lapiz);
+  color: var(--ms-texto-suave);
 }
 
 // Botón circular con ícono (Figma: iconBtn) — papel con borde de tinta.
@@ -710,7 +710,7 @@
   line-height: 15px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--ms-lapiz);
+  color: var(--ms-texto-suave);
 }
 
 // Opción seleccionable (Figma: chip) — mono 11 en mayúsculas.
@@ -854,4 +854,44 @@
   line-height: 1.1;
   color: var(--ms-tinta-oscura);
   text-align: center;
+}
+
+// ---------------------------------------------------------------------------
+// Accesibilidad del shell (no reemplaza lo que cada página deba resolver)
+// ---------------------------------------------------------------------------
+
+// Foco visible para quien navega con teclado. :focus-visible no se activa con
+// el clic del mouse, así que no cambia el aspecto para el resto de usuarios.
+// Ionic marca con .ion-focused sus componentes con foco de teclado.
+:focus-visible,
+.ion-focused {
+  outline: 3px solid var(--ms-tinta-azul);
+  outline-offset: 2px;
+}
+
+// Sobre fondos azules (sidebar y panel de marca) el contorno azul no se ve:
+// se usa el amarillo marcador y hacia adentro, porque el sidebar recorta lo
+// que sobresale (overflow: hidden).
+.ms-sidebar,
+.ms-auth-brand {
+  :focus-visible,
+  .ion-focused {
+    outline-color: var(--ms-marcador);
+    outline-offset: -3px;
+  }
+}
+
+// Quien pide menos movimiento en el sistema no recibe animaciones ni
+// transiciones propias. Las de Ionic (páginas, modales) se apagan con la
+// opción `animated` en app.module.ts.
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0s !important;
+    scroll-behavior: auto !important;
+  }
 }
