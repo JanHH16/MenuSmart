@@ -223,7 +223,9 @@ terraform plan
 
 **Estado del despliegue:** `terraform apply` todavía no se ha ejecutado (requiere una
 cuenta real de Render). El ambiente de staging en vivo queda pendiente, ver
-[Limitaciones conocidas](#limitaciones-conocidas).
+[Limitaciones conocidas](#limitaciones-conocidas). El pipeline de CI/CD, el despliegue
+automático a staging con health checks y el rollback están descritos en
+[`docs/pipeline-y-staging.md`](docs/pipeline-y-staging.md).
 
 ## Documentación de la API
 
@@ -245,9 +247,9 @@ disponibles son:
   servicio Python solo tiene el endpoint de normalización de ingredientes.
 - No hay endpoints CRUD todavía de Comidas, Ingredientes, Listas de compra ni Precios
   (el esquema de datos ya existe, ver [`docs/database.md`](docs/database.md)).
-- El despliegue en Render no se ha ejecutado; `frontend/nginx.conf` resuelve el backend
-  como `http://backend:3000` (nombre de Docker Compose), que no aplica igual en Render.
-  Ver ADR-001.
+- El despliegue en Render no se ha ejecutado todavía (requiere cuenta, API key y secrets
+  de GitHub). El pipeline y el procedimiento están listos, ver
+  [`docs/pipeline-y-staging.md`](docs/pipeline-y-staging.md).
 - No hay documentación OpenAPI/Swagger generada todavía.
 - La app Android (Capacitor) tiene la configuración inicial, pero no se ha generado el
   proyecto nativo ni probado en un dispositivo/emulador.
