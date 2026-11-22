@@ -41,9 +41,20 @@ jobs:
         working-directory: frontend
         run: npm ci
 
-      - name: Build de la aplicacion web
+      - name: Configurar la URL del backend para la app nativa
         working-directory: frontend
-        run: npx ng build
+        env:
+          BACKEND_URL: ${{ vars.STAGING_BACKEND_URL }}
+        run: |
+          if [ -z "$BACKEND_URL" ]; then
+            echo "::warning::STAGING_BACKEND_URL no esta definida: el APK se compila pero no podra conectarse a ningun backend."
+          else
+            sed -i "s#https://URL_DEL_BACKEND_NO_CONFIGURADA#${BACKEND_URL%/}#" src/environments/environment.android.ts
+          fi
+
+      - name: Build de la aplicacion web (configuracion android)
+        working-directory: frontend
+        run: npx ng build --configuration android
 
       - name: Sincronizar el proyecto Android (Capacitor)
         working-directory: frontend

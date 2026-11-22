@@ -93,3 +93,21 @@ Las acciones están fijadas por SHA de commit, con la versión en un comentario.
 4. **Probar en un dispositivo real** (o emulador) y comprobar el modo sin conexión, la cámara y la galería.
 5. **Firma de release.** El workflow solo genera un APK de depuración. Para publicar en Play Store hace falta un keystore propio, guardado como secreto de GitHub y fuera del repositorio, y un `assembleRelease` o `bundleRelease`.
 6. **Auditoría Lighthouse** (PWA y accesibilidad) sobre el build servido por nginx, para dejar evidencia en la entrega.
+
+## URL del backend en la app Android
+
+Dentro de la app nativa el origen es `https://localhost`, así que el proxy relativo `/api` de nginx no existe. Por eso hay una configuración de build propia:
+
+- `frontend/src/environments/environment.android.ts` lleva un marcador (`URL_DEL_BACKEND_NO_CONFIGURADA`) en lugar de la URL.
+- `ng build --configuration android` usa ese archivo.
+- El workflow `android.yml` reemplaza el marcador por la variable de GitHub `STAGING_BACKEND_URL` (la misma que usa el despliegue a staging). Si la variable no existe, el APK se compila igual pero muestra una advertencia, y no podrá conectarse a ningún backend.
+
+Para compilar a mano, cambia el marcador por la URL del backend desplegado (sin barra final y terminada en `/api`) y ejecuta:
+
+```powershell
+cd frontend
+npx ng build --configuration android
+npx cap sync android
+```
+
+El backend acepta cualquier origen (CORS abierto, ver `docs/seguridad-privacidad-etica.md`), por lo que no necesita cambios para esta app.
