@@ -8,3 +8,8 @@ region           = "oregon"
 repo_url         = "https://github.com/JanHH16/MenuSmart"
 branch           = "develop"
 jwt_secret       = "changeme"
+
+# "free" (sin costo, los servicios se duermen tras 15 min sin trafico) o "starter" (de pago).
+instance_plan = "free"
+# Clave compartida backend <-> servicio Python, al menos 24 caracteres aleatorios.
+python_service_key = "changeme-una-clave-larga-y-aleatoria"

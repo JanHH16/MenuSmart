@@ -9,6 +9,7 @@ import { HttpService } from '@nestjs/axios';
 import { AxiosError, isAxiosError } from 'axios';
 import { catchError, firstValueFrom, timeout } from 'rxjs';
 import { obtenerRequestId } from '../observability/request-context';
+import { timeoutPythonMs } from './python-http.config';
 import { InvalidScrapeResponseError, parseScrapeResponse } from './scrape-response';
 import { ScrapeSearchOptions, ScrapeSearchRequest, ScrapeSearchResult } from './scrape.types';
 
@@ -59,7 +60,7 @@ export class PythonClientService {
         { headers: cabecerasDeTrazabilidad() },
       )
       .pipe(
-        timeout(5000),
+        timeout(timeoutPythonMs()),
         catchError((error: AxiosError) => {
           if (error.response) {
             // Python respondió (validación inválida, error interno, etc.): no es

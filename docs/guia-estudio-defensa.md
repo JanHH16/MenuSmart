@@ -36,7 +36,7 @@ Mapa de documentos: [README](../README.md), [architecture.md](architecture.md), 
 
 1. *¿Por qué Python no escribe en la base?* Para que haya un solo dueño del esquema y para que, si la fuente externa entrega datos corruptos, haya dos barreras (Pydantic y el validador de NestJS) antes de la base.
 2. *¿Qué pasa si cae el servicio Python?* NestJS responde 503 con un mensaje claro tras un reintento, `/health` pasa a `degraded`, los precios y listas ya guardados siguen disponibles y el recomendador sigue funcionando sin medir la reutilización.
-3. *¿Qué riesgo tiene esta arquitectura?* NestJS es punto único de entrada; el servicio Python no tiene autenticación propia y depende de ser privado; el contrato está duplicado en dos lenguajes.
+3. *¿Qué riesgo tiene esta arquitectura?* NestJS es punto único de entrada; en staging el servicio Python es público (plan gratuito) y se protege solo con una clave de servicio compartida; el contrato está duplicado en dos lenguajes.
 
 ## 3. Flujo de datos
 
@@ -138,11 +138,11 @@ Mapa de documentos: [README](../README.md), [architecture.md](architecture.md), 
 
 ## 10. Terraform e infraestructura
 
-**Qué es.** `infra/` define en el proveedor Render: una base `render_postgres`, un servicio privado para Python y servicios web para backend y frontend.
+**Qué es.** `infra/` define en el proveedor Render: una base `render_postgres` y tres servicios web (Python, backend y frontend), por defecto en plan gratuito (`instance_plan`). El servicio Python tiene URL pública, así que exige la clave `X-Service-Key`.
 
 **Archivos clave.** `infra/services.tf`, `infra/database.tf`, `infra/variables.tf`, `infra/terraform.tfvars.example`, [ADR-001](adr/001-infraestructura-render.md).
 
-**Decisiones.** Render por soportar contenedores Docker con servicios privados y plan gratuito; el servicio Python es privado porque el frontend no debe llamarlo; variables sensibles (`jwt_secret`, clave de Render) con `sensitive` y fuera del repositorio (`terraform.tfvars` está en `.gitignore`); el CI solo valida (`fmt`, `validate`), nunca aplica.
+**Decisiones.** Render por soportar contenedores Docker y plan gratuito; como el plan gratuito no tiene servicios privados, el servicio Python es público pero protegido con una clave compartida con el backend, porque el frontend no debe llamarlo (ver el riesgo en ADR-001); variables sensibles (`jwt_secret`, `python_service_key`, clave de Render) con `sensitive` y fuera del repositorio (`terraform.tfvars` está en `.gitignore`); el CI solo valida (`fmt`, `validate`), nunca aplica.
 
 **Preguntas**
 

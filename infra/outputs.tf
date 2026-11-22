@@ -8,9 +8,9 @@ output "frontend_url" {
   value       = render_web_service.frontend.url
 }
 
-output "python_service_internal_url" {
-  description = "URL interna del servicio Python (red privada de Render, no alcanzable desde internet)."
-  value       = "http://${render_private_service.python_service.slug}:${local.python_port}"
+output "python_service_url" {
+  description = "URL publica del servicio Python (variable opcional STAGING_PYTHON_URL en GitHub). Exige la clave X-Service-Key salvo en /health."
+  value       = render_web_service.python_service.url
 }
 
 output "render_service_id_backend" {
@@ -25,7 +25,7 @@ output "render_service_id_frontend" {
 
 output "render_service_id_python" {
   description = "ID del servicio Python (variable RENDER_SERVICE_ID_PYTHON en GitHub)."
-  value       = render_private_service.python_service.id
+  value       = render_web_service.python_service.id
 }
 
 output "database_internal_connection_string" {

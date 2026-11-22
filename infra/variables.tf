@@ -33,6 +33,28 @@ variable "branch" {
   default     = "develop"
 }
 
+variable "instance_plan" {
+  description = "Plan de las instancias de los tres servicios. \"free\" (sin costo, se duermen tras 15 min sin trafico) o \"starter\" (de pago, siempre despiertos)."
+  type        = string
+  default     = "free"
+
+  validation {
+    condition     = contains(["free", "starter"], var.instance_plan)
+    error_message = "instance_plan debe ser \"free\" o \"starter\"."
+  }
+}
+
+variable "python_service_key" {
+  description = "Clave compartida entre el backend y el servicio Python (cabecera X-Service-Key). Debe ser larga y aleatoria."
+  type        = string
+  sensitive   = true
+
+  validation {
+    condition     = length(var.python_service_key) >= 24
+    error_message = "python_service_key debe tener al menos 24 caracteres."
+  }
+}
+
 variable "jwt_secret" {
   description = "Secreto usado por el backend para firmar los JWT en este ambiente."
   type        = string

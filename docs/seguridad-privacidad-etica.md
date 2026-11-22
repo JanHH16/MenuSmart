@@ -46,7 +46,7 @@ Hay un solo rol: usuario autenticado. No existe rol administrador.
 | `POST /api/auth/register`, `POST /api/auth/login`, `GET /health` | Cualquiera | Públicos; los de autenticación tienen límite de solicitudes |
 | `GET/DELETE /api/users/me` | Solo el dueño de la cuenta | `JwtAuthGuard`; el id sale del token, nunca de la URL ni del cuerpo |
 | `/api/prices/*`, `/api/ingredients/normalize`, `/api/metrics` | Cualquier usuario autenticado | `JwtAuthGuard` en el controlador |
-| Servicio Python (`/scrape/search`, `/ingredients/normalize`, `/metrics`) | Solo el backend | En Render es un servicio privado (`infra/services.tf`, `render_private_service`); no tiene autenticación propia |
+| Servicio Python (`/scrape/search`, `/ingredients/normalize`, `/metrics`) | Solo el backend | En Render (plan gratuito) es un servicio web público, protegido con una clave de servicio `X-Service-Key` (`infra/services.tf`, `python-service/app/seguridad.py`); con un plan de pago vuelve a ser privado |
 
 Principio para los recursos del usuario (comidas, listas): toda consulta debe filtrar por el
 `usuarioId` del token. Lo cumplen `GET/DELETE /api/users/me`, el CRUD de comidas, la lista de
@@ -163,7 +163,7 @@ producción.
 | Clickjacking, sniffing de contenido, fugas por referrer | Cabeceras de helmet | `seguridad.e2e-spec.ts` |
 | Abuso de la actualización de precios (carga sobre las tiendas) | Límite por IP, mínimo de minutos entre actualizaciones exitosas, una sola actualización en curso (409), 1 solicitud por segundo a cada tienda | `prices.e2e-spec.ts` (409 y 429), `test_scraper_service.py` |
 | Fuente externa maliciosa o corrupta (redirección, respuesta enorme, datos inválidos) | Redirecciones solo al mismo dominio, tope de 5 MB, validación de cada registro | `test_scraper_service.py` ("redirección fuera del dominio", "respuesta demasiado grande", "descarta items inválidos") |
-| Acceso directo al servicio Python | Servicio privado en Render | `infra/services.tf` |
+| Acceso directo al servicio Python | Clave de servicio compartida (401 sin ella, comparación en tiempo constante, nunca en logs) | `python-service/app/seguridad.py`, `python-service/tests/test_seguridad.py` |
 | Vulnerabilidades en dependencias o imágenes | `npm audit`, `pip-audit`, Trivy en CI | `ci.yml` |
 
 ## 8. Riesgos de la fuente externa (scraping de Jumbo y Santa Isabel)

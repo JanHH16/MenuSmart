@@ -21,8 +21,23 @@ import { PythonClientService } from './../src/python-client/python-client.servic
 
 const URL_PYTHON = process.env.PYTHON_SERVICE_URL ?? 'http://127.0.0.1:8000';
 
+// Si el servicio Python se levanta con SERVICE_API_KEY, estas pruebas deben correr con la misma
+// clave en PYTHON_SERVICE_KEY, igual que el backend real (ver python-http.config.ts).
+const CLAVE = process.env.PYTHON_SERVICE_KEY;
+
 const crearCliente = (baseURL: string) =>
-  new PythonClientService(new HttpService(axios.create({ baseURL, timeout: 5000 })));
+  new PythonClientService(
+    new HttpService(
+      axios.create({
+        baseURL,
+        timeout: 5000,
+        ...(CLAVE ? { headers: { 'X-Service-Key': CLAVE } } : {}),
+      }),
+    ),
+  );
+
+// Solo tiene sentido cuando el servicio Python exige clave (en CI se levanta asi).
+const itConClave = CLAVE ? it : it.skip;
 
 describe('Integracion NestJS <-> servicio Python real', () => {
   const cliente = crearCliente(URL_PYTHON);
@@ -103,6 +118,23 @@ describe('Integracion NestJS <-> servicio Python real', () => {
     await expect(
       cliente.scrapeSearch({ tienda: 'jumbo', consultas: [] }, { retries: 0 }),
     ).rejects.toMatchObject({ status: 422 });
+  });
+
+  itConClave('autenticacion de servicio: sin la clave correcta Python responde 401', async () => {
+    const sinClave = await axios.post(
+      `${URL_PYTHON}/ingredients/normalize`,
+      { ingredients: [{ name: 'arroz', quantity: 1, unit: 'kg' }] },
+      { validateStatus: () => true },
+    );
+    expect(sinClave.status).toBe(401);
+    const claveMala = await axios.post(
+      `${URL_PYTHON}/ingredients/normalize`,
+      { ingredients: [] },
+      { headers: { 'X-Service-Key': 'incorrecta' }, validateStatus: () => true },
+    );
+    expect(claveMala.status).toBe(401);
+    // /health sigue abierto para los orquestadores.
+    expect((await axios.get(`${URL_PYTHON}/health`)).status).toBe(200);
   });
 
   it('recuperacion: con el servicio Python caido, NestJS responde 503 en vez de colgarse', async () => {

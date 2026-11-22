@@ -13,8 +13,8 @@ Contraste honesto del repositorio con las rúbricas de la **EP2** (sección 29.3
 
 | Verificación | Resultado |
 |---|---|
-| Pruebas del backend (unitarias y e2e, contra PostgreSQL) | 247 en verde, cobertura de 97,8% de sentencias y 81,4% de ramas |
-| Pruebas del servicio Python | 149 en verde, cobertura de 96% |
+| Pruebas del backend (unitarias y e2e, contra PostgreSQL) | 257 en verde, cobertura de 97,8% de sentencias y 81,4% de ramas |
+| Pruebas del servicio Python | 161 en verde, cobertura de 96% |
 | Pruebas del frontend | 109 en verde, cobertura de 57,7% de sentencias |
 | Lint de los tres proyectos y build de producción del frontend y del backend | Sin errores |
 | 5 migraciones sobre una base vacía y `migration:generate --check` | Sin deriva |
@@ -65,7 +65,7 @@ Contraste honesto del repositorio con las rúbricas de la **EP2** (sección 29.3
 | 4 | Backend, API, persistencia y control de acceso | 10% | Controladores y DTO validados, [openapi.json](api/openapi.json) (26 operaciones, todas con resumen y errores documentados), migraciones sin deriva, transacciones, aislamiento por usuario con e2e de dos usuarios, borrado de cuenta en cascada | **Hecho**, con brechas | Un solo rol; las respuestas de varios endpoints aparecen como `object` sin campos en Swagger |
 | 5 | Información web y calidad del procesamiento | 10% | [calidad-de-datos.md](calidad-de-datos.md), ADR-002 y 003, `python-service/app/scrapers/` | **Hecho**, con brechas | Sin actualización automática ni alertas; términos de servicio sin análisis jurídico |
 | 6 | Capacidad adaptativa o inteligente | 15% | `backend/src/recommendations/`, pantalla de sugerencias, [capacidad-adaptativa.md](capacidad-adaptativa.md), evaluación contra versión base ([evaluacion-recomendador.md](evaluacion-recomendador.md)), explicaciones, aceptar, rechazar, pesos, exclusiones y modo sin adaptación | **Hecho**, con brecha | Evaluada por simulación; falta la evaluación con usuarios (aceptación, utilidad percibida, comprensión). Sin restricciones alimentarias |
-| 7 | Pruebas y evaluación del sistema | 10% | [plan-de-pruebas.md](plan-de-pruebas.md): 505 pruebas, cobertura medida y exigida en CI, tiempos de respuesta, recuperación, evaluación del recomendador | **Hecho**, con brechas | Sin pruebas de carga ni de interfaz de punta a punta |
+| 7 | Pruebas y evaluación del sistema | 10% | [plan-de-pruebas.md](plan-de-pruebas.md): 527 pruebas, cobertura medida y exigida en CI, tiempos de respuesta, recuperación, evaluación del recomendador | **Hecho**, con brechas | Sin pruebas de carga ni de interfaz de punta a punta |
 | 8 | DevSecOps, contenedores, IaC y despliegue | 12% | `ci.yml` (lint, pruebas con cobertura, migraciones, integración, Terraform, auditoría `high`, gitleaks, Trivy, despliegue a staging con health checks), workflow de rollback, `docker-compose.yml`, imágenes sin root, `infra/` validada | **Pendiente de Jan** y **no verificable aquí** | Sin staging ni `terraform apply`; rollback no probado; CI no visto en GitHub; protección de ramas sin configurar |
 | 9 | Observabilidad, seguridad, privacidad y ética | 8% | Logs estructurados y correlacionados, `/health`, `/api/metrics`, helmet, límite de solicitudes, redacción de secretos en logs, [seguridad-privacidad-etica.md](seguridad-privacidad-etica.md), eliminación de cuenta | **Hecho**, con brechas | Sin alertas automáticas; métricas en memoria; sin roles ni recuperación de contraseña |
 | 10 | Documentación, reproducibilidad y trabajo colaborativo | 5% | README, documentos de `docs/`, [registro-participacion.md](registro-participacion.md), [guia-estudio-defensa.md](guia-estudio-defensa.md) | **Parcial** | Confirmar el registro de participación; el historial de git concentra muchos commits en pocos días (ver ese documento); enlaces pendientes |

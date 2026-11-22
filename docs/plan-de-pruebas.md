@@ -19,7 +19,7 @@ Medido el 22-11-2026 sobre la rama de integración. Cada número de este documen
 | Evaluación de la adaptación | El recomendador contra versiones base con precios reales | `npm run evaluar:recomendador` | 3 escenarios x 5 estrategias | Manual (ver `docs/evaluacion-recomendador.md`) |
 | No funcionales | Tiempos de respuesta, disponibilidad | `npm run medir:latencia`, `/health`, `/api/metrics` | ver sección 3 | Manual y en producción |
 
-Total de pruebas automáticas: **505** (247 de backend: 191 unitarias y 56 e2e; 149 de Python y 109 de frontend).
+Total de pruebas automáticas: **527** (257 de backend: 201 unitarias y 56 e2e; 161 de Python y 109 de frontend). Las coberturas de este documento se midieron con 505 pruebas, antes de agregar la clave de servicio entre NestJS y Python (22 pruebas nuevas); el CI sigue exigiendo los mínimos.
 
 ## 2. Cobertura
 

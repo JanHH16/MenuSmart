@@ -98,7 +98,7 @@ flowchart TB
     subgraph Render["Render (staging)"]
         FrontendSvc["render_web_service: frontend<br/>publico"]
         BackendSvc["render_web_service: backend<br/>publico, /health"]
-        PythonSvc["render_private_service: python-service<br/>SIN url publica"]
+        PythonSvc["render_web_service: python-service<br/>URL publica, exige X-Service-Key"]
         PostgresSvc[("render_postgres<br/>plan free")]
     end
 

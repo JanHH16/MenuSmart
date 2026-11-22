@@ -2,14 +2,18 @@
 # dispara el pipeline de GitHub Actions (job deploy-staging) solo despues de que
 # pasan las pruebas, y apuntando a un commit exacto. Con auto_deploy = true Render
 # desplegaria en cada push sin esperar al CI. Ver docs/pipeline-y-staging.md.
+#
+# Plan de las instancias (var.instance_plan): por defecto "free". Un servicio gratuito se
+# duerme tras 15 minutos sin trafico y tarda cerca de un minuto en despertar; para una demo en
+# vivo conviene "despertarlos" antes (ver docs/pipeline-y-staging.md). Con "starter" no se duermen.
 
-# Servicio Python (FastAPI): privado a proposito. El enunciado del curso exige
-# que el frontend nunca lo llame directo, solo NestJS puede hacerlo (seccion 3).
-# render_private_service no expone URL publica, solo es alcanzable por otros
-# servicios de la misma region/cuenta, usando su nombre (slug) como host.
-resource "render_private_service" "python_service" {
+# Servicio Python (FastAPI). El plan gratuito de Render no ofrece servicios privados, asi que es
+# un servicio web con URL publica. Para que el enunciado se siga cumpliendo (solo NestJS puede
+# usarlo), exige una clave compartida en la cabecera X-Service-Key (SERVICE_API_KEY): sin ella
+# responde 401 en todo salvo /health. El frontend nunca lo llama. Ver ADR-001 (actualizado).
+resource "render_web_service" "python_service" {
   name   = "menusmart-${var.environment}-python"
-  plan   = "starter"
+  plan   = var.instance_plan
   region = var.region
 
   runtime_source = {
@@ -22,15 +26,18 @@ resource "render_private_service" "python_service" {
     }
   }
 
+  health_check_path = "/health"
+
   env_vars = {
-    PORT = { value = local.python_port }
+    PORT            = { value = local.python_port }
+    SERVICE_API_KEY = { value = var.python_service_key }
   }
 }
 
 # Backend NestJS: unico punto de entrada de la API, publico.
 resource "render_web_service" "backend" {
   name   = "menusmart-${var.environment}-backend"
-  plan   = "starter"
+  plan   = var.instance_plan
   region = var.region
 
   runtime_source = {
@@ -53,8 +60,12 @@ resource "render_web_service" "backend" {
     DATABASE_URL   = { value = render_postgres.menusmart.connection_info.internal_connection_string }
     JWT_SECRET     = { value = var.jwt_secret }
     JWT_EXPIRES_IN = { value = "3600s" }
-    # Red privada de Render: el host es el nombre del servicio Python.
-    PYTHON_SERVICE_URL = { value = "http://${render_private_service.python_service.slug}:${local.python_port}" }
+    # URL publica del servicio Python (https) y la clave que este exige.
+    PYTHON_SERVICE_URL = { value = render_web_service.python_service.url }
+    PYTHON_SERVICE_KEY = { value = var.python_service_key }
+    # Un servicio gratuito dormido tarda cerca de 1 minuto en despertar: un timeout corto
+    # haria fallar la primera llamada. Con "starter" (siempre despierto) basta el valor por defecto.
+    PYTHON_TIMEOUT_MS = { value = var.instance_plan == "free" ? "90000" : "5000" }
   }
 }
 
@@ -64,7 +75,7 @@ resource "render_web_service" "backend" {
 # destino cuya resolucion esta garantizada entre servicios web de Render.
 resource "render_web_service" "frontend" {
   name   = "menusmart-${var.environment}-frontend"
-  plan   = "starter"
+  plan   = var.instance_plan
   region = var.region
 
   runtime_source = {

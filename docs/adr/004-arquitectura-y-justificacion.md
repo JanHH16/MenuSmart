@@ -53,7 +53,7 @@ flowchart LR
 
 ## Decisión 2: FastAPI como servicio de procesamiento y scraping que no escribe en la base
 
-**Decisión.** El servicio Python hace dos cosas: normalizar ingredientes (`POST /ingredients/normalize`) y extraer precios de las tiendas (`POST /scrape/search`). **No tiene acceso a la base de datos** (no incluye ningún controlador de PostgreSQL en `requirements.txt`): devuelve sus resultados a NestJS, que los valida y los persiste. En Render es un servicio privado, sin URL pública (ADR-001).
+**Decisión.** El servicio Python hace dos cosas: normalizar ingredientes (`POST /ingredients/normalize`) y extraer precios de las tiendas (`POST /scrape/search`). **No tiene acceso a la base de datos** (no incluye ningún controlador de PostgreSQL en `requirements.txt`): devuelve sus resultados a NestJS, que los valida y los persiste. En Render (plan gratuito, sin servicios privados) es un servicio web con URL pública que solo atiende al backend: exige la cabecera `X-Service-Key` salvo en `/health` (ADR-001, actualización del 22-11-2026).
 
 **Por qué.**
 
@@ -70,7 +70,7 @@ flowchart LR
 | Python escribe directo en PostgreSQL | Rompe la regla de un solo dueño de la base y duplica la lógica de upsert y deduplicación |
 | Cola de mensajes entre NestJS y Python (Redis, RabbitMQ) | Infraestructura adicional que no se justifica con 31 consultas por tienda (C5); la corrida se ejecuta en segundo plano y se consulta por `GET /prices/runs/:id` |
 
-**Consecuencias y riesgos.** La llamada entre servicios es síncrona: una actualización completa tarda más de un minuto (entre 37 y 43 s por tienda en la última corrida, con el scraper a 1 solicitud por segundo; ver [calidad-de-datos.md](../calidad-de-datos.md)), por eso se hace en segundo plano. El servicio Python no tiene autenticación propia: depende de ser privado en el despliegue. Si se expusiera, haría falta autenticación de servicio a servicio.
+**Consecuencias y riesgos.** La llamada entre servicios es síncrona: una actualización completa tarda más de un minuto (entre 37 y 43 s por tienda en la última corrida, con el scraper a 1 solicitud por segundo; ver [calidad-de-datos.md](../calidad-de-datos.md)), por eso se hace en segundo plano. En staging el servicio Python es público (plan gratuito), por eso se protege con una clave de servicio compartida con el backend (`SERVICE_API_KEY` y `PYTHON_SERVICE_KEY`, cabecera `X-Service-Key`); sin la variable, en local y Docker Compose, no se exige nada porque solo es alcanzable en la red privada. La clave es un secreto compartido simple: no hay rotación automática ni identidad por servicio.
 
 ## Decisión 3: contrato validado en ambos lados
 
@@ -149,12 +149,12 @@ Resumen: se eligió una política transparente con dos variables (costo por porc
 | Autenticación | JWT firmado con HS256 y expiración de 1 hora, contraseñas con bcrypt | `backend/src/auth/`; detalle en `docs/seguridad-privacidad-etica.md` (rama `feature/seguridad`) |
 | Observabilidad | Logs JSON con identificador de solicitud que viaja de NestJS a Python, métricas de tiempo y `/health` | Rama `feature/observability` |
 | Documentación de la API | OpenAPI con `@nestjs/swagger` en `/api/docs`; FastAPI publica la suya | [docs/api/README.md](../api/README.md) |
-| Infraestructura | Terraform y Render, servicio Python privado | [ADR-001](001-infraestructura-render.md) |
+| Infraestructura | Terraform y Render (plan gratuito), servicio Python con clave de servicio | [ADR-001](001-infraestructura-render.md) |
 
 ## Riesgos de la arquitectura que se aceptan
 
 1. **Dependencia de una fuente externa frágil.** Si las tiendas cambian su HTML o su `robots.txt`, el scraper falla (error `estructura` o `robots`) y se conservan los precios anteriores con su fecha. No hay API oficial alternativa (ADR-002 y 003).
-2. **Servicio Python sin autenticación propia.** Protegido solo por red privada.
+2. **Servicio Python expuesto en staging.** Protegido por una clave de servicio compartida, sin rotación ni identidad por servicio; en un plan de pago volvería a ser privado.
 3. **Contrato duplicado** entre Pydantic y el validador manual de NestJS.
 4. **Escalado:** los límites de solicitudes y las métricas viven en memoria; con varias instancias del backend cada una cuenta por separado.
 5. **Despliegue real pendiente:** el ambiente de staging definido como código no se ha creado, por lo que parte de las decisiones de despliegue no se han verificado en vivo.

@@ -219,11 +219,13 @@ Variables del backend:
 | `JWT_SECRET` | sin valor por defecto | Obligatorio; sin él el backend no arranca |
 | `JWT_EXPIRES_IN` | `3600s` | Duración del token |
 | `PYTHON_SERVICE_URL` | `http://localhost:8000` | Dirección del servicio Python |
+| `PYTHON_SERVICE_KEY` | sin valor | Opcional. Clave que se envía en `X-Service-Key`; debe coincidir con `SERVICE_API_KEY` del servicio Python (solo si este es público) |
+| `PYTHON_TIMEOUT_MS` | `5000` | Opcional. Timeout de las llamadas cortas a Python; con instancias gratuitas de Render conviene `90000` |
 | `PRICES_MIN_REFRESH_INTERVAL_MINUTES` | `10` | Minutos mínimos entre dos actualizaciones exitosas |
 | `PRICES_STALE_HOURS` | `48` | Horas desde las que un precio se marca como desactualizado |
 | `SCRAPER_BATCH_SIZE`, `SCRAPER_BATCH_TIMEOUT_MS` | `5`, `120000` | Consultas por llamada a Python (máximo 10) y tiempo de espera |
 
-Variables del servicio Python: `PORT` (8000), `SCRAPER_USER_AGENT`, `SCRAPER_MIN_INTERVAL_SECONDS` (1.0), `SCRAPER_TIMEOUT_SECONDS` (10), `SCRAPER_MAX_RETRIES` (2).
+Variables del servicio Python: `PORT` (8000), `SERVICE_API_KEY` (opcional: si existe, todas las rutas salvo `/health` exigen la cabecera `X-Service-Key`), `SCRAPER_USER_AGENT`, `SCRAPER_MIN_INTERVAL_SECONDS` (1.0), `SCRAPER_TIMEOUT_SECONDS` (10), `SCRAPER_MAX_RETRIES` (2).
 
 ## Ejecución local sin Docker
 
@@ -296,7 +298,7 @@ cd frontend && npx ng test --watch=false
 cd python-service && pytest
 ```
 
-Estado el 22-11-2026 sobre `integration/ep2-ef`, ejecutado en local: backend **247 pruebas en verde** (191 unitarias y 56 e2e contra PostgreSQL, cobertura de 97,8% de sentencias), servicio Python **149 en verde** (96% de cobertura) y frontend **109 en verde** (58% de cobertura). Detalle por niveles, cobertura, tiempos de respuesta y limitaciones en [`docs/plan-de-pruebas.md`](docs/plan-de-pruebas.md); accesibilidad en [`docs/accesibilidad.md`](docs/accesibilidad.md).
+Estado el 22-11-2026, ejecutado en local: backend **257 pruebas en verde** (201 unitarias y 56 e2e contra PostgreSQL, cobertura de 97,8% de sentencias medida antes de agregar la clave de servicio), servicio Python **161 en verde** (96% de cobertura medida antes de ese cambio) y frontend **109 en verde** (58% de cobertura). Detalle por niveles, cobertura, tiempos de respuesta y limitaciones en [`docs/plan-de-pruebas.md`](docs/plan-de-pruebas.md); accesibilidad en [`docs/accesibilidad.md`](docs/accesibilidad.md).
 
 Además de las pruebas de funcionalidad hay pruebas de las partes sensibles de la entrega: contrato entre servicios, normalización de ingredientes, recuperación ante fallas del scraper, cálculo de costos y recomendador. La evaluación del recomendador se repite con `cd backend && npm run evaluar:recomendador` (reescribe `docs/evaluacion-recomendador.md`). La lista completa de evidencias por criterio de la rúbrica está en [`docs/checklist-entrega.md`](docs/checklist-entrega.md).
 
@@ -331,7 +333,7 @@ Resumen de las rutas de NestJS (todas con `Authorization: Bearer <token>` salvo 
 
 Detalle, secretos y variables de GitHub, y pasos manuales: [`docs/pipeline-y-staging.md`](docs/pipeline-y-staging.md) (documento de la rama `feature/pipeline-staging`; si no aparece en esta rama todavía, está allí). Política de migraciones y auditoría: [`docs/migraciones-y-auditoria.md`](docs/migraciones-y-auditoria.md) (rama `feature/ci-auditoria`).
 
-**Infraestructura como código:** [`infra/`](infra/) define en Terraform (proveedor Render) la base de datos y los tres servicios; el servicio Python es privado ([ADR-001](docs/adr/001-infraestructura-render.md)).
+**Infraestructura como código:** [`infra/`](infra/) define en Terraform (proveedor Render) la base de datos y los tres servicios; por defecto en plan gratuito. El servicio Python tiene URL pública y solo responde al backend gracias a una clave de servicio ([ADR-001](docs/adr/001-infraestructura-render.md)).
 
 ```bash
 cd infra
