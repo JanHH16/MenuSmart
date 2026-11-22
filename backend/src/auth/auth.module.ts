@@ -6,6 +6,7 @@ import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { UsersModule } from '../users/users.module';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { JWT_ALGORITMO, JWT_EXPIRACION_POR_DEFECTO } from './auth.constants';
 
 @Module({
   imports: [
@@ -24,7 +25,9 @@ import { JwtStrategy } from './strategies/jwt.strategy';
         return {
           secret,
           signOptions: {
-            expiresIn: (config.get<string>('JWT_EXPIRES_IN') ?? '3600s') as unknown as number,
+            algorithm: JWT_ALGORITMO,
+            expiresIn: (config.get<string>('JWT_EXPIRES_IN') ??
+              JWT_EXPIRACION_POR_DEFECTO) as unknown as number,
           },
         };
       },
