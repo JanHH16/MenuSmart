@@ -13,18 +13,18 @@
         <div class="ms-perfil-usuario-wrap">
           <span class="ms-cinta ms-perfil-usuario-cinta"></span>
           <div class="ms-card-desktop ms-perfil-usuario">
-            <div class="ms-perfil-usuario-avatar">UD</div>
+            <div class="ms-perfil-usuario-avatar">{{ iniciales }}</div>
             <h2 class="ms-perfil-usuario-nombre">{{ nombre }}</h2>
             <p class="ms-perfil-usuario-email">{{ email }}</p>
             <div class="ms-perfil-usuario-punteada"></div>
             <div class="ms-perfil-usuario-stats">
               <div>
-                <span class="ms-perfil-usuario-stat-valor">{{ comidasPlaneadas }}</span>
+                <span class="ms-perfil-usuario-stat-valor">{{ comidasPlaneadas() }}</span>
                 <span class="ms-perfil-usuario-stat-label">comidas planeadas</span>
               </div>
               <div>
-                <span class="ms-perfil-usuario-stat-valor">{{ formatoAhorro }}</span>
-                <span class="ms-perfil-usuario-stat-label">ahorrado este mes</span>
+                <span class="ms-perfil-usuario-stat-valor">{{ ahorroEstimado() }}</span>
+                <span class="ms-perfil-usuario-stat-label">ahorro estimado en tu lista</span>
               </div>
             </div>
             <button type="button" class="ms-btn-figma ms-btn-figma--secundario ms-perfil-logout" (click)="logout()">
@@ -79,7 +79,7 @@
 
   <ion-content class="ion-padding">
     <div class="ms-card-libreta ms-perfil-card">
-      <div class="ms-perfil-avatar">U</div>
+      <div class="ms-perfil-avatar">{{ iniciales.slice(0, 1) }}</div>
       <div>
         <h2>{{ nombre }}</h2>
         <p class="ms-text-secondary">{{ email }}</p>
@@ -87,14 +87,14 @@
     </div>
 
     <div class="ms-card-libreta ms-perfil-stat">
-      <span class="ms-mono ms-perfil-stat-value">{{ semanasPlaneadas }}</span>
-      <span class="ms-text-secondary">semanas planeadas</span>
+      <span class="ms-mono ms-perfil-stat-value">{{ comidasPlaneadas() }}</span>
+      <span class="ms-text-secondary">comidas planeadas esta semana</span>
     </div>
 
     <ion-list class="ms-perfil-lista" lines="full">
       @for (opcion of opciones; track opcion.label) {
         <ion-item button detail="false" (click)="proximamente()">
-          <ion-icon [name]="opcion.icon" slot="start" color="primary"></ion-icon>
+          <ion-icon [name]="opcion.icon" slot="start" color="primary" aria-hidden="true"></ion-icon>
           <ion-label>{{ opcion.label }}</ion-label>
           <span class="ms-label-secundario" slot="end">Pronto</span>
         </ion-item>

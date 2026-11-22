@@ -4,6 +4,10 @@ on:
   push:
   pull_request:
 
+# Permisos minimos para todo el workflow: los jobs solo leen el repositorio.
+permissions:
+  contents: read
+
 jobs:
   # ---------------------------------------------------------------------------
   # Backend (NestJS)
@@ -37,10 +41,10 @@ jobs:
       NODE_ENV: development
     steps:
       - name: Obtener el codigo fuente
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: Configurar Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: "24"
           cache: "npm"
@@ -66,9 +70,86 @@ jobs:
         working-directory: backend
         run: npm run test:e2e
 
-      - name: Analisis de dependencias vulnerables
+      # Unitarias y e2e juntas, en serie (comparten la base de datos), con umbral minimo:
+      # si la cobertura baja de 90% de sentencias o 70% de ramas, el job falla.
+      - name: Cobertura de pruebas (unitarias y e2e)
         working-directory: backend
-        run: npm audit --omit=dev --audit-level=critical
+        run: npm run test:cobertura
+
+      # Politica de severidad: falla ante vulnerabilidades ALTAS o CRITICAS en
+      # dependencias de produccion (--omit=dev). Ver docs/migraciones-y-auditoria.md.
+      - name: Analisis de dependencias vulnerables (severidad alta o critica)
+        working-directory: backend
+        run: npm audit --omit=dev --audit-level=high
+
+  # ---------------------------------------------------------------------------
+  # Migraciones como unica fuente de verdad de la estructura de la base.
+  # Ejecuta TODAS las migraciones sobre una base vacia y falla si despues el
+  # modelo (entidades) todavia difiere de lo que dejaron las migraciones, es
+  # decir, si alguien cambio una entidad sin escribir su migracion.
+  # synchronize NO interviene: este job usa el DataSource de la CLI
+  # (backend/src/data-source.ts), que lo tiene siempre en false.
+  # Detalle: docs/migraciones-y-auditoria.md
+  # ---------------------------------------------------------------------------
+  migraciones:
+    name: Migraciones - base vacia y sin deriva
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: menusmart
+          POSTGRES_PASSWORD: ci-password
+          POSTGRES_DB: menusmart_migraciones
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U menusmart"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_HOST: localhost
+      DATABASE_PORT: 5432
+      DATABASE_USER: menusmart
+      DATABASE_PASSWORD: ci-password
+      DATABASE_NAME: menusmart_migraciones
+    steps:
+      - name: Obtener el codigo fuente
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "24"
+          cache: "npm"
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Instalar dependencias (reproducible)
+        working-directory: backend
+        run: npm ci
+
+      - name: Compilar (la CLI ejecuta las migraciones compiladas en dist/)
+        working-directory: backend
+        run: npm run build
+
+      - name: Ejecutar todas las migraciones sobre la base vacia
+        working-directory: backend
+        run: npm run migration:run
+
+      - name: Listar migraciones aplicadas
+        working-directory: backend
+        run: npm run migration:show
+
+      # Con --check, TypeORM compara las entidades contra la base ya migrada y
+      # termina con codigo 1 si faltaria alguna migracion. No escribe archivos.
+      - name: Verificar que no quedan cambios pendientes (deriva entidades vs migraciones)
+        working-directory: backend
+        run: |
+          npm run migration:check || {
+            echo "::error::Hay entidades sin migracion. Genera una con: npm run migration:generate -- src/migrations/NombreDelCambio"
+            exit 1
+          }
 
   # ---------------------------------------------------------------------------
   # Frontend (Angular / Ionic)
@@ -78,10 +159,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Obtener el codigo fuente
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: Configurar Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: "24"
           cache: "npm"
@@ -101,11 +182,14 @@ jobs:
 
       - name: Pruebas unitarias
         working-directory: frontend
-        run: npx ng test --watch=false
+        # Con informe de cobertura (se muestra en el log del job).
+        run: npx ng test --watch=false --coverage
 
-      - name: Analisis de dependencias vulnerables
+      # Politica de severidad: falla ante vulnerabilidades ALTAS o CRITICAS en
+      # dependencias de produccion (--omit=dev). Ver docs/migraciones-y-auditoria.md.
+      - name: Analisis de dependencias vulnerables (severidad alta o critica)
         working-directory: frontend
-        run: npm audit --omit=dev --audit-level=critical
+        run: npm audit --omit=dev --audit-level=high
 
   # ---------------------------------------------------------------------------
   # Servicio Python (FastAPI)
@@ -115,10 +199,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Obtener el codigo fuente
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: Configurar Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: "3.14"
           cache: "pip"
@@ -138,11 +222,22 @@ jobs:
           pip install bandit
           bandit -r app
 
-      - name: Pruebas unitarias
+      - name: Pruebas unitarias (todas, incluye el scraper con fixtures)
         working-directory: python-service
-        run: pytest
+        run: pytest --cov=app --cov-report=term --cov-fail-under=90
 
-      - name: Analisis de dependencias vulnerables
+      # Escenarios de fallo del scraper. Corren con transporte HTTP simulado y
+      # fixtures congeladas: nunca se accede a internet ni a las tiendas reales.
+      - name: Pruebas de recuperacion del scraper (timeout, reintentos, bloqueo, estado parcial)
+        working-directory: python-service
+        run: |
+          pytest -v tests/test_scraper_service.py -k "timeout_reintenta or error_de_servidor_se_recupera or bloqueo_429 or sin_estructura_esperada or robots_no_disponible or estado_parcial or redireccion_fuera or demasiado_grande"
+
+      # pip-audit no tiene niveles de severidad: termina con codigo distinto de
+      # cero ante CUALQUIER vulnerabilidad conocida en las dependencias de
+      # produccion (requirements.txt, con versiones fijas), tenga o no correccion
+      # publicada. Es mas estricto que la politica "alta o critica" de npm.
+      - name: Analisis de dependencias vulnerables (cualquier vulnerabilidad)
         working-directory: python-service
         run: |
           pip install pip-audit
@@ -156,7 +251,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Obtener el codigo fuente
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           fetch-depth: 0
 
@@ -166,25 +261,105 @@ jobs:
             --source /repo --config /repo/.gitleaks.toml --exit-code 1 --redact --no-banner
 
   # ---------------------------------------------------------------------------
+  # Integracion NestJS <-> FastAPI con el servicio Python real
+  # Levanta uvicorn con la app de produccion (app.main) y un transporte simulado
+  # que sirve los fixtures de las tiendas; luego corre pruebas de Jest del cliente
+  # HTTP real del backend. No usa base de datos ni accede a internet.
+  # ---------------------------------------------------------------------------
+  integracion-python:
+    name: Integracion NestJS - FastAPI (servicio Python real)
+    runs-on: ubuntu-latest
+    env:
+      PYTHON_SERVICE_URL: http://127.0.0.1:8000
+    steps:
+      - name: Obtener el codigo fuente
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.14"
+          cache: "pip"
+          cache-dependency-path: python-service/requirements-dev.txt
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "24"
+          cache: "npm"
+          cache-dependency-path: backend/package-lock.json
+
+      # El servidor de integracion reutiliza los fixtures de las pruebas (tests/conftest.py,
+      # que importa pytest), por eso se instalan tambien las dependencias de desarrollo.
+      - name: Instalar dependencias de Python
+        working-directory: python-service
+        run: pip install -r requirements-dev.txt
+
+      - name: Instalar dependencias del backend
+        working-directory: backend
+        run: npm ci
+
+      - name: Levantar el servicio Python y correr las pruebas de integracion
+        run: |
+          cd python-service
+          uvicorn tests.servidor_integracion:app --host 127.0.0.1 --port 8000 > ../uvicorn.log 2>&1 &
+          SERVIDOR=$!
+          trap 'kill "$SERVIDOR" 2>/dev/null || true' EXIT
+          HEALTH_ATTEMPTS=20 HEALTH_INTERVAL=1 bash ../.github/scripts/health-check.sh http://127.0.0.1:8000/health ok \
+            || { echo "El servicio Python no arranco:"; cat ../uvicorn.log; exit 1; }
+          cd ../backend
+          npx jest --config ./test/jest-integration.json \
+            || { echo "Log del servicio Python:"; cat ../uvicorn.log; exit 1; }
+
+  # ---------------------------------------------------------------------------
+  # Infraestructura como codigo: formato y validacion de Terraform
+  # No se ejecuta plan ni apply (no hay credenciales de Render en este job).
+  # ---------------------------------------------------------------------------
+  terraform:
+    name: Terraform - fmt y validate
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: infra
+    steps:
+      - name: Obtener el codigo fuente
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Configurar Terraform
+        uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3
+        with:
+          terraform_version: "~> 1.9"
+          terraform_wrapper: false
+
+      - name: Formato (terraform fmt)
+        run: terraform fmt -check -recursive
+
+      - name: Inicializar sin backend
+        run: terraform init -backend=false -input=false
+
+      - name: Validar (terraform validate)
+        run: terraform validate
+
+  # ---------------------------------------------------------------------------
   # Construccion y analisis de vulnerabilidades de imagenes Docker
   # (solo si todo lo anterior paso: quality gate)
   # ---------------------------------------------------------------------------
   docker-images:
     name: Build y escaneo de imagenes Docker
     runs-on: ubuntu-latest
-    needs: [backend, frontend, python-service, secrets-scan]
+    needs: [backend, migraciones, frontend, python-service, integracion-python, terraform, secrets-scan]
     strategy:
       matrix:
         service: [backend, frontend, python-service]
     steps:
       - name: Obtener el codigo fuente
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: Construir imagen de ${{ matrix.service }}
         run: docker build -t menusmart-${{ matrix.service }}:${{ github.sha }} ./${{ matrix.service }}
 
       - name: Escaneo de vulnerabilidades (Trivy)
-        uses: aquasecurity/trivy-action@v0.36.0
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           image-ref: menusmart-${{ matrix.service }}:${{ github.sha }}
           format: table
@@ -192,3 +367,95 @@ jobs:
           exit-code: "1"
           ignore-unfixed: true
           trivyignores: .trivyignore
+
+  # ---------------------------------------------------------------------------
+  # Despliegue automatico a staging (Render) y health checks posteriores.
+  # Solo en push a develop y solo si TODOS los jobs anteriores pasaron.
+  # Detalle, secrets y rollback: docs/pipeline-y-staging.md
+  # ---------------------------------------------------------------------------
+  deploy-staging:
+    name: Desplegar a staging y verificar salud
+    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+    runs-on: ubuntu-latest
+    needs:
+      - backend
+      - migraciones
+      - frontend
+      - python-service
+      - integracion-python
+      - terraform
+      - secrets-scan
+      - docker-images
+    environment:
+      name: staging
+      url: ${{ vars.STAGING_FRONTEND_URL }}
+    # Un solo despliegue a la vez; uno en curso nunca se cancela a la mitad.
+    concurrency:
+      group: staging-deploy
+      cancel-in-progress: false
+    permissions:
+      contents: read
+    timeout-minutes: 45
+    env:
+      RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+      SERVICE_ID_PYTHON: ${{ vars.RENDER_SERVICE_ID_PYTHON }}
+      SERVICE_ID_BACKEND: ${{ vars.RENDER_SERVICE_ID_BACKEND }}
+      SERVICE_ID_FRONTEND: ${{ vars.RENDER_SERVICE_ID_FRONTEND }}
+      BACKEND_URL: ${{ vars.STAGING_BACKEND_URL }}
+      FRONTEND_URL: ${{ vars.STAGING_FRONTEND_URL }}
+      PYTHON_URL: ${{ vars.STAGING_PYTHON_URL }}
+    steps:
+      - name: Obtener el codigo fuente (solo para los scripts de despliegue)
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Verificar la configuracion de staging
+        run: |
+          faltantes=""
+          [ -n "$RENDER_API_KEY" ] || faltantes="$faltantes RENDER_API_KEY(secret)"
+          [ -n "$SERVICE_ID_PYTHON" ] || faltantes="$faltantes RENDER_SERVICE_ID_PYTHON"
+          [ -n "$SERVICE_ID_BACKEND" ] || faltantes="$faltantes RENDER_SERVICE_ID_BACKEND"
+          [ -n "$SERVICE_ID_FRONTEND" ] || faltantes="$faltantes RENDER_SERVICE_ID_FRONTEND"
+          [ -n "$BACKEND_URL" ] || faltantes="$faltantes STAGING_BACKEND_URL"
+          [ -n "$FRONTEND_URL" ] || faltantes="$faltantes STAGING_FRONTEND_URL"
+          if [ -n "$faltantes" ]; then
+            echo "Falta configurar en el environment staging:$faltantes" >&2
+            exit 1
+          fi
+
+      # Orden: Python -> backend -> frontend. El backend depende del servicio
+      # Python y el frontend depende del backend (proxy /api/). Todos reciben el
+      # mismo SHA para que el ambiente quede consistente y sea reproducible.
+      - name: Desplegar servicio Python
+        run: bash .github/scripts/render-deploy.sh "$SERVICE_ID_PYTHON" "$GITHUB_SHA"
+
+      - name: Desplegar backend
+        run: bash .github/scripts/render-deploy.sh "$SERVICE_ID_BACKEND" "$GITHUB_SHA"
+
+      - name: Desplegar frontend
+        run: bash .github/scripts/render-deploy.sh "$SERVICE_ID_FRONTEND" "$GITHUB_SHA"
+
+      # /health del backend responde 200 aun degradado; por eso se exige
+      # status=ok, que incluye PostgreSQL y el servicio Python (privado en Render,
+      # no alcanzable desde GitHub, asi que se verifica a traves del backend).
+      - name: Health check del backend (/health, con PostgreSQL y servicio Python)
+        run: bash .github/scripts/health-check.sh "$BACKEND_URL/health" ok
+
+      - name: Health check del frontend
+        run: bash .github/scripts/health-check.sh "$FRONTEND_URL/"
+
+      - name: Health check del proxy frontend a backend (/api/)
+        run: bash .github/scripts/health-check.sh "$FRONTEND_URL/api/"
+
+      - name: Health check directo del servicio Python (/health, opcional)
+        if: ${{ vars.STAGING_PYTHON_URL != '' }}
+        run: bash .github/scripts/health-check.sh "$PYTHON_URL/health" ok
+
+      - name: Resumen
+        if: always()
+        run: |
+          {
+            echo "### Despliegue a staging"
+            echo "- Commit: \`$GITHUB_SHA\`"
+            echo "- Resultado: ${{ job.status }}"
+            echo "- Rollback: ver docs/pipeline-y-staging.md (workflow Rollback de staging)"
+          } >> "$GITHUB_STEP_SUMMARY"

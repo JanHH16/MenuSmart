@@ -30,15 +30,21 @@ export class DetalleComidaPage implements OnInit {
 
   comida?: Comida;
 
-  ngOnInit(): void {
+  cargando = true;
+  error = '';
+
+  async ngOnInit(): Promise<void> {
     const id = this.route.snapshot.paramMap.get('id');
-    this.comida = id ? this.planSemanalService.getComida(id) : undefined;
+    this.comida = id ? await this.planSemanalService.obtenerComida(id) : undefined;
+    this.cargando = false;
+    this.cdr.detectChanges();
   }
 
   async cambiarFoto(): Promise<void> {
     const foto = await this.photoService.elegirFoto();
     if (foto && this.comida) {
       this.comida.foto = foto;
+      this.planSemanalService.setFoto(this.comida.id, foto);
     }
     // Este proyecto corre sin zone.js (angular.json: "polyfills": []), así
     // que Angular no se entera solo de que una promesa ajena a un evento de
@@ -58,24 +64,48 @@ export class DetalleComidaPage implements OnInit {
     await modal.present();
     const { data, role } = await modal.onWillDismiss<IngredienteFormValue>();
     if (role === 'confirm' && data) {
-      this.planSemanalService.agregarIngrediente(this.comida.id, data);
+      const comida = this.comida;
+      await this.ejecutar(async () => {
+        this.comida = await this.planSemanalService.agregarIngrediente(comida, data);
+      }, 'No se pudo agregar el ingrediente.');
     }
     this.cdr.detectChanges();
   }
 
-  eliminarIngrediente(ingredienteId: string): void {
+  async eliminarIngrediente(ingredienteId: string): Promise<void> {
     if (!this.comida) {
       return;
     }
-    this.planSemanalService.eliminarIngrediente(this.comida.id, ingredienteId);
+    const comida = this.comida;
+    await this.ejecutar(async () => {
+      this.comida = await this.planSemanalService.eliminarIngrediente(comida, ingredienteId);
+    }, 'No se pudo quitar el ingrediente.');
+    this.cdr.detectChanges();
   }
 
   volver(): void {
     this.router.navigateByUrl('/tabs/plan-semanal');
   }
 
-  guardar(): void {
-    // TODO: persistir cambios cuando exista el endpoint real de comidas.
-    this.volver();
+  async guardar(): Promise<void> {
+    if (!this.comida) {
+      return;
+    }
+    const { id, nombre, tipo, dia, notas } = this.comida;
+    await this.ejecutar(async () => {
+      await this.planSemanalService.guardarCambios(id, { nombre, tipo, dia, notas: notas ?? '' });
+      this.volver();
+    }, 'No se pudieron guardar los cambios.');
+    this.cdr.detectChanges();
+  }
+
+  /** Corre una acción contra el servidor y deja el mensaje de error visible si falla. */
+  private async ejecutar(accion: () => Promise<void>, mensajeError: string): Promise<void> {
+    this.error = '';
+    try {
+      await accion();
+    } catch {
+      this.error = mensajeError;
+    }
   }
 }

@@ -1,0 +1,514 @@
+// Sugerencias de recetas. Mismo lenguaje "libreta y boleta" que el resto del plan:
+// tarjetas de papel con franja azul, etiquetas mono y botones de boleta.
+
+// ---------------------------------------------------------------------------
+// Foco visible en todos los controles de la pantalla (teclado).
+// ---------------------------------------------------------------------------
+.ms-sug-chip:focus-visible,
+.ms-sug-boton:focus-visible,
+.ms-sug-enlace:focus-visible,
+.ms-sug-switch:focus-visible,
+.ms-sug-rango:focus-visible,
+.ms-sug-mas:focus-visible,
+.ms-sug-excluir-resumen:focus-visible,
+.ms-sug-como-resumen:focus-visible,
+.ms-sug-ingredientes summary:focus-visible,
+.ms-volver-desktop:focus-visible {
+  outline: 3px solid var(--ms-tinta-azul);
+  outline-offset: 2px;
+}
+
+// ---------------------------------------------------------------------------
+// Controles
+// ---------------------------------------------------------------------------
+.ms-sug-controles {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.ms-sug-control {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.ms-sug-control-titulo {
+  font-family: var(--ms-font-boleta);
+  font-weight: 700;
+  font-size: 11px;
+  line-height: 16px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ms-tinta-oscura);
+}
+
+.ms-sug-ayuda {
+  margin: 0;
+  font-size: 12px;
+  line-height: 17px;
+  color: var(--ms-texto-suave);
+}
+
+// Interruptor accesible: es un checkbox nativo con role="switch".
+.ms-sug-control--switch {
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.ms-sug-switch-texto {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  cursor: pointer;
+}
+
+.ms-sug-switch {
+  appearance: none;
+  -webkit-appearance: none;
+  position: relative;
+  flex-shrink: 0;
+  width: 44px;
+  height: 24px;
+  margin: 0;
+  border-radius: 12px;
+  border: 1.5px solid var(--ms-tinta-oscura);
+  background: var(--ms-papel-oscuro);
+  cursor: pointer;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 17px;
+    height: 17px;
+    border-radius: 50%;
+    border: 1.5px solid var(--ms-tinta-oscura);
+    background: var(--ms-papel-hoja);
+    transition: transform 0.15s ease;
+  }
+
+  &:checked {
+    background: var(--ms-tinta-azul);
+  }
+
+  &:checked::after {
+    transform: translateX(20px);
+  }
+}
+
+.ms-sug-rango {
+  width: 100%;
+  margin: 4px 0 0;
+  accent-color: var(--ms-tinta-azul);
+  cursor: pointer;
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+}
+
+.ms-sug-rango-extremos {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-family: var(--ms-font-boleta);
+  font-size: 10px;
+  color: var(--ms-texto-suave);
+}
+
+.ms-sug-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ms-sug-chip {
+  min-height: 36px;
+  padding: 0 12px;
+  cursor: pointer;
+}
+
+.ms-sug-excluir {
+  border-top: 1px dashed var(--ms-lapiz);
+  padding-top: 14px;
+
+  .ms-sug-ayuda {
+    margin: 8px 0;
+  }
+}
+
+.ms-sug-excluir-resumen,
+.ms-sug-como-resumen {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  cursor: pointer;
+  list-style: none;
+
+  &::-webkit-details-marker {
+    display: none;
+  }
+
+  &::after {
+    content: '+';
+    font-family: var(--ms-font-boleta);
+    font-weight: 700;
+    color: var(--ms-tinta-azul);
+  }
+}
+
+details[open] > .ms-sug-excluir-resumen::after,
+details[open] > .ms-sug-como-resumen::after {
+  content: '-';
+}
+
+.ms-sug-excluir-resumen {
+  justify-content: flex-start;
+
+  &::after {
+    margin-left: auto;
+  }
+}
+
+.ms-sug-enlace {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 12px;
+  color: var(--ms-tinta-azul);
+  text-decoration: underline;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Cómo se calcula
+// ---------------------------------------------------------------------------
+.ms-sug-como {
+  margin-top: 20px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--ms-lapiz);
+}
+
+.ms-sug-como-resumen {
+  font-family: var(--ms-font-boleta);
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ms-tinta-azul);
+}
+
+.ms-sug-como-cuerpo {
+  margin-top: 10px;
+  font-size: 13px;
+  line-height: 19px;
+  color: var(--ms-tinta-oscura);
+
+  h3 {
+    margin: 14px 0 4px;
+    font-family: var(--ms-font-boleta);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ms-texto-suave);
+  }
+
+  p {
+    margin: 0;
+  }
+
+  ul {
+    margin: 0;
+    padding-left: 18px;
+  }
+
+  li + li {
+    margin-top: 6px;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Avisos y estados
+// ---------------------------------------------------------------------------
+.ms-sug-aviso {
+  // Pegado arriba para verlo aunque la lista esté desplazada.
+  position: sticky;
+  top: 8px;
+  z-index: 5;
+  box-shadow: var(--ms-sombra-suave);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 0 16px;
+  padding: 10px 14px;
+  border: 1.5px solid var(--ms-timbre-verde);
+  border-radius: 6px;
+  background: var(--ms-papel-hoja);
+  font-size: 13px;
+  color: var(--ms-timbre-verde);
+
+  &--error {
+    border-color: var(--ms-margen-rojo);
+    color: #a8321f;
+  }
+}
+
+.ms-sug-estado {
+  margin: 0 0 12px;
+  font-size: 14px;
+  color: var(--ms-texto-suave);
+
+  p {
+    margin: 0 0 12px;
+  }
+}
+
+.ms-sug-contexto {
+  margin: 0 0 10px;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--ms-texto-suave);
+}
+
+// ---------------------------------------------------------------------------
+// Tarjetas
+// ---------------------------------------------------------------------------
+.ms-sug-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+// Boleta blanca con franja azul a la izquierda (como las comidas del plan).
+.ms-sug-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px 18px 16px 22px;
+  border: 1.2px solid var(--ms-tinta-oscura);
+  border-radius: 4px;
+  background: #ffffff;
+  box-shadow:
+    inset 4px 0 0 0 var(--ms-tinta-azul),
+    2px 2px 0 0 var(--ms-tinta-oscura);
+}
+
+.ms-sug-card-encabezado {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.ms-sug-card-titulo {
+  margin: 6px 0 0;
+  font-family: var(--ms-font-libreta);
+  font-weight: 700;
+  font-size: 26px;
+  line-height: 28px;
+  color: var(--ms-tinta-azul);
+}
+
+.ms-sug-meta {
+  margin: 2px 0 0;
+  font-family: var(--ms-font-boleta);
+  font-size: 11px;
+  color: var(--ms-texto-suave);
+}
+
+.ms-sug-tag-plan {
+  margin-left: 6px;
+  border-color: var(--ms-timbre-verde);
+  color: var(--ms-timbre-verde);
+}
+
+.ms-sug-costo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  flex-shrink: 0;
+  text-align: right;
+}
+
+.ms-sug-costo-valor {
+  font-weight: 700;
+  font-size: 22px;
+  line-height: 26px;
+  color: var(--ms-tinta-oscura);
+}
+
+.ms-sug-costo-etiqueta {
+  font-family: var(--ms-font-boleta);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ms-texto-suave);
+}
+
+.ms-sug-tiendas {
+  margin: 0;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--ms-tinta-oscura);
+}
+
+.ms-sug-porque-titulo {
+  margin: 4px 0 0;
+  font-family: var(--ms-font-boleta);
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ms-texto-suave);
+}
+
+.ms-sug-porque {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 13px;
+  line-height: 19px;
+  color: var(--ms-tinta-oscura);
+
+  li + li {
+    margin-top: 3px;
+  }
+}
+
+.ms-sug-compartidos {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+}
+
+.ms-sug-chips-lista {
+  display: contents;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ms-sug-chip-compartido {
+  padding: 2px 8px;
+  border-radius: 20px;
+  background: var(--ms-marcador);
+  font-family: var(--ms-font-boleta);
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ms-tinta-oscura);
+  list-style: none;
+}
+
+.ms-sug-sin-precio {
+  margin: 0;
+  padding: 6px 10px;
+  border-left: 3px solid var(--ms-margen-rojo);
+  background: rgba(224, 98, 79, 0.08);
+  font-size: 12px;
+  line-height: 17px;
+  color: #a8321f;
+}
+
+.ms-sug-ingredientes {
+  font-size: 12px;
+
+  summary {
+    cursor: pointer;
+    font-family: var(--ms-font-boleta);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--ms-tinta-azul);
+  }
+
+  ul {
+    margin: 8px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  li {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 3px 0;
+    border-bottom: 1px dotted var(--ms-renglon);
+  }
+}
+
+.ms-sug-dias {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1.5px dashed var(--ms-tinta-azul);
+  border-radius: 6px;
+}
+
+.ms-sug-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.ms-sug-boton {
+  min-height: 40px;
+  padding: 0 16px;
+  cursor: pointer;
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+}
+
+.ms-sug-mas {
+  width: 100%;
+  min-height: 44px;
+  margin-top: 16px;
+  cursor: pointer;
+}
+
+// ---------------------------------------------------------------------------
+// Estructura desktop y mobile
+// ---------------------------------------------------------------------------
+.ms-sug-desktop-header {
+  margin: 12px 0 20px;
+}
+
+.ms-sug-desktop-columnas {
+  display: grid;
+  grid-template-columns: minmax(280px, 340px) minmax(0, 1fr);
+  gap: 28px;
+  align-items: start;
+}
+
+.ms-sug-panel {
+  position: sticky;
+  top: 16px;
+  padding: 20px;
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+}
+
+.ms-sug-panel-mobile {
+  margin: 16px 0 20px;
+  padding-right: 16px;
+}

@@ -3,7 +3,7 @@
 .ms-tab-bar {
   --background: var(--ms-papel-hoja);
   --border: 1.5px solid #dccdb0;
-  --color: var(--ms-lapiz);
+  --color: var(--ms-texto-suave);
   --color-selected: var(--ms-tinta-azul);
   height: 76px;
 
@@ -19,7 +19,7 @@
     line-height: 14px;
     letter-spacing: 0.04em;
     text-transform: uppercase;
-    color: var(--ms-lapiz);
+    color: var(--ms-texto-suave);
   }
 
   // Tab activa: etiqueta en negrita tinta oscura con el marcador amarillo

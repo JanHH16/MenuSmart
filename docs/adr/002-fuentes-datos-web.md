@@ -59,6 +59,7 @@ Jumbo/Santa Isabel). Líder queda descartado del proyecto.
   es directa (mismo formato de página, mismo tipo de identificador de producto).
 - Si Jumbo o Santa Isabel cambian su `robots.txt` o estructura HTML durante el semestre,
   este ADR debe revisarse: el scraper es frágil a cambios de estructura de página.
-- **Pendiente de implementación (Fase 6 / EP2):** el módulo de scraping en sí todavía no
-  existe en `python-service/`; hoy el servicio Python solo tiene el endpoint de
-  normalización de ingredientes. Este ADR fija la decisión antes de construirlo.
+- **Actualización (2026-11-22):** el módulo de scraping ya existe en
+  `python-service/app/scrapers/` y el método elegido está en el
+  [ADR-003](003-metodo-scraping.md). Este ADR fijó la decisión de fuentes antes de
+  construirlo; el texto original de esta consecuencia decía que el scraper estaba pendiente.

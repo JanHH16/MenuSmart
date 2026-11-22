@@ -32,11 +32,20 @@ staging:
 - `terraform plan` (creación desde cero) también corre limpio **sin necesitar credenciales
   reales de Render**. Terraform no necesita autenticarse contra la API para planificar
   recursos que aún no existen, solo para leer/aplicar contra recursos reales.
-- **Pendiente (no bloqueante para EP1):** `frontend/nginx.conf` resuelve el backend como
-  `http://backend:3000`, nombre de servicio válido en Docker Compose pero no en la red de
-  Render. Antes de un despliegue real hay que verificar con una cuenta de Render cómo
-  resolver el backend desde el frontend (URL pública vs. red privada equivalente) y
-  parametrizar `nginx.conf` en lugar de dejarlo hardcodeado.
 - `terraform apply` no se ha ejecutado. Requiere una cuenta real de Render con API key,
   y aplicar cambios de infraestructura debe hacerse de forma controlada (sección 9 del
   enunciado), no como parte de esta entrega preliminar.
+
+## Actualización (Fase 5, 2026-11-21)
+
+Dos puntos de esta decisión cambiaron al construir el despliegue automático. El detalle
+operativo está en [`docs/pipeline-y-staging.md`](../pipeline-y-staging.md).
+
+- **Proxy del frontend resuelto.** `frontend/nginx.conf` pasó a ser una plantilla
+  (`nginx.conf.template`) que lee `BACKEND_URL` al arrancar. En Docker Compose vale
+  `http://backend:3000`; en Render es la URL pública del backend, que Terraform inyecta.
+  Deja de estar pendiente el hostname hardcodeado.
+- **`auto_deploy = false` en los tres servicios.** Antes Render desplegaba por su cuenta en
+  cada push. Ahora el único camino a staging es el job `deploy-staging` del CI, que
+  despliega después de que pasan las pruebas y a un commit exacto, y permite rollback por
+  SHA. Render sigue siendo la plataforma; solo cambia quién dispara el despliegue.

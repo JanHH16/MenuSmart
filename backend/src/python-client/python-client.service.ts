@@ -1,7 +1,24 @@
-import { HttpException, Injectable, Logger, ServiceUnavailableException } from '@nestjs/common';
+import {
+  BadGatewayException,
+  HttpException,
+  Injectable,
+  Logger,
+  ServiceUnavailableException,
+} from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
-import { AxiosError } from 'axios';
+import { AxiosError, isAxiosError } from 'axios';
 import { catchError, firstValueFrom, timeout } from 'rxjs';
+import { obtenerRequestId } from '../observability/request-context';
+import { InvalidScrapeResponseError, parseScrapeResponse } from './scrape-response';
+import { ScrapeSearchOptions, ScrapeSearchRequest, ScrapeSearchResult } from './scrape.types';
+
+/** Cabecera con el id de la solicitud en curso, para seguirla de NestJS a Python. */
+function cabecerasDeTrazabilidad(): Record<string, string> | undefined {
+  const requestId = obtenerRequestId();
+  return requestId ? { 'X-Request-ID': requestId } : undefined;
+}
+
+const esperar = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
 export interface RawIngredientInput {
   name: string;
@@ -13,6 +30,13 @@ export interface NormalizedIngredient {
   name: string;
   quantity: number;
   unit: string;
+  /** Término del catálogo de precios al que se mapeó, o null si no hubo coincidencia. */
+  term?: string | null;
+  category?: string | null;
+  /** Reglas aplicadas (mapeo de nombre, conversión de unidad, equivalencias). */
+  rules?: string[];
+  original_names?: string[];
+  merged_lines?: number;
 }
 
 export interface NormalizeResponse {
@@ -29,7 +53,11 @@ export class PythonClientService {
 
   async normalizeIngredients(ingredients: RawIngredientInput[]): Promise<NormalizeResponse> {
     const request$ = this.httpService
-      .post<NormalizeResponse>('/ingredients/normalize', { ingredients })
+      .post<NormalizeResponse>(
+        '/ingredients/normalize',
+        { ingredients },
+        { headers: cabecerasDeTrazabilidad() },
+      )
       .pipe(
         timeout(5000),
         catchError((error: AxiosError) => {
@@ -54,5 +82,57 @@ export class PythonClientService {
 
     const response = await firstValueFrom(request$);
     return response.data;
+  }
+
+  /**
+   * Pide al servicio Python buscar precios en una tienda. Reintenta de forma limitada solo
+   * cuando no hubo respuesta (servicio caído o timeout); si Python respondió con error o con
+   * una respuesta que no cumple el contrato, no reintenta y lo informa.
+   */
+  async scrapeSearch(
+    request: ScrapeSearchRequest,
+    options: ScrapeSearchOptions = {},
+  ): Promise<ScrapeSearchResult> {
+    const { timeoutMs = 120_000, retries = 1, retryDelayMs = 1000 } = options;
+
+    for (let intento = 0; ; intento++) {
+      try {
+        const response = await firstValueFrom(
+          this.httpService
+            .post<unknown>('/scrape/search', request, {
+              timeout: timeoutMs,
+              headers: cabecerasDeTrazabilidad(),
+            })
+            .pipe(timeout(timeoutMs + 1000)),
+        );
+        try {
+          return parseScrapeResponse(response.data);
+        } catch (error) {
+          if (error instanceof InvalidScrapeResponseError) {
+            this.logger.error(`Respuesta inválida del servicio de precios: ${error.message}`);
+            throw new BadGatewayException('El servicio de precios devolvió una respuesta inválida.');
+          }
+          throw error;
+        }
+      } catch (error) {
+        if (error instanceof HttpException) throw error;
+        if (isAxiosError(error) && error.response) {
+          this.logger.warn(`El servicio de precios respondió con error ${error.response.status}`);
+          throw new HttpException(
+            error.response.data ?? 'Error en el servicio de precios',
+            error.response.status,
+          );
+        }
+        if (intento < retries) {
+          this.logger.warn(`Sin respuesta del servicio de precios, reintentando (${intento + 1})`);
+          await esperar(retryDelayMs);
+          continue;
+        }
+        this.logger.error('El servicio de precios no responde');
+        throw new ServiceUnavailableException(
+          'El servicio de precios no está disponible en este momento.',
+        );
+      }
+    }
   }
 }

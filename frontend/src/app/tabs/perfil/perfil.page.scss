@@ -109,7 +109,7 @@
   font-family: var(--ms-font-boleta);
   font-size: 13px;
   line-height: 19px;
-  color: var(--ms-lapiz);
+  color: var(--ms-texto-suave);
 }
 
 .ms-perfil-usuario-punteada {
@@ -144,7 +144,7 @@
   font-size: 9px;
   line-height: 14px;
   text-transform: uppercase;
-  color: var(--ms-lapiz);
+  color: var(--ms-texto-suave);
 }
 
 // button('Cerrar sesión', 28, 432, cw-56, 52, 'secondary', color margen).
@@ -152,7 +152,7 @@
   width: 100%;
   height: 52px;
   margin-top: 86px;
-  color: var(--ms-margen-rojo);
+  color: var(--ion-color-danger);
 }
 
 .ms-perfil-desktop-derecha {
@@ -218,7 +218,7 @@
 .ms-perfil-pref-tag {
   margin-top: 14px;
   border-color: var(--ms-lapiz);
-  color: var(--ms-lapiz);
+  color: var(--ms-texto-suave);
 }
 
 .ms-perfil-pref-fila {

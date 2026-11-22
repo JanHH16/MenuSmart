@@ -41,19 +41,21 @@ export class AgregarComidaPage {
   // id real) al presionar "Guardar comida".
   ingredientes: IngredienteFormValue[] = [];
 
-  readonly comidasGuardadas = this.planSemanalService.getComidasGuardadas();
+  readonly comidasGuardadas = this.planSemanalService.comidasGuardadas;
+  guardando = false;
+  error = '';
   busqueda = '';
 
   get puedeGuardar(): boolean {
-    return this.nombre.trim().length > 0;
+    return this.nombre.trim().length > 0 && !this.guardando;
   }
 
   get comidasGuardadasFiltradas(): ComidaGuardada[] {
     const q = this.busqueda.trim().toLowerCase();
     if (!q) {
-      return this.comidasGuardadas;
+      return this.comidasGuardadas();
     }
-    return this.comidasGuardadas.filter((comida) => comida.nombre.toLowerCase().includes(q));
+    return this.comidasGuardadas().filter((comida) => comida.nombre.toLowerCase().includes(q));
   }
 
   async elegirFoto(): Promise<void> {
@@ -85,30 +87,43 @@ export class AgregarComidaPage {
     this.ingredientes.splice(index, 1);
   }
 
-  guardar(): void {
+  async guardar(): Promise<void> {
     if (!this.puedeGuardar) {
       return;
     }
-    const comida = this.planSemanalService.crearComida({
-      nombre: this.nombre.trim(),
-      dia: this.diaSeleccionado,
-      tipo: this.tipoSeleccionado,
-      foto: this.foto,
-      notas: this.notas.trim() || undefined,
-    });
-    for (const ingrediente of this.ingredientes) {
-      this.planSemanalService.agregarIngrediente(comida.id, ingrediente);
+    this.guardando = true;
+    this.error = '';
+    try {
+      await this.planSemanalService.crearComida({
+        nombre: this.nombre.trim(),
+        dia: this.diaSeleccionado,
+        tipo: this.tipoSeleccionado,
+        foto: this.foto,
+        notas: this.notas.trim() || undefined,
+        ingredientes: this.ingredientes,
+      });
+      this.volver();
+    } catch {
+      this.error = 'No se pudo guardar la comida. Revisa tu conexión e intenta de nuevo.';
+    } finally {
+      this.guardando = false;
+      this.cdr.detectChanges();
     }
-    this.volver();
   }
 
   nombresIngredientes(guardada: ComidaGuardada): string {
     return guardada.ingredientes.map((ingrediente) => ingrediente.nombre).join(', ');
   }
 
-  usarComidaGuardada(guardada: ComidaGuardada): void {
-    this.planSemanalService.reutilizarComida(guardada, this.diaSeleccionado, this.tipoSeleccionado);
-    this.volver();
+  async usarComidaGuardada(guardada: ComidaGuardada): Promise<void> {
+    this.error = '';
+    try {
+      await this.planSemanalService.reutilizarComida(guardada, this.diaSeleccionado, this.tipoSeleccionado);
+      this.volver();
+    } catch {
+      this.error = 'No se pudo agregar la comida. Revisa tu conexión e intenta de nuevo.';
+      this.cdr.detectChanges();
+    }
   }
 
   volver(): void {

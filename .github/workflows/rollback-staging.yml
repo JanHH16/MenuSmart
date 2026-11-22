@@ -1,0 +1,83 @@
+name: Rollback de staging
+
+# Redespliega en staging un commit anterior (por SHA) y verifica la salud.
+# Se ejecuta a mano: Actions > "Rollback de staging" > Run workflow.
+# No corre las pruebas: es para recuperar el ambiente lo antes posible.
+# Procedimiento completo: docs/pipeline-y-staging.md
+
+on:
+  workflow_dispatch:
+    inputs:
+      sha:
+        description: "SHA completo (40 caracteres) del commit a desplegar"
+        required: true
+        type: string
+      servicios:
+        description: "Que servicios redesplegar"
+        required: true
+        type: choice
+        default: todos
+        options:
+          - todos
+          - solo-backend
+          - solo-frontend
+          - solo-python
+
+permissions:
+  contents: read
+
+jobs:
+  rollback:
+    name: Redesplegar commit anterior en staging
+    runs-on: ubuntu-latest
+    environment:
+      name: staging
+      url: ${{ vars.STAGING_FRONTEND_URL }}
+    concurrency:
+      group: staging-deploy
+      cancel-in-progress: false
+    timeout-minutes: 45
+    env:
+      RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+      SERVICE_ID_PYTHON: ${{ vars.RENDER_SERVICE_ID_PYTHON }}
+      SERVICE_ID_BACKEND: ${{ vars.RENDER_SERVICE_ID_BACKEND }}
+      SERVICE_ID_FRONTEND: ${{ vars.RENDER_SERVICE_ID_FRONTEND }}
+      BACKEND_URL: ${{ vars.STAGING_BACKEND_URL }}
+      FRONTEND_URL: ${{ vars.STAGING_FRONTEND_URL }}
+      # Las entradas se pasan por variables de entorno (nunca interpoladas en el
+      # script) para evitar inyeccion de comandos.
+      SHA_OBJETIVO: ${{ inputs.sha }}
+      SERVICIOS: ${{ inputs.servicios }}
+    steps:
+      - name: Obtener el codigo fuente (solo para los scripts de despliegue)
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Validar el SHA indicado
+        run: |
+          if ! printf '%s' "$SHA_OBJETIVO" | grep -Eq '^[0-9a-f]{40}$'; then
+            echo "El SHA debe tener 40 caracteres hexadecimales en minuscula" >&2
+            exit 1
+          fi
+          git fetch --no-tags --depth=1 origin "$SHA_OBJETIVO" \
+            || { echo "El commit $SHA_OBJETIVO no existe en el repositorio" >&2; exit 1; }
+
+      - name: Redesplegar servicio Python
+        if: ${{ inputs.servicios == 'todos' || inputs.servicios == 'solo-python' }}
+        run: bash .github/scripts/render-deploy.sh "$SERVICE_ID_PYTHON" "$SHA_OBJETIVO"
+
+      - name: Redesplegar backend
+        if: ${{ inputs.servicios == 'todos' || inputs.servicios == 'solo-backend' }}
+        run: bash .github/scripts/render-deploy.sh "$SERVICE_ID_BACKEND" "$SHA_OBJETIVO"
+
+      - name: Redesplegar frontend
+        if: ${{ inputs.servicios == 'todos' || inputs.servicios == 'solo-frontend' }}
+        run: bash .github/scripts/render-deploy.sh "$SERVICE_ID_FRONTEND" "$SHA_OBJETIVO"
+
+      - name: Health check del backend (/health, con PostgreSQL y servicio Python)
+        run: bash .github/scripts/health-check.sh "$BACKEND_URL/health" ok
+
+      - name: Health check del frontend
+        run: bash .github/scripts/health-check.sh "$FRONTEND_URL/"
+
+      - name: Health check del proxy frontend a backend (/api/)
+        run: bash .github/scripts/health-check.sh "$FRONTEND_URL/api/"

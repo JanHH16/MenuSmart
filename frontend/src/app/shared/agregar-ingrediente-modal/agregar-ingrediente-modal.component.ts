@@ -1,5 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { ModalController } from '@ionic/angular/lazy';
+import { parsearCantidad } from '../../core/utils/cantidad';
 
 export interface IngredienteFormValue {
   nombre: string;
@@ -24,7 +25,8 @@ export class AgregarIngredienteModalComponent {
   cantidad = '';
 
   get esValido(): boolean {
-    return this.nombre.trim().length > 0 && this.cantidad.trim().length > 0;
+    // La cantidad debe empezar con un número ("400 g", "2 unid.") para poder sumarla y valorizarla.
+    return this.nombre.trim().length > 0 && parsearCantidad(this.cantidad) !== null;
   }
 
   cancelar(): void {

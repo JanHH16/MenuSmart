@@ -1,0 +1,1860 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/api": {
+      "get": {
+        "operationId": "AppController_getHello",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Mensaje de bienvenida de la API (sin autenticaciÃ³n)",
+        "tags": [
+          "observabilidad"
+        ]
+      }
+    },
+    "/api/metrics": {
+      "get": {
+        "description": "Valores desde el Ãºltimo arranque del servicio (viven en memoria).",
+        "operationId": "MetricsController_obtener",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "description": "Los datos enviados no son vÃ¡lidos"
+          },
+          "401": {
+            "description": "Falta el token de acceso o no es vÃ¡lido"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Tiempos de respuesta por ruta y resultado de las actualizaciones de precios",
+        "tags": [
+          "observabilidad"
+        ]
+      }
+    },
+    "/health": {
+      "get": {
+        "description": "Informa la base de datos y el servicio Python. `status` es `degraded` si alguna falla.",
+        "operationId": "HealthController_check",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Estado del servicio y de sus dependencias",
+        "tags": [
+          "observabilidad"
+        ]
+      }
+    },
+    "/api/users/me": {
+      "get": {
+        "description": "Correo, nombre y fecha de alta. Nunca incluye la contraseÃ±a ni su hash.",
+        "operationId": "UsersController_me",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Los datos enviados no son vÃ¡lidos"
+          },
+          "401": {
+            "description": "Falta el token de acceso o no es vÃ¡lido"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Datos personales que MenuSmart guarda de la cuenta",
+        "tags": [
+          "users"
+        ]
+      },
+      "delete": {
+        "description": "Exige la contraseÃ±a actual. Borra el usuario y, en cascada, sus comidas, ingredientes y listas de compra. No se puede deshacer; el token deja de servir de inmediato.",
+        "operationId": "UsersController_eliminar",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteAccountDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "400": {
+            "description": "Los datos enviados no son vÃ¡lidos"
+          },
+          "401": {
+            "description": "Falta el token de acceso o no es vÃ¡lido"
+          },
+          "403": {
+            "description": "La contraseÃ±a no coincide"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Elimina la cuenta y todos sus datos",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/api/auth/register": {
+      "post": {
+        "operationId": "AuthController_register",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "400": {
+            "description": "Datos invÃ¡lidos (contraseÃ±a de 8 a 72 caracteres con letra y nÃºmero)"
+          },
+          "409": {
+            "description": "Ya existe una cuenta con ese correo"
+          },
+          "429": {
+            "description": "Demasiados registros desde la misma direcciÃ³n"
+          }
+        },
+        "summary": "Crea una cuenta y entrega un token de acceso",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "operationId": "AuthController_login",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "401": {
+            "description": "Correo o contraseÃ±a incorrectos"
+          },
+          "429": {
+            "description": "Demasiados intentos desde la misma direcciÃ³n"
+          }
+        },
+        "summary": "Inicia sesiÃ³n y entrega un token de acceso",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/ingredients/normalize": {
+      "post": {
+        "description": "Limpia el nombre, lo mapea a un tÃ©rmino del catÃ¡logo de precios, convierte las cantidades a kg, l o un y une las lÃ­neas repetidas. Cada Ã­tem informa las reglas aplicadas. Lo resuelve el servicio Python.",
+        "operationId": "IngredientsController_normalize",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NormalizeIngredientsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Los datos enviados no son vÃ¡lidos"
+          },
+          "401": {
+            "description": "Falta el token de acceso o no es vÃ¡lido"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Normaliza ingredientes escritos libremente",
+        "tags": [
+          "ingredients"
+        ]
+      }
+    },
+    "/api/meals": {
+      "get": {
+        "description": "Sin `semana` devuelve la semana actual; con una fecha, la semana que la contiene.",
+        "operationId": "MealsController_listar",
+        "parameters": [
+          {
+            "name": "semana",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Comida"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Los datos enviados no son vÃ¡lidos"
+          },
+          "401": {
+            "description": "Falta el token de acceso o no es vÃ¡lido"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Comidas del plan semanal del usuario",
+        "tags": [
+          "meals"
+        ]
+      },
+      "post": {
+        "operationId": "MealsController_crear",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrearComidaDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Comida"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Los datos enviados no son vÃ¡lidos"
+          },
+          "401": {
+            "description": "Falta el token de acceso o no es vÃ¡lido"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Agrega una comida (con sus ingredientes) al plan semanal",
+        "tags": [
+          "meals"
+        ]
+      }
+    },
+    "/api/meals/{id}": {
+      "get": {
+        "operationId": "MealsController_obtener",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Comida"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Los datos enviados no son vÃ¡lidos"
+          },
+          "401": {
+            "description": "Falta el token de acceso o no es vÃ¡lido"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Detalle de una comida del usuario",
+        "tags": [
+          "meals"
+        ]
+      },
+      "patch": {
+        "description": "Si se envÃ­an `ingredientes`, reemplazan a los actuales.",
+        "operationId": "MealsController_actualizar",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ActualizarComidaDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Comida"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Los datos enviados no son vÃ¡lidos"
+          },
+          "401": {
+            "description": "Falta el token de acceso o no es vÃ¡lido"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Modifica una comida",
+        "tags": [
+          "meals"
+        ]
+      },
+      "delete": {
+        "operationId": "MealsController_eliminar",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "400": {
+            "description": "Los datos enviados no son vÃ¡lidos"
+          },
+          "401": {
+            "description": "Falta el token de acceso o no es vÃ¡lido"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Elimina una comida y sus ingredientes",
+        "tags": [
+          "meals"
+        ]
+      }
+    },
+    "/api/shopping-lists/generate": {
+      "post": {
+        "description": "Normaliza y suma los ingredientes de las comidas (servicio Python) y reemplaza la lista anterior de esa semana. Conserva lo ya marcado como comprado.",
+        "operationId": "ShoppingListsController_generar",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerarListaDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Los datos enviados no son vÃ¡lidos"
+          },
+          "401": {
+            "description": "Falta el token de acceso o no es vÃ¡lido"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Genera la lista de compras de la semana a partir del plan",
+        "tags": [
+          "shopping-lists"
+        ]
+      }
+    },
+    "/api/shopping-lists": {
+      "get": {
+        "description": "Los totales por tienda solo suman los items con precio en ambas tiendas; los demÃ¡s indican el motivo por el que no se pudieron valorizar.",
+        "operationId": "ShoppingListsController_obtener",
+        "parameters": [
+          {
+            "name": "semana",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Los datos enviados no son vÃ¡lidos"
+          },
+          "401": {
+            "description": "Falta el token de acceso o no es vÃ¡lido"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Lista de compras de la semana con el costo estimado en cada supermercado",
+        "tags": [
+          "shopping-lists"
+        ]
+      }
+    },
+    "/api/shopping-lists/items/{id}": {
+      "patch": {
+        "operationId": "ShoppingListsController_marcarComprado",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MarcarCompradoDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "400": {
+            "description": "Los datos enviados no son vÃ¡lidos"
+          },
+          "401": {
+            "description": "Falta el token de acceso o no es vÃ¡lido"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Marca o desmarca un item como comprado",
+        "tags": [
+          "shopping-lists"
+        ]
+      }
+    },
+    "/api/prices/catalog": {
+      "get": {
+        "operationId": "PricesController_catalog",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "description": "Los datos enviados no son vÃ¡lidos"
+          },
+          "401": {
+            "description": "Falta el token de acceso o no es vÃ¡lido"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "TÃ©rminos del catÃ¡logo que se buscan en cada tienda",
+        "tags": [
+          "prices"
+        ]
+      }
+    },
+    "/api/prices/refresh": {
+      "post": {
+        "description": "Crea una ejecuciÃ³n por tienda y responde de inmediato. Consultar el avance en GET /prices/runs/{id}. Responde 409 si ya hay una en curso y 429 si hubo una exitosa hace poco.",
+        "operationId": "PricesController_refresh",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshPricesDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EjecucionScraping"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Los datos enviados no son vÃ¡lidos"
+          },
+          "401": {
+            "description": "Falta el token de acceso o no es vÃ¡lido"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Inicia la actualizaciÃ³n de precios (segundo plano)",
+        "tags": [
+          "prices"
+        ]
+      }
+    },
+    "/api/prices/runs": {
+      "get": {
+        "operationId": "PricesController_runs",
+        "parameters": [
+          {
+            "name": "limite",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 50,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EjecucionScraping"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Los datos enviados no son vÃ¡lidos"
+          },
+          "401": {
+            "description": "Falta el token de acceso o no es vÃ¡lido"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Ãšltimas ejecuciones de actualizaciÃ³n",
+        "tags": [
+          "prices"
+        ]
+      }
+    },
+    "/api/prices/runs/{id}": {
+      "get": {
+        "operationId": "PricesController_run",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EjecucionScraping"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Los datos enviados no son vÃ¡lidos"
+          },
+          "401": {
+            "description": "Falta el token de acceso o no es vÃ¡lido"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Estado y mÃ©tricas de una ejecuciÃ³n",
+        "tags": [
+          "prices"
+        ]
+      }
+    },
+    "/api/prices/compare": {
+      "get": {
+        "description": "Mejor producto por precio unitario en cada tienda para cada tÃ©rmino, mÃ¡s los productos idÃ©nticos presentes en ambas tiendas. Indica la fecha de cada precio.",
+        "operationId": "PricesController_compare",
+        "parameters": [
+          {
+            "name": "terminos",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "maxItems": 40,
+              "uniqueItems": true,
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "arroz",
+                  "fideos",
+                  "harina",
+                  "azucar",
+                  "aceite",
+                  "sal",
+                  "lentejas",
+                  "porotos",
+                  "atun",
+                  "salsa de tomate",
+                  "pollo",
+                  "carne molida",
+                  "cerdo",
+                  "merluza",
+                  "salmon",
+                  "tomate",
+                  "cebolla",
+                  "papa",
+                  "zanahoria",
+                  "lechuga",
+                  "palta",
+                  "limon",
+                  "manzana",
+                  "platano",
+                  "zapallo",
+                  "leche",
+                  "huevos",
+                  "queso",
+                  "mantequilla",
+                  "yogurt",
+                  "pan"
+                ]
+              }
+            }
+          },
+          {
+            "name": "limiteComunes",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Los datos enviados no son vÃ¡lidos"
+          },
+          "401": {
+            "description": "Falta el token de acceso o no es vÃ¡lido"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Compara Jumbo y Santa Isabel",
+        "tags": [
+          "prices"
+        ]
+      }
+    },
+    "/api/prices/quality": {
+      "get": {
+        "description": "Porcentaje de registros vÃ¡lidos, duplicados y descartados, tasa de errores, tiempos, actualidad y cobertura del catÃ¡logo, por tienda.",
+        "operationId": "PricesController_quality",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Los datos enviados no son vÃ¡lidos"
+          },
+          "401": {
+            "description": "Falta el token de acceso o no es vÃ¡lido"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "MÃ©tricas de calidad de los datos recuperados",
+        "tags": [
+          "prices"
+        ]
+      }
+    },
+    "/api/recommendations": {
+      "get": {
+        "description": "Ordena por costo por porciÃ³n y por reutilizaciÃ³n de los ingredientes ya planificados. `pesoCosto` (0 a 100) fija la importancia del costo; `excluir` oculta recetas con esos ingredientes; `adaptativo=false` devuelve el orden base alfabÃ©tico, sin adaptaciÃ³n.",
+        "operationId": "RecommendationsController_recomendar",
+        "parameters": [
+          {
+            "name": "semana",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+              "type": "string"
+            }
+          },
+          {
+            "name": "pesoCosto",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 0,
+              "maximum": 100,
+              "type": "number"
+            }
+          },
+          {
+            "name": "excluir",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "arroz",
+                  "fideos",
+                  "harina",
+                  "azucar",
+                  "aceite",
+                  "sal",
+                  "lentejas",
+                  "porotos",
+                  "atun",
+                  "salsa de tomate",
+                  "pollo",
+                  "carne molida",
+                  "cerdo",
+                  "merluza",
+                  "salmon",
+                  "tomate",
+                  "cebolla",
+                  "papa",
+                  "zanahoria",
+                  "lechuga",
+                  "palta",
+                  "limon",
+                  "manzana",
+                  "platano",
+                  "zapallo",
+                  "leche",
+                  "huevos",
+                  "queso",
+                  "mantequilla",
+                  "yogurt",
+                  "pan"
+                ]
+              }
+            }
+          },
+          {
+            "name": "tipo",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "desayuno",
+                "almuerzo",
+                "cena"
+              ]
+            }
+          },
+          {
+            "name": "limite",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 30,
+              "type": "number"
+            }
+          },
+          {
+            "name": "adaptativo",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Los datos enviados no son vÃ¡lidos"
+          },
+          "401": {
+            "description": "Falta el token de acceso o no es vÃ¡lido"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Recetas sugeridas para la semana, con la explicaciÃ³n de cada una",
+        "tags": [
+          "recommendations"
+        ]
+      }
+    },
+    "/api/recommendations/accept": {
+      "post": {
+        "operationId": "RecommendationsController_aceptar",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AceptarRecomendacionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Comida"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Los datos enviados no son vÃ¡lidos"
+          },
+          "401": {
+            "description": "Falta el token de acceso o no es vÃ¡lido"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Acepta una sugerencia: la agrega al plan de la semana",
+        "tags": [
+          "recommendations"
+        ]
+      }
+    },
+    "/api/recommendations/reject": {
+      "post": {
+        "operationId": "RecommendationsController_rechazar",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RechazarRecomendacionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "400": {
+            "description": "Los datos enviados no son vÃ¡lidos"
+          },
+          "401": {
+            "description": "Falta el token de acceso o no es vÃ¡lido"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Rechaza una sugerencia: deja de mostrarse",
+        "tags": [
+          "recommendations"
+        ]
+      }
+    },
+    "/api/recommendations/feedback": {
+      "delete": {
+        "operationId": "RecommendationsController_restablecer",
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "400": {
+            "description": "Los datos enviados no son vÃ¡lidos"
+          },
+          "401": {
+            "description": "Falta el token de acceso o no es vÃ¡lido"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Vuelve a mostrar las sugerencias que se habÃ­an rechazado",
+        "tags": [
+          "recommendations"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "MenuSmart API",
+    "description": "API principal de MenuSmart: autenticaciÃ³n, normalizaciÃ³n de ingredientes y comparaciÃ³n de precios entre supermercados.",
+    "version": "0.2.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "securitySchemes": {
+      "bearer": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http"
+      }
+    },
+    "schemas": {
+      "ProfileDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "name",
+          "createdAt"
+        ]
+      },
+      "DeleteAccountDto": {
+        "type": "object",
+        "properties": {
+          "password": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 72,
+            "description": "ContraseÃ±a actual: confirma que quien borra la cuenta es su dueÃ±o"
+          }
+        },
+        "required": [
+          "password"
+        ]
+      },
+      "RegisterDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "maxLength": 254,
+            "format": "email",
+            "example": "ana@correo.cl"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 72,
+            "pattern": "[A-Za-z]",
+            "description": "Entre 8 y 72 caracteres, con al menos una letra y un nÃºmero"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 100,
+            "example": "Ana"
+          }
+        },
+        "required": [
+          "email",
+          "password",
+          "name"
+        ]
+      },
+      "LoginDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "maxLength": 254,
+            "format": "email",
+            "example": "ana@correo.cl"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 72
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      },
+      "RawIngredientDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "quantity": {
+            "type": "number",
+            "minimum": 1
+          },
+          "unit": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "name",
+          "quantity",
+          "unit"
+        ]
+      },
+      "NormalizeIngredientsDto": {
+        "type": "object",
+        "properties": {
+          "ingredients": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RawIngredientDto"
+            }
+          }
+        },
+        "required": [
+          "ingredients"
+        ]
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "passwordHash": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "passwordHash",
+          "name",
+          "createdAt"
+        ]
+      },
+      "Comida": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "usuario": {
+            "$ref": "#/components/schemas/User"
+          },
+          "usuarioId": {
+            "type": "string"
+          },
+          "nombre": {
+            "type": "string"
+          },
+          "tipo": {
+            "type": "string"
+          },
+          "diaSemana": {
+            "type": "string"
+          },
+          "semana": {
+            "type": "string"
+          },
+          "porciones": {
+            "type": "number"
+          },
+          "notas": {
+            "type": "string",
+            "nullable": true
+          },
+          "ingredientes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Ingrediente"
+            }
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "usuario",
+          "usuarioId",
+          "nombre",
+          "tipo",
+          "diaSemana",
+          "semana",
+          "porciones",
+          "notas",
+          "ingredientes",
+          "createdAt"
+        ]
+      },
+      "EjecucionScraping": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "tienda": {
+            "type": "string"
+          },
+          "estado": {
+            "type": "string"
+          },
+          "iniciadaEn": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "finalizadaEn": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "consultasTotal": {
+            "type": "number"
+          },
+          "consultasOk": {
+            "type": "number"
+          },
+          "consultasFallidas": {
+            "type": "number"
+          },
+          "registrosExtraidos": {
+            "type": "number"
+          },
+          "registrosValidos": {
+            "type": "number"
+          },
+          "registrosDuplicados": {
+            "type": "number"
+          },
+          "registrosDescartados": {
+            "type": "number"
+          },
+          "descartesPorMotivo": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "number"
+            }
+          },
+          "errores": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "duracionMs": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "tienda",
+          "estado",
+          "iniciadaEn",
+          "finalizadaEn",
+          "consultasTotal",
+          "consultasOk",
+          "consultasFallidas",
+          "registrosExtraidos",
+          "registrosValidos",
+          "registrosDuplicados",
+          "registrosDescartados",
+          "descartesPorMotivo",
+          "errores",
+          "duracionMs"
+        ]
+      },
+      "PrecioSupermercado": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "producto": {
+            "$ref": "#/components/schemas/Producto"
+          },
+          "productoId": {
+            "type": "string"
+          },
+          "supermercado": {
+            "type": "string"
+          },
+          "precio": {
+            "type": "number"
+          },
+          "fechaObtencion": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "fechaDia": {
+            "type": "string"
+          },
+          "consulta": {
+            "type": "string"
+          },
+          "precioUnitario": {
+            "type": "number",
+            "nullable": true
+          },
+          "disponible": {
+            "type": "boolean"
+          },
+          "urlProducto": {
+            "type": "string",
+            "nullable": true
+          },
+          "ejecucion": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EjecucionScraping"
+              }
+            ]
+          },
+          "ejecucionId": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "producto",
+          "productoId",
+          "supermercado",
+          "precio",
+          "fechaObtencion",
+          "fechaDia",
+          "consulta",
+          "precioUnitario",
+          "disponible",
+          "urlProducto",
+          "ejecucion",
+          "ejecucionId"
+        ]
+      },
+      "Producto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string",
+            "nullable": true
+          },
+          "nombreNormalizado": {
+            "type": "string"
+          },
+          "nombre": {
+            "type": "string",
+            "nullable": true
+          },
+          "marca": {
+            "type": "string",
+            "nullable": true
+          },
+          "categoria": {
+            "type": "string"
+          },
+          "imagenUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "cantidad": {
+            "type": "number",
+            "nullable": true
+          },
+          "unidad": {
+            "type": "string",
+            "nullable": true
+          },
+          "precios": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PrecioSupermercado"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "slug",
+          "nombreNormalizado",
+          "nombre",
+          "marca",
+          "categoria",
+          "imagenUrl",
+          "cantidad",
+          "unidad",
+          "precios"
+        ]
+      },
+      "Ingrediente": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "comida": {
+            "$ref": "#/components/schemas/Comida"
+          },
+          "comidaId": {
+            "type": "string"
+          },
+          "nombre": {
+            "type": "string"
+          },
+          "cantidad": {
+            "type": "number"
+          },
+          "unidad": {
+            "type": "string"
+          },
+          "producto": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Producto"
+              }
+            ]
+          },
+          "productoId": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "comida",
+          "comidaId",
+          "nombre",
+          "cantidad",
+          "unidad",
+          "producto",
+          "productoId"
+        ]
+      },
+      "IngredienteDto": {
+        "type": "object",
+        "properties": {
+          "nombre": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "cantidad": {
+            "type": "number",
+            "maximum": 100000,
+            "minimum": 1
+          },
+          "unidad": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 20
+          }
+        },
+        "required": [
+          "nombre",
+          "cantidad",
+          "unidad"
+        ]
+      },
+      "CrearComidaDto": {
+        "type": "object",
+        "properties": {
+          "nombre": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "desayuno",
+              "almuerzo",
+              "cena",
+              "colacion"
+            ]
+          },
+          "diaSemana": {
+            "type": "string",
+            "enum": [
+              "lunes",
+              "martes",
+              "miercoles",
+              "jueves",
+              "viernes",
+              "sabado",
+              "domingo"
+            ]
+          },
+          "semana": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          },
+          "porciones": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 50
+          },
+          "notas": {
+            "type": "string",
+            "maxLength": 500
+          },
+          "ingredientes": {
+            "maxItems": 50,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IngredienteDto"
+            }
+          }
+        },
+        "required": [
+          "nombre",
+          "tipo",
+          "diaSemana",
+          "ingredientes"
+        ]
+      },
+      "ActualizarComidaDto": {
+        "type": "object",
+        "properties": {
+          "nombre": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "desayuno",
+              "almuerzo",
+              "cena",
+              "colacion"
+            ]
+          },
+          "diaSemana": {
+            "type": "string",
+            "enum": [
+              "lunes",
+              "martes",
+              "miercoles",
+              "jueves",
+              "viernes",
+              "sabado",
+              "domingo"
+            ]
+          },
+          "porciones": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 50
+          },
+          "notas": {
+            "type": "string",
+            "maxLength": 500
+          },
+          "ingredientes": {
+            "maxItems": 50,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IngredienteDto"
+            }
+          }
+        }
+      },
+      "GenerarListaDto": {
+        "type": "object",
+        "properties": {
+          "semana": {
+            "type": "string"
+          }
+        }
+      },
+      "MarcarCompradoDto": {
+        "type": "object",
+        "properties": {
+          "comprado": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "comprado"
+        ]
+      },
+      "RefreshPricesDto": {
+        "type": "object",
+        "properties": {
+          "tiendas": {
+            "type": "array",
+            "uniqueItems": true,
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "enum": [
+                "jumbo",
+                "santa_isabel"
+              ]
+            }
+          }
+        }
+      },
+      "AceptarRecomendacionDto": {
+        "type": "object",
+        "properties": {
+          "recetaId": {
+            "type": "string",
+            "enum": [
+              "arroz-con-pollo",
+              "tallarines-con-salsa",
+              "lentejas-con-arroz",
+              "pastel-de-papas",
+              "cazuela-de-pollo",
+              "porotos-con-fideos",
+              "tortilla-de-papas",
+              "ensalada-chilena",
+              "pollo-al-horno",
+              "merluza-al-horno",
+              "salmon-con-arroz",
+              "hamburguesas-caseras",
+              "charquican",
+              "tortilla-de-verduras",
+              "atun-con-arroz",
+              "fideos-con-atun",
+              "sopa-de-zapallo",
+              "panqueques",
+              "yogurt-con-frutas",
+              "pan-con-palta-y-huevo",
+              "pan-con-queso",
+              "estofado-de-cerdo",
+              "arroz-con-huevo",
+              "pollo-con-fideos",
+              "ensalada-de-lentejas"
+            ]
+          },
+          "diaSemana": {
+            "type": "string",
+            "enum": [
+              "lunes",
+              "martes",
+              "miercoles",
+              "jueves",
+              "viernes",
+              "sabado",
+              "domingo"
+            ]
+          },
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "desayuno",
+              "almuerzo",
+              "cena"
+            ]
+          },
+          "semana": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          }
+        },
+        "required": [
+          "recetaId",
+          "diaSemana"
+        ]
+      },
+      "RechazarRecomendacionDto": {
+        "type": "object",
+        "properties": {
+          "recetaId": {
+            "type": "string",
+            "enum": [
+              "arroz-con-pollo",
+              "tallarines-con-salsa",
+              "lentejas-con-arroz",
+              "pastel-de-papas",
+              "cazuela-de-pollo",
+              "porotos-con-fideos",
+              "tortilla-de-papas",
+              "ensalada-chilena",
+              "pollo-al-horno",
+              "merluza-al-horno",
+              "salmon-con-arroz",
+              "hamburguesas-caseras",
+              "charquican",
+              "tortilla-de-verduras",
+              "atun-con-arroz",
+              "fideos-con-atun",
+              "sopa-de-zapallo",
+              "panqueques",
+              "yogurt-con-frutas",
+              "pan-con-palta-y-huevo",
+              "pan-con-queso",
+              "estofado-de-cerdo",
+              "arroz-con-huevo",
+              "pollo-con-fideos",
+              "ensalada-de-lentejas"
+            ]
+          }
+        },
+        "required": [
+          "recetaId"
+        ]
+      }
+    }
+  }
+}

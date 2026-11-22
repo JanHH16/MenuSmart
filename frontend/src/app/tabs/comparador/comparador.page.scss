@@ -114,7 +114,7 @@
   font-size: 11px;
   line-height: 16px;
   text-transform: uppercase;
-  color: var(--ms-lapiz);
+  color: var(--ms-texto-suave);
 }
 
 // dashed(): línea de 1px, trazo 4 / hueco 3, tinta térmica al 60%.
@@ -208,7 +208,7 @@
   font-family: var(--ms-font-boleta);
   font-size: 13px;
   line-height: 19px;
-  color: var(--ms-lapiz);
+  color: var(--ms-texto-suave);
 
   &--mejor {
     font-weight: 700;
@@ -232,7 +232,7 @@
   font-family: var(--ms-font-boleta);
   font-size: 12px;
   line-height: 19px;
-  color: var(--ms-lapiz);
+  color: var(--ms-texto-suave);
 }
 
 // stamp(80×26, rot ±3, size 9).
@@ -241,6 +241,8 @@
   height: 26px;
   margin-top: -4px;
   font-size: 9px;
+  // Sin la transparencia del sello: con ella el texto verde no alcanza el contraste AA.
+  opacity: 1;
 }
 
 .ms-comp-gracias {
@@ -251,7 +253,7 @@
   line-height: 15px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--ms-lapiz);
+  color: var(--ms-texto-suave);
 }
 
 // barcode(220×36) centrado en y=660.
@@ -312,7 +314,7 @@
   line-height: 16px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--ms-lapiz);
+  color: var(--ms-texto-suave);
 }
 
 .ms-comp-resumen-valor {
@@ -321,7 +323,7 @@
   font-weight: 700;
   font-size: 20px;
   line-height: 26px;
-  color: var(--ms-lapiz);
+  color: var(--ms-texto-suave);
 
   &--mejor {
     color: var(--ms-tinta-oscura);
@@ -360,6 +362,8 @@
   margin: 23px 20px 0;
   font-size: 16px;
   transform: rotate(-4deg);
+  // Sin la transparencia del sello, para que el texto verde alcance el contraste AA.
+  opacity: 1;
 }
 
 .ms-comp-resumen-ahorras {
@@ -377,4 +381,39 @@
   height: 120px;
   margin: 40px 20px 0;
   transform: rotate(2deg);
+}
+
+// Estado de los datos (fechas, avisos, botón de actualizar) y estados sin boleta.
+.ms-comp-estado {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 0 0 16px;
+  font-size: 0.8rem;
+
+  p {
+    margin: 0;
+  }
+}
+
+.ms-comp-estado-fechas {
+  color: var(--ms-texto-suave);
+}
+
+.ms-comp-aviso {
+  color: var(--ion-color-danger);
+}
+
+.ms-comp-vacio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 32px 16px;
+  text-align: center;
+
+  p {
+    margin: 0;
+  }
 }

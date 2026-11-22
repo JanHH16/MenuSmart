@@ -1,3 +1,13 @@
-<ion-app>
+<ion-app [class.ms-sin-conexion]="conectividad.sinConexion()">
+  <!-- Aviso global de conectividad. El contenedor existe siempre (vacío no
+       ocupa espacio) para que los lectores de pantalla anuncien el cambio
+       cuando aparece o desaparece el mensaje. -->
+  <div class="ms-aviso-conexion" role="status" aria-live="polite">
+    @if (conectividad.sinConexion()) {
+      <p class="ms-aviso-conexion__texto">
+        Sin conexión: mostrando los últimos datos guardados
+      </p>
+    }
+  </div>
   <ion-router-outlet></ion-router-outlet>
 </ion-app>

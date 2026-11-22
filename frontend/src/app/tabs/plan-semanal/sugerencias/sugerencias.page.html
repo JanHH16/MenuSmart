@@ -1,0 +1,376 @@
+<!-- Controles que cambian cómo se ordenan las sugerencias. Se reutilizan en desktop y mobile. -->
+<ng-template #controles>
+  <section class="ms-sug-controles" aria-label="Ajustes de las sugerencias">
+    <div class="ms-sug-control ms-sug-control--switch">
+      <input
+        id="sug-adaptativo"
+        class="ms-sug-switch"
+        type="checkbox"
+        role="switch"
+        [checked]="adaptativo()"
+        (change)="cambiarAdaptacion($event)"
+      />
+      <label for="sug-adaptativo" class="ms-sug-switch-texto">
+        <span class="ms-sug-control-titulo">Sugerencias adaptativas</span>
+        <span class="ms-sug-ayuda">
+          @if (adaptativo()) {
+            Activadas: se ordenan según el costo y lo que ya tienes en tu semana.
+          } @else {
+            Apagadas: se muestran en orden alfabético, sin mirar precios ni tu semana.
+          }
+        </span>
+      </label>
+    </div>
+
+    <div class="ms-sug-control">
+      <label for="sug-peso" class="ms-sug-control-titulo">
+        Importancia del costo: <span class="ms-mono">{{ pesoCosto() }}%</span>
+      </label>
+      <input
+        id="sug-peso"
+        class="ms-sug-rango"
+        type="range"
+        min="0"
+        max="100"
+        step="5"
+        aria-describedby="sug-peso-ayuda"
+        [attr.aria-valuetext]="pesoCosto() + ' por ciento al costo y ' + pesoReuso() + ' por ciento a reutilizar ingredientes'"
+        [value]="pesoCosto()"
+        [disabled]="!adaptativo()"
+        (input)="moverPeso($event)"
+        (change)="soltarPeso()"
+      />
+      <div class="ms-sug-rango-extremos" aria-hidden="true">
+        <span>Reutilizar ingredientes</span>
+        <span>Gastar menos</span>
+      </div>
+      <p id="sug-peso-ayuda" class="ms-sug-ayuda">
+        @if (adaptativo()) {
+          Hoy cuenta {{ pesoCosto() }}% el costo y {{ pesoReuso() }}% reutilizar ingredientes de tu semana.
+        } @else {
+          Se usa solo con las sugerencias adaptativas.
+        }
+      </p>
+    </div>
+
+    <div class="ms-sug-control" role="group" aria-labelledby="sug-tipo-titulo">
+      <span id="sug-tipo-titulo" class="ms-sug-control-titulo">Tipo de comida</span>
+      <div class="ms-sug-chips">
+        @for (opcion of tipos; track opcion.valor) {
+          <button
+            type="button"
+            class="ms-chip-figma ms-sug-chip"
+            [class.ms-chip-figma--activo]="tipo() === opcion.valor"
+            [attr.aria-pressed]="tipo() === opcion.valor"
+            (click)="elegirTipo(opcion.valor)"
+          >
+            {{ opcion.etiqueta }}
+          </button>
+        }
+      </div>
+    </div>
+
+    <details class="ms-sug-excluir">
+      <summary class="ms-sug-excluir-resumen">
+        <span class="ms-sug-control-titulo">Ingredientes que no quiero</span>
+        <span class="ms-tag-pildora">
+          {{ excluidos().length === 0 ? 'ninguno' : excluidos().length + (excluidos().length === 1 ? ' excluido' : ' excluidos') }}
+        </span>
+      </summary>
+      <p class="ms-sug-ayuda" id="sug-excluir-ayuda">
+        Las recetas que usen un ingrediente marcado dejan de aparecer.
+      </p>
+      <div class="ms-sug-chips" role="group" aria-label="Ingredientes que no quiero" aria-describedby="sug-excluir-ayuda">
+        @for (ingrediente of ingredientes; track ingrediente.termino) {
+          <button
+            type="button"
+            class="ms-chip-figma ms-sug-chip"
+            [class.ms-chip-figma--activo]="estaExcluido(ingrediente.termino)"
+            [attr.aria-pressed]="estaExcluido(ingrediente.termino)"
+            (click)="alternarExcluido(ingrediente.termino)"
+          >
+            {{ ingrediente.etiqueta }}
+          </button>
+        }
+      </div>
+      @if (excluidos().length > 0) {
+        <button type="button" class="ms-sug-enlace" (click)="limpiarExcluidos()">Quitar todos los excluidos</button>
+      }
+    </details>
+  </section>
+</ng-template>
+
+<!-- Panel plegable: qué variables usa el recomendador y qué datos guarda. -->
+<ng-template #comoSeCalcula>
+  <details class="ms-sug-como">
+    <summary class="ms-sug-como-resumen">Cómo se calcula</summary>
+    <div class="ms-sug-como-cuerpo">
+      <h3>Qué variables usa</h3>
+      <ul>
+        <li>
+          <strong>Costo por porción.</strong> Se calcula con los precios reales de Jumbo y Santa Isabel: de cada
+          ingrediente se toma la tienda más barata y el total se divide por las porciones.
+        </li>
+        <li>
+          <strong>Ingredientes que ya usas.</strong> Se cuenta cuántos ingredientes de la receta ya están en las
+          comidas de tu semana. Reutilizarlos significa comprar menos productos distintos y que sobre menos.
+        </li>
+      </ul>
+
+      <h3>Cuánto pesa cada una</h3>
+      <p>
+        Con tu ajuste actual el costo vale {{ pesoCosto() }}% y reutilizar ingredientes {{ pesoReuso() }}%. Puedes
+        cambiarlo con el deslizador de arriba. Las recetas sin precios suficientes quedan al final.
+      </p>
+
+      <h3>Precios usados</h3>
+      <p>
+        Jumbo: {{ fechaPrecios(resumen()?.preciosJumbo) }}. Santa Isabel: {{ fechaPrecios(resumen()?.preciosSantaIsabel) }}.
+      </p>
+
+      <h3>Qué se guarda</h3>
+      <p>
+        No se arma ningún perfil de tus gustos ni se guarda tu historial. Solo se guardan las veces que aceptas o
+        rechazas una sugerencia, para no volver a mostrarte lo que descartaste. Tus ajustes de esta pantalla
+        quedan en este dispositivo.
+      </p>
+
+      <h3>Cómo desactivarlo</h3>
+      <p>
+        Apaga "Sugerencias adaptativas" y verás las recetas en orden alfabético, sin que cuenten los precios ni tu
+        semana. Con "Volver a mostrar las descartadas" también se borran los rechazos guardados.
+      </p>
+    </div>
+  </details>
+</ng-template>
+
+<!-- Aviso del resultado de la última acción (agregar, descartar, volver a mostrar). -->
+<ng-template #aviso>
+  @if (mensaje(); as m) {
+    <div class="ms-sug-aviso" [class.ms-sug-aviso--error]="m.tipo === 'error'" [attr.role]="m.tipo === 'error' ? 'alert' : 'status'">
+      <span>{{ m.texto }}</span>
+      <button type="button" class="ms-sug-enlace" (click)="cerrarMensaje()">Cerrar</button>
+    </div>
+  }
+</ng-template>
+
+<!-- Resultado: cargando, error, vacío o tarjetas. -->
+<ng-template #resultado>
+  @if (estado() === 'cargando') {
+    <p class="ms-sug-estado" role="status">Buscando sugerencias para tu semana...</p>
+  } @else if (estado() === 'error') {
+    <div class="ms-sug-estado" role="alert">
+      <p>{{ errorCarga() }}</p>
+      <button type="button" class="ms-btn-figma ms-btn-figma--secundario ms-sug-boton" (click)="reintentar()">
+        Reintentar
+      </button>
+    </div>
+  } @else {
+    @if (resumen(); as r) {
+      <p class="ms-sug-contexto">
+        @if (ingredientesDelPlan().length > 0) {
+          Ingredientes que ya tienes en tu semana: {{ ingredientesDelPlan().join(', ') }}.
+        } @else {
+          Todavía no tienes comidas con ingredientes del catálogo en esta semana, así que no se puede medir qué
+          reutilizar.
+        }
+      </p>
+      @if (r.descartadasRechazadas > 0 || r.descartadasPorExclusion > 0) {
+        <p class="ms-sug-contexto">
+          @if (r.descartadasPorExclusion > 0) {
+            {{ r.descartadasPorExclusion }} {{ r.descartadasPorExclusion === 1 ? 'receta oculta' : 'recetas ocultas' }}
+            por los ingredientes que excluiste.
+          }
+          @if (r.descartadasRechazadas > 0) {
+            {{ r.descartadasRechazadas }} {{ r.descartadasRechazadas === 1 ? 'descartada' : 'descartadas' }} por ti.
+            <button type="button" class="ms-sug-enlace" [disabled]="ocupada() !== null" (click)="volverAMostrar()">
+              Volver a mostrar las descartadas
+            </button>
+          }
+        </p>
+      }
+    }
+
+    @if (sugerencias().length === 0) {
+      <p class="ms-sug-estado" role="status">
+        No hay sugerencias con esos filtros. Prueba con otro tipo de comida o quita algún ingrediente excluido.
+      </p>
+    } @else {
+      <ul class="ms-sug-lista">
+        @for (s of sugerencias(); track s.recetaId) {
+          <li>
+            <article class="ms-card-desktop ms-sug-card" [attr.aria-labelledby]="'sug-titulo-' + s.recetaId">
+              <header class="ms-sug-card-encabezado">
+                <div>
+                  <span class="ms-tag-pildora">{{ s.tipo }}</span>
+                  @if (nombresEnPlan().has(s.nombre)) {
+                    <span class="ms-tag-pildora ms-sug-tag-plan">ya en tu semana</span>
+                  }
+                  <h3 class="ms-sug-card-titulo" tabindex="-1" [id]="'sug-titulo-' + s.recetaId">{{ s.nombre }}</h3>
+                  <p class="ms-sug-meta">{{ s.porciones }} porciones</p>
+                </div>
+                <div class="ms-sug-costo">
+                  @if (s.costoPorPorcion !== null) {
+                    <span class="ms-sug-costo-valor ms-mono">{{ precio(s.costoPorPorcion) }}</span>
+                    <span class="ms-sug-costo-etiqueta">por porción</span>
+                  } @else {
+                    <span class="ms-sug-costo-etiqueta">sin precio suficiente</span>
+                  }
+                </div>
+              </header>
+
+              <p class="ms-sug-tiendas ms-mono">
+                Todo en Jumbo:
+                @if (s.costoJumbo !== null) {
+                  <strong>{{ precio(s.costoJumbo) }}</strong>
+                } @else {
+                  sin precio completo
+                }
+                <span aria-hidden="true"> · </span>
+                Todo en Santa Isabel:
+                @if (s.costoSantaIsabel !== null) {
+                  <strong>{{ precio(s.costoSantaIsabel) }}</strong>
+                } @else {
+                  sin precio completo
+                }
+              </p>
+
+              <p class="ms-sug-porque-titulo">{{ adaptativo() ? 'Por qué te la sugerimos' : 'Por qué se muestra' }}</p>
+              <ul class="ms-sug-porque">
+                @for (linea of s.explicacion; track $index) {
+                  <li>{{ linea }}</li>
+                }
+              </ul>
+
+              @if (s.compartidos.length > 0) {
+                <div class="ms-sug-compartidos">
+                  <span class="ms-sug-meta">Ya lo usas en tu semana:</span>
+                  <ul class="ms-sug-chips-lista">
+                    @for (termino of s.compartidos; track termino) {
+                      <li class="ms-sug-chip-compartido">{{ etiqueta(termino) }}</li>
+                    }
+                  </ul>
+                </div>
+              }
+
+              @if (s.sinPrecio.length > 0) {
+                <p class="ms-sug-sin-precio">
+                  Sin precio para {{ etiquetas(s.sinPrecio) }}: el costo mostrado puede ser mayor.
+                </p>
+              }
+
+              <details class="ms-sug-ingredientes">
+                <summary>Ver ingredientes ({{ s.ingredientes.length }})</summary>
+                <ul>
+                  @for (ingrediente of s.ingredientes; track ingrediente.termino) {
+                    <li>
+                      <span>{{ etiqueta(ingrediente.termino) }}</span>
+                      <span class="ms-mono">{{ cantidadIngrediente(ingrediente) }}</span>
+                    </li>
+                  }
+                </ul>
+              </details>
+
+              @if (eligiendoDia() === s.recetaId) {
+                <div class="ms-sug-dias" role="group" [attr.aria-label]="'Elige el día para ' + s.nombre">
+                  <span class="ms-sug-control-titulo">¿Qué día?</span>
+                  <div class="ms-sug-chips">
+                    @for (dia of dias; track dia.api) {
+                      <button
+                        type="button"
+                        class="ms-chip-figma ms-sug-chip"
+                        [attr.aria-label]="'Agregar ' + s.nombre + ' el ' + dia.nombre"
+                        [disabled]="ocupada() !== null"
+                        (click)="agregar(s, dia)"
+                      >
+                        {{ dia.corto }}
+                      </button>
+                    }
+                  </div>
+                </div>
+              }
+
+              <div class="ms-sug-acciones">
+                <button
+                  type="button"
+                  class="ms-btn-figma ms-btn-figma--primario ms-sug-boton"
+                  [attr.aria-expanded]="eligiendoDia() === s.recetaId"
+                  [disabled]="ocupada() !== null"
+                  (click)="abrirElegirDia(s.recetaId)"
+                >
+                  {{ ocupada() === s.recetaId ? 'Agregando...' : 'Agregar a mi semana' }}
+                </button>
+                <button
+                  type="button"
+                  class="ms-btn-figma ms-btn-figma--secundario ms-sug-boton"
+                  [attr.aria-label]="'No me interesa: ' + s.nombre"
+                  [disabled]="ocupada() !== null"
+                  (click)="descartar(s)"
+                >
+                  No me interesa
+                </button>
+              </div>
+            </article>
+          </li>
+        }
+      </ul>
+
+      @if (hayMas()) {
+        <button type="button" class="ms-btn-punteado ms-sug-mas" (click)="verMas()">Ver más sugerencias</button>
+      }
+    }
+  }
+</ng-template>
+
+@if (esDesktop$ | async) {
+  <!-- Desktop: título + ajustes en una columna lateral y las sugerencias al lado. -->
+  <ion-content class="ms-desktop-content">
+    <div class="ms-desktop-page ms-sug-desktop">
+      <button type="button" class="ms-volver-desktop ms-sug-volver" (click)="volver()">
+        <ion-icon name="chevron-back-outline" aria-hidden="true"></ion-icon>
+        Volver al plan
+      </button>
+
+      <header class="ms-sug-desktop-header">
+        <h1 class="ms-titulo-desktop">sugerencias</h1>
+        <p class="ms-subtitulo-desktop">Recetas para la semana del {{ rangoSemana() }}. Tú decides cuáles entran.</p>
+      </header>
+
+      <ng-container *ngTemplateOutlet="aviso"></ng-container>
+
+      <div class="ms-sug-desktop-columnas">
+        <aside class="ms-card-desktop ms-sug-panel">
+          <ng-container *ngTemplateOutlet="controles"></ng-container>
+          <ng-container *ngTemplateOutlet="comoSeCalcula"></ng-container>
+        </aside>
+        <div class="ms-sug-resultados">
+          <ng-container *ngTemplateOutlet="resultado"></ng-container>
+        </div>
+      </div>
+    </div>
+  </ion-content>
+} @else {
+  <ion-header>
+    <ion-toolbar>
+      <ion-buttons slot="start">
+        <ion-button (click)="volver()">
+          <ion-icon slot="start" name="chevron-back-outline" aria-hidden="true"></ion-icon>
+          Volver
+        </ion-button>
+      </ion-buttons>
+      <div slot="end" class="ms-toolbar-label">Sugerencias</div>
+    </ion-toolbar>
+  </ion-header>
+
+  <ion-content class="ion-padding">
+    <h1 class="ms-titulo-mobile">sugerencias</h1>
+    <p class="ms-sug-meta">Semana del {{ rangoSemana() }}. Tú decides cuáles entran.</p>
+
+    <ng-container *ngTemplateOutlet="aviso"></ng-container>
+    <div class="ms-card-libreta ms-sug-panel-mobile">
+      <ng-container *ngTemplateOutlet="controles"></ng-container>
+    </div>
+    <ng-container *ngTemplateOutlet="resultado"></ng-container>
+    <ng-container *ngTemplateOutlet="comoSeCalcula"></ng-container>
+  </ion-content>
+}
