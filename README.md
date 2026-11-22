@@ -14,7 +14,7 @@ Proyecto de la asignatura **Ingeniería Web Avanzada**.
 |---|---|
 | Repositorio | https://github.com/JanHH16/MenuSmart |
 | Entrega Parcial 1 (tag) | `v1.0.0-ep1` |
-| Tag de la Entrega Parcial 2 y de la Entrega Final | Pendiente: completar |
+| Tag de la Entrega Parcial 2 y de la Entrega Final | `v1.1.0-ep2` (EP2) y `v2.0.0-ef` (Entrega Final), creados el 22-11-2026 sobre `main` |
 | Ambiente de staging | Sitio: https://menusmart-staging-frontend.onrender.com · API: https://menusmart-staging-backend.onrender.com (plan gratuito de Render: si estaba dormido, la primera visita tarda cerca de 1 minuto; ver [Limitaciones](#limitaciones-conocidas)) |
 | Tablero de gestión del proyecto | Pendiente: completar |
 | Prototipo Figma | [Ver abajo](#prototipo-figma) |
