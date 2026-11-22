@@ -9,6 +9,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, In, MoreThan, Not, Repository } from 'typeorm';
+import { MetricsService } from '../observability/metrics.service';
 import { PythonClientService } from '../python-client/python-client.service';
 import { ScrapedProduct, Tienda, TIENDAS } from '../python-client/scrape.types';
 import { Calidad, calcularCalidad } from './calidad';
@@ -76,6 +77,7 @@ export class PricesService {
     @InjectDataSource() private readonly dataSource: DataSource,
     private readonly python: PythonClientService,
     private readonly config: ConfigService,
+    private readonly metrics: MetricsService,
   ) {}
 
   /**
@@ -279,8 +281,22 @@ export class PricesService {
               (acumulado.descartes.respuesta_invalida ?? 0) + invalidos;
           }
           acumulado.errores.push(...response.errores);
+          for (const error of response.errores) {
+            this.logger.warn({
+              msg: 'error_fuente_externa',
+              tienda,
+              consulta: error.consulta,
+              tipo: error.tipo,
+            });
+          }
         } catch (error) {
           acumulado.consultasFallidas += lote.length;
+          this.logger.error({
+            msg: 'error_servicio_python',
+            tienda,
+            consultas: lote.length,
+            detalle: mensajeDe(error),
+          });
           acumulado.errores.push({
             consulta: null,
             tipo: 'servicio_python',
@@ -355,11 +371,21 @@ export class PricesService {
       duracionMs,
     });
     await this.ejecuciones.save(corrida);
-    this.logger.log(
-      `Actualización de ${corrida.tienda}: estado=${estado} validos=${acumulado.validos} ` +
-        `duplicados=${acumulado.duplicados} descartados=${acumulado.descartados} ` +
-        `errores=${acumulado.errores.length} duracion_ms=${duracionMs}`,
-    );
+    const erroresPorTipo: Record<string, number> = {};
+    for (const error of acumulado.errores) {
+      erroresPorTipo[error.tipo] = (erroresPorTipo[error.tipo] ?? 0) + 1;
+    }
+    this.metrics.registrarActualizacion(corrida.tienda, estado, duracionMs, erroresPorTipo);
+    this.logger.log({
+      msg: 'actualizacion_terminada',
+      tienda: corrida.tienda,
+      estado,
+      registrosValidos: acumulado.validos,
+      registrosDuplicados: acumulado.duplicados,
+      registrosDescartados: acumulado.descartados,
+      errores: acumulado.errores.length,
+      durationMs: duracionMs,
+    });
   }
 
   private numero(clave: string, porDefecto: number): number {

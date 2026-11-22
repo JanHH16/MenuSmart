@@ -7,6 +7,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import { getDataSourceToken, getRepositoryToken } from '@nestjs/typeorm';
+import { MetricsService } from '../observability/metrics.service';
 import { PythonClientService } from '../python-client/python-client.service';
 import { ScrapedProduct, ScrapeSearchRequest } from '../python-client/scrape.types';
 import { TERMINOS } from './catalogo';
@@ -65,6 +66,7 @@ function resultado(
 
 describe('PricesService', () => {
   let servicio: PricesService;
+  let metricas: MetricsService;
   let repo: { create: jest.Mock; save: jest.Mock; find: jest.Mock; findOneBy: jest.Mock };
   let manager: { query: jest.Mock };
   let dataSource: { transaction: jest.Mock; query: jest.Mock };
@@ -101,10 +103,12 @@ describe('PricesService', () => {
         { provide: getRepositoryToken(EjecucionScraping), useValue: repo },
         { provide: getDataSourceToken(), useValue: dataSource },
         { provide: PythonClientService, useValue: python },
+        MetricsService,
         { provide: ConfigService, useValue: { get: (clave: string) => configuracion[clave] } },
       ],
     }).compile();
     servicio = modulo.get(PricesService);
+    metricas = modulo.get(MetricsService);
   });
 
   async function ejecutar(tiendas: ('jumbo' | 'santa_isabel')[] = ['jumbo']) {
@@ -179,6 +183,22 @@ describe('PricesService', () => {
       expect(corrida.errores).toHaveLength(1);
       expect(corrida.errores[0].tipo).toBe('servicio_python');
       expect(corrida.errores[0].detalle).toContain('caído');
+    });
+
+    it('registra en las métricas el resultado de la actualización y sus errores', async () => {
+      let llamada = 0;
+      python.scrapeSearch.mockImplementation((peticion: ScrapeSearchRequest) => {
+        llamada++;
+        if (llamada === 2) return Promise.reject(new ServiceUnavailableException('caído'));
+        return Promise.resolve(resultado(peticion, [producto(`m-${llamada}`)]));
+      });
+
+      await ejecutar();
+
+      const fuente = metricas.snapshot().fuenteExterna.jumbo;
+      expect(fuente.corridas).toBe(1);
+      expect(fuente.porEstado).toEqual({ parcial: 1 });
+      expect(fuente.erroresPorTipo).toEqual({ servicio_python: 1 });
     });
 
     it('termina como fallido, sin guardar nada, si ningún lote funciona', async () => {

@@ -8,8 +8,15 @@ import {
 import { HttpService } from '@nestjs/axios';
 import { AxiosError, isAxiosError } from 'axios';
 import { catchError, firstValueFrom, timeout } from 'rxjs';
+import { obtenerRequestId } from '../observability/request-context';
 import { InvalidScrapeResponseError, parseScrapeResponse } from './scrape-response';
 import { ScrapeSearchOptions, ScrapeSearchRequest, ScrapeSearchResult } from './scrape.types';
+
+/** Cabecera con el id de la solicitud en curso, para seguirla de NestJS a Python. */
+function cabecerasDeTrazabilidad(): Record<string, string> | undefined {
+  const requestId = obtenerRequestId();
+  return requestId ? { 'X-Request-ID': requestId } : undefined;
+}
 
 const esperar = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
@@ -39,7 +46,11 @@ export class PythonClientService {
 
   async normalizeIngredients(ingredients: RawIngredientInput[]): Promise<NormalizeResponse> {
     const request$ = this.httpService
-      .post<NormalizeResponse>('/ingredients/normalize', { ingredients })
+      .post<NormalizeResponse>(
+        '/ingredients/normalize',
+        { ingredients },
+        { headers: cabecerasDeTrazabilidad() },
+      )
       .pipe(
         timeout(5000),
         catchError((error: AxiosError) => {
@@ -81,7 +92,10 @@ export class PythonClientService {
       try {
         const response = await firstValueFrom(
           this.httpService
-            .post<unknown>('/scrape/search', request, { timeout: timeoutMs })
+            .post<unknown>('/scrape/search', request, {
+              timeout: timeoutMs,
+              headers: cabecerasDeTrazabilidad(),
+            })
             .pipe(timeout(timeoutMs + 1000)),
         );
         try {

@@ -139,6 +139,25 @@ describe('Precios (e2e)', () => {
     await request(app.getHttpServer()).get('/api/prices/compare').expect(401);
   });
 
+  it('devuelve el id de solicitud y expone las métricas de tiempo de respuesta', async () => {
+    const conId = await request(app.getHttpServer())
+      .get('/api/prices/catalog')
+      .set('Authorization', `Bearer ${token}`)
+      .set('X-Request-ID', 'e2e-traza-1')
+      .expect(200);
+    expect(conId.headers['x-request-id']).toBe('e2e-traza-1');
+
+    const sinId = await get('/api/prices/catalog').expect(200);
+    expect(sinId.headers['x-request-id']).toMatch(/^[0-9a-f-]{36}$/);
+
+    await request(app.getHttpServer()).get('/api/metrics').expect(401);
+    const metricas = await get('/api/metrics').expect(200);
+    const cuerpo = metricas.body as { rutas: { ruta: string; solicitudes: number; p95Ms: number }[] };
+    const ruta = cuerpo.rutas.find((r) => r.ruta === 'GET /api/prices/catalog');
+    expect(ruta?.solicitudes).toBeGreaterThanOrEqual(2);
+    expect(ruta?.p95Ms).toBeGreaterThanOrEqual(0);
+  });
+
   it('entrega el catálogo de términos', async () => {
     const respuesta = await get('/api/prices/catalog').expect(200);
     const terminos = (respuesta.body as { termino: string }[]).map((t) => t.termino);

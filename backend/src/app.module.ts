@@ -11,6 +11,7 @@ import { MealsModule } from './meals/meals.module';
 import { ProductsModule } from './products/products.module';
 import { ShoppingListsModule } from './shopping-lists/shopping-lists.module';
 import { PricesModule } from './prices/prices.module';
+import { ObservabilityModule } from './observability/observability.module';
 
 @Module({
   imports: [
@@ -49,6 +50,7 @@ import { PricesModule } from './prices/prices.module';
         };
       },
     }),
+    ObservabilityModule,
     HealthModule,
     UsersModule,
     AuthModule,
