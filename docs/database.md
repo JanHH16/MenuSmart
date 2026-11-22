@@ -177,7 +177,12 @@ Comandos disponibles (`backend/package.json`):
 npm run migration:generate -- src/migrations/NombreDeLaMigracion
 npm run migration:run
 npm run migration:revert
+npm run migration:check   # falla si hay entidades sin migración
 ```
+
+La verificación de que la estructura sale solo de migraciones (job `migraciones` del CI) y el
+procedimiento para crear una migración nueva están en
+[migraciones-y-auditoria.md](migraciones-y-auditoria.md).
 
 ## 4. Inicializar la base de datos
 
