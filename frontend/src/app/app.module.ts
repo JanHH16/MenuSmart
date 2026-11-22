@@ -11,12 +11,22 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { AuthInterceptor } from './core/interceptors/auth.interceptor';
 
+function prefiereMenosMovimiento(): boolean {
+  return (
+    typeof window !== 'undefined' &&
+    typeof window.matchMedia === 'function' &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  );
+}
+
 @NgModule({
   declarations: [AppComponent],
   imports: [
     BrowserModule,
     HttpClientModule,
-    IonicModule.forRoot(),
+    // `animated` se apaga si el sistema pide menos movimiento
+    // (prefers-reduced-motion), para páginas, modales y action sheets.
+    IonicModule.forRoot({ animated: !prefiereMenosMovimiento() }),
     AppRoutingModule,
     // Service worker de la PWA (ver ngsw-config.json). Solo en producción: en
     // desarrollo cachearía los bundles y ocultaría los cambios. Tampoco se
