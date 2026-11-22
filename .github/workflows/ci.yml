@@ -77,6 +77,75 @@ jobs:
         run: npm audit --omit=dev --audit-level=high
 
   # ---------------------------------------------------------------------------
+  # Migraciones como unica fuente de verdad de la estructura de la base.
+  # Ejecuta TODAS las migraciones sobre una base vacia y falla si despues el
+  # modelo (entidades) todavia difiere de lo que dejaron las migraciones, es
+  # decir, si alguien cambio una entidad sin escribir su migracion.
+  # synchronize NO interviene: este job usa el DataSource de la CLI
+  # (backend/src/data-source.ts), que lo tiene siempre en false.
+  # Detalle: docs/migraciones-y-auditoria.md
+  # ---------------------------------------------------------------------------
+  migraciones:
+    name: Migraciones - base vacia y sin deriva
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: menusmart
+          POSTGRES_PASSWORD: ci-password
+          POSTGRES_DB: menusmart_migraciones
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U menusmart"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_HOST: localhost
+      DATABASE_PORT: 5432
+      DATABASE_USER: menusmart
+      DATABASE_PASSWORD: ci-password
+      DATABASE_NAME: menusmart_migraciones
+    steps:
+      - name: Obtener el codigo fuente
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "24"
+          cache: "npm"
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Instalar dependencias (reproducible)
+        working-directory: backend
+        run: npm ci
+
+      - name: Compilar (la CLI ejecuta las migraciones compiladas en dist/)
+        working-directory: backend
+        run: npm run build
+
+      - name: Ejecutar todas las migraciones sobre la base vacia
+        working-directory: backend
+        run: npm run migration:run
+
+      - name: Listar migraciones aplicadas
+        working-directory: backend
+        run: npm run migration:show
+
+      # Con --check, TypeORM compara las entidades contra la base ya migrada y
+      # termina con codigo 1 si faltaria alguna migracion. No escribe archivos.
+      - name: Verificar que no quedan cambios pendientes (deriva entidades vs migraciones)
+        working-directory: backend
+        run: |
+          npm run migration:check || {
+            echo "::error::Hay entidades sin migracion. Genera una con: npm run migration:generate -- src/migrations/NombreDelCambio"
+            exit 1
+          }
+
+  # ---------------------------------------------------------------------------
   # Frontend (Angular / Ionic)
   # ---------------------------------------------------------------------------
   frontend:
@@ -269,7 +338,7 @@ jobs:
   docker-images:
     name: Build y escaneo de imagenes Docker
     runs-on: ubuntu-latest
-    needs: [backend, frontend, python-service, integracion-python, terraform, secrets-scan]
+    needs: [backend, migraciones, frontend, python-service, integracion-python, terraform, secrets-scan]
     strategy:
       matrix:
         service: [backend, frontend, python-service]
@@ -301,6 +370,7 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - backend
+      - migraciones
       - frontend
       - python-service
       - integracion-python
