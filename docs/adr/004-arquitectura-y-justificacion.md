@@ -70,7 +70,7 @@ flowchart LR
 | Python escribe directo en PostgreSQL | Rompe la regla de un solo dueño de la base y duplica la lógica de upsert y deduplicación |
 | Cola de mensajes entre NestJS y Python (Redis, RabbitMQ) | Infraestructura adicional que no se justifica con 31 consultas por tienda (C5); la corrida se ejecuta en segundo plano y se consulta por `GET /prices/runs/:id` |
 
-**Consecuencias y riesgos.** La llamada entre servicios es síncrona: una actualización completa tarda más de un minuto (entre 37 y 43 s por tienda en la última corrida, con el scraper a 1 solicitud por segundo; ver [calidad-de-datos.md](calidad-de-datos.md)), por eso se hace en segundo plano. El servicio Python no tiene autenticación propia: depende de ser privado en el despliegue. Si se expusiera, haría falta autenticación de servicio a servicio.
+**Consecuencias y riesgos.** La llamada entre servicios es síncrona: una actualización completa tarda más de un minuto (entre 37 y 43 s por tienda en la última corrida, con el scraper a 1 solicitud por segundo; ver [calidad-de-datos.md](../calidad-de-datos.md)), por eso se hace en segundo plano. El servicio Python no tiene autenticación propia: depende de ser privado en el despliegue. Si se expusiera, haría falta autenticación de servicio a servicio.
 
 ## Decisión 3: contrato validado en ambos lados
 
