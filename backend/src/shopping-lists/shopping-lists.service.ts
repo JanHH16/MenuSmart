@@ -119,7 +119,7 @@ export class ShoppingListsService {
     const terminos = [
       ...new Set(items.map((i) => i.terminoCatalogo).filter((t): t is string => !!t)),
     ].filter((t) => TERMINOS.includes(t));
-    const comparacion = terminos.length > 0 ? await this.prices.comparar(terminos) : null;
+    const precios = terminos.length > 0 ? await this.prices.preciosVigentes(terminos) : null;
 
     const { porItem, resumen } = calcularCostos(
       items.map((i) => ({
@@ -128,7 +128,9 @@ export class ShoppingListsService {
         unidad: i.unidad,
         terminoCatalogo: i.terminoCatalogo,
       })),
-      comparacion?.terminos ?? [],
+      precios?.filas ?? [],
+      precios?.ahora ?? new Date(),
+      precios?.horasParaObsoleto ?? 0,
     );
 
     return {
@@ -148,7 +150,7 @@ export class ShoppingListsService {
         costo: porItem.get(i.id) as CostoItem,
       })),
       resumen,
-      preciosActualizadosEn: comparacion?.ultimaActualizacion ?? {},
+      preciosActualizadosEn: precios?.ultimaActualizacion ?? {},
     };
   }
 

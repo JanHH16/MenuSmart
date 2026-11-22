@@ -128,13 +128,17 @@ export class PricesService {
     return this.ejecuciones.find({ order: { iniciadaEn: 'DESC' }, take: limite });
   }
 
-  async comparar(terminos?: string[], limiteComunes = 20): Promise<ComparacionRespuesta> {
-    const pedidos = terminos?.length ? terminos : [...TERMINOS];
-    const filas = await this.dataSource.query<FilaPrecio[]>(SQL_PRECIOS_VIGENTES, [pedidos]);
-    const ahora = new Date();
-    const horas = this.horasParaObsoleto;
-    const comparacion = construirComparacion(filas, pedidos, ahora, horas, limiteComunes);
-
+  /**
+   * Último precio conocido de cada producto en cada tienda para los términos pedidos, junto con
+   * cuándo se actualizó cada tienda por última vez y el límite para considerarlo desactualizado.
+   */
+  async preciosVigentes(terminos: string[]): Promise<{
+    filas: FilaPrecio[];
+    ahora: Date;
+    horasParaObsoleto: number;
+    ultimaActualizacion: Record<Tienda, string | null>;
+  }> {
+    const filas = await this.dataSource.query<FilaPrecio[]>(SQL_PRECIOS_VIGENTES, [terminos]);
     const exitosas = await this.dataSource.query<{ tienda: Tienda; finalizadaEn: Date }[]>(
       SQL_ULTIMAS_EXITOSAS,
     );
@@ -144,10 +148,18 @@ export class PricesService {
         exitosas.find((fila) => fila.tienda === tienda)?.finalizadaEn.toISOString() ?? null,
       ]),
     ) as Record<Tienda, string | null>;
+    return { filas, ahora: new Date(), horasParaObsoleto: this.horasParaObsoleto, ultimaActualizacion };
+  }
+
+  async comparar(terminos?: string[], limiteComunes = 20): Promise<ComparacionRespuesta> {
+    const pedidos = terminos?.length ? terminos : [...TERMINOS];
+    const { filas, ahora, horasParaObsoleto, ultimaActualizacion } =
+      await this.preciosVigentes(pedidos);
+    const comparacion = construirComparacion(filas, pedidos, ahora, horasParaObsoleto, limiteComunes);
 
     return {
       generadoEn: ahora.toISOString(),
-      horasParaObsoleto: horas,
+      horasParaObsoleto,
       ultimaActualizacion,
       ...comparacion,
     };

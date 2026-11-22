@@ -1,5 +1,6 @@
-import { ComparacionTermino, PrecioTienda } from '../prices/compare';
+import { FilaPrecio } from '../prices/compare';
 import { Tienda, TIENDAS } from '../python-client/scrape.types';
+import { esProductoRelevante } from './relevancia';
 
 export interface ItemParaCosto {
   id: string;
@@ -12,7 +13,8 @@ export interface ItemParaCosto {
  * Por que un item no tiene precio en una tienda:
  * - `sin_termino`: el ingrediente no se pudo mapear al catalogo de precios.
  * - `sin_precio_en_tienda`: esa tienda no tiene un producto disponible para el termino.
- * - `unidad_no_comparable`: la unidad del item no coincide con la del precio (kg contra un).
+ * - `unidad_no_comparable`: hay productos, pero ninguno con precio por la misma unidad que
+ *   el item (se necesitan kg y solo hay precios por unidad, por ejemplo).
  */
 export type MotivoSinPrecio = 'sin_termino' | 'sin_precio_en_tienda' | 'unidad_no_comparable';
 
@@ -42,49 +44,73 @@ export interface ResumenCosto {
   } | null;
 }
 
+const MS_POR_HORA = 3_600_000;
+
+/**
+ * Mejor producto para un item en una tienda: entre los disponibles del termino cuyo precio
+ * unitario esta en la misma unidad que el item, el de menor precio unitario. Asi un item en kg
+ * nunca se valoriza con un precio por unidad.
+ */
 function costoEnTienda(
   item: ItemParaCosto,
-  precio: PrecioTienda | null | undefined,
+  filas: FilaPrecio[],
+  ahora: Date,
+  horasObsoleto: number,
 ): { costo: CostoEnTienda } | { motivo: MotivoSinPrecio } {
   if (!item.terminoCatalogo) return { motivo: 'sin_termino' };
-  if (!precio) return { motivo: 'sin_precio_en_tienda' };
-  if (precio.precioUnitario === null || precio.unidad !== item.unidad) {
-    return { motivo: 'unidad_no_comparable' };
-  }
+
+  const disponibles = filas.filter(
+    (fila) =>
+      fila.disponible && esProductoRelevante(item.terminoCatalogo ?? '', fila.nombre ?? fila.slug),
+  );
+  if (disponibles.length === 0) return { motivo: 'sin_precio_en_tienda' };
+
+  const comparables = disponibles.filter(
+    (fila) => fila.precioUnitario !== null && fila.unidad === item.unidad,
+  );
+  if (comparables.length === 0) return { motivo: 'unidad_no_comparable' };
+
+  const mejor = [...comparables].sort(
+    (a, b) => (a.precioUnitario ?? 0) - (b.precioUnitario ?? 0) || a.precio - b.precio,
+  )[0];
+  const precioUnitario = mejor.precioUnitario ?? 0;
   return {
     costo: {
-      total: Math.round(precio.precioUnitario * item.cantidad),
-      producto: precio.nombre,
-      precioUnitario: precio.precioUnitario,
-      unidad: precio.unidad,
-      desactualizado: precio.desactualizado,
-      url: precio.url,
+      total: Math.round(precioUnitario * item.cantidad),
+      producto: mejor.nombre ?? mejor.slug,
+      precioUnitario,
+      unidad: item.unidad,
+      desactualizado: ahora.getTime() - mejor.fechaObtencion.getTime() > horasObsoleto * MS_POR_HORA,
+      url: mejor.urlProducto,
     },
   };
 }
 
 /**
- * Estima el costo de cada item en cada tienda a partir del mejor producto de cada termino
- * (menor precio unitario). Nunca inventa precios: si no se puede valorizar, informa el motivo.
- * Los totales por tienda se suman solo sobre los items que tienen precio en las dos tiendas.
+ * Estima el costo de cada item en cada tienda con los precios vigentes. Nunca inventa precios:
+ * si no se puede valorizar, informa el motivo. Los totales por tienda se suman solo sobre los
+ * items que tienen precio en las dos tiendas.
  */
 export function calcularCostos(
   items: ItemParaCosto[],
-  comparaciones: ComparacionTermino[],
+  filas: FilaPrecio[],
+  ahora: Date,
+  horasObsoleto: number,
 ): { porItem: Map<string, CostoItem>; resumen: ResumenCosto } {
-  const porTermino = new Map(comparaciones.map((c) => [c.termino, c]));
   const porItem = new Map<string, CostoItem>();
   const totales = Object.fromEntries(TIENDAS.map((t) => [t, 0])) as Record<Tienda, number>;
   let comparables = 0;
 
   for (const item of items) {
-    const comparacion = item.terminoCatalogo ? porTermino.get(item.terminoCatalogo) : undefined;
     const costoItem: CostoItem = {
       tiendas: Object.fromEntries(TIENDAS.map((t) => [t, null])) as CostoItem['tiendas'],
       motivoSinPrecio: {},
     };
     for (const tienda of TIENDAS) {
-      const resultado = costoEnTienda(item, comparacion?.tiendas[tienda]);
+      const delTermino = filas.filter(
+        (fila) => fila.consulta === item.terminoCatalogo && fila.supermercado === tienda,
+      );
+      const resultado = costoEnTienda(item, delTermino, ahora, horasObsoleto);
       if ('costo' in resultado) costoItem.tiendas[tienda] = resultado.costo;
       else costoItem.motivoSinPrecio[tienda] = resultado.motivo;
     }
