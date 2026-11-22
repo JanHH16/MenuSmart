@@ -88,6 +88,9 @@ class Termino:
     peso_unidad_kg: float | None = None
     # kg por litro: permite pasar tazas o cucharadas de un solido a kg. None si no aplica.
     densidad_kg_por_l: float | None = None
+    # Palabras que, si aparecen en el nombre, indican OTRO producto ("leche condensada" no es
+    # "leche"). Solo se aplican al mapeo por contencion, no a los sinonimos explicitos.
+    excluye: tuple[str, ...] = field(default_factory=tuple)
 
 
 CATALOGO: tuple[Termino, ...] = (
@@ -96,11 +99,12 @@ CATALOGO: tuple[Termino, ...] = (
     Termino("fideos", "despensa", "kg", ("fideo", "tallarin", "espagueti", "spaghetti", "pasta",
                                          "macarron", "macarrones"), densidad_kg_por_l=0.4),
     Termino("harina", "despensa", "kg", ("harina de trigo", "harina sin polvos"),
-            densidad_kg_por_l=0.5),
+            densidad_kg_por_l=0.5, excluye=("maiz", "almendra", "almendras", "coco")),
     Termino("azucar", "despensa", "kg", ("azucar blanca", "azucar granulada"),
             densidad_kg_por_l=0.83),
     Termino("aceite", "despensa", "l", ("aceite de oliva", "aceite vegetal", "aceite maravilla",
-                                        "aceite de maravilla"), densidad_kg_por_l=0.91),
+                                        "aceite de maravilla"), densidad_kg_por_l=0.91,
+            excluye=("coco", "sesamo")),
     Termino("sal", "despensa", "kg", ("sal de mesa", "sal fina", "sal gruesa"),
             densidad_kg_por_l=1.2),
     Termino("lentejas", "despensa", "kg", ("lenteja",), densidad_kg_por_l=0.8),
@@ -108,7 +112,8 @@ CATALOGO: tuple[Termino, ...] = (
                                           "porotos negros"), densidad_kg_por_l=0.75),
     Termino("atun", "despensa", "kg", ("atun en lata", "atun al agua", "atun en aceite")),
     Termino("salsa de tomate", "despensa", "kg", ("pomarola", "salsa de tomates",
-                                                  "salsa pomodoro"), densidad_kg_por_l=1.05),
+                                                  "salsa pomodoro", "pasta de tomate",
+                                                  "pure de tomate"), densidad_kg_por_l=1.05),
     Termino("pollo", "carnes", "kg", ("pechuga de pollo", "trutro de pollo", "pollo entero",
                                       "muslo de pollo", "filete de pollo", "pechuga", "trutro")),
     Termino("carne molida", "carnes", "kg", ("carne picada", "carne molida de vacuno")),
@@ -128,7 +133,8 @@ CATALOGO: tuple[Termino, ...] = (
     Termino("platano", "frutas y verduras", "kg", ("banana",), peso_unidad_kg=0.12),
     Termino("zapallo", "frutas y verduras", "kg", ("zapallo camote",)),
     Termino("leche", "lacteos y huevos", "l", ("leche entera", "leche descremada",
-                                               "leche semidescremada"), densidad_kg_por_l=1.03),
+                                               "leche semidescremada"), densidad_kg_por_l=1.03,
+            excluye=("condensada", "evaporada", "coco", "chocolatada", "achocolatada")),
     Termino("huevos", "lacteos y huevos", "un", ("huevo", "huevo de gallina")),
     Termino("queso", "lacteos y huevos", "kg", ("queso gauda", "queso mantecoso", "queso rallado",
                                                 "queso laminado")),

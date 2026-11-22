@@ -61,6 +61,33 @@ class TestBuscarTermino:
     def test_sin_coincidencia(self, nombre):
         assert buscar_termino(limpiar_texto(nombre)) == (None, None)
 
+    @pytest.mark.parametrize(
+        ("nombre", "termino"),
+        [
+            ("pasta de tomate", "salsa de tomate"),
+            ("puré de tomate", "salsa de tomate"),
+            ("leche entera", "leche"),
+            ("harina de trigo", "harina"),
+        ],
+    )
+    def test_sinonimos_explicitos_ganan_a_la_palabra_suelta(self, nombre, termino):
+        encontrado, _ = buscar_termino(limpiar_texto(nombre))
+        assert encontrado is not None
+        assert encontrado.nombre == termino
+
+    @pytest.mark.parametrize(
+        "nombre",
+        [
+            "leche condensada",
+            "leche de coco",
+            "leche evaporada",
+            "harina de maíz",
+            "aceite de coco",
+        ],
+    )
+    def test_no_mapea_productos_distintos_que_contienen_un_termino(self, nombre):
+        assert buscar_termino(limpiar_texto(nombre)) == (None, None)
+
     def test_no_confunde_palabras_que_contienen_un_termino(self):
         # "salsa" contiene las letras de "sal", pero no es la palabra "sal".
         assert buscar_termino("salsa verde") == (None, None)

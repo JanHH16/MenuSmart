@@ -36,6 +36,12 @@ const PALABRAS_PROCESADO = new Set([
   'saborizante',
   'gelatina',
   'helado',
+  // Alimentos para bebes: llevan el nombre del ingrediente ("zanahoria picado infantil").
+  'infantil',
+  'bebe',
+  'papilla',
+  'colado',
+  'colados',
 ]);
 
 /** Nombres con los que se vende realmente el ingrediente cuando no coinciden con el termino. */

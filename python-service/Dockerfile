@@ -11,6 +11,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY app ./app
 
+# Sin privilegios de root, y sin escribir .pyc en un directorio que ese usuario no puede modificar.
+ENV PYTHONDONTWRITEBYTECODE=1
+RUN useradd --system --uid 10001 --no-create-home --shell /usr/sbin/nologin app
+USER app
+
 EXPOSE 8000
 
 # Forma shell (no exec): permite que ${PORT} se expanda en tiempo de

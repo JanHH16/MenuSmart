@@ -11,7 +11,8 @@ Pasos, en orden (cada paso deja una regla en `reglas` para poder explicar el res
    conversion con su densidad o su peso por unidad cuando existen.
 4. Union de lineas que quedaron con el mismo termino (o nombre) y la misma unidad.
 
-Limitacion conocida: el mapeo es lexico, no semantico. "leche condensada" se mapea a "leche".
+Limitacion conocida: el mapeo es lexico, no semantico. Algunos terminos declaran palabras que
+indican otro producto (`excluye`: "condensada" para la leche), pero la lista es corta y manual.
 """
 
 import re
@@ -84,7 +85,11 @@ def buscar_termino(nombre_limpio: str) -> tuple[Termino | None, str | None]:
     palabras_con_singular = {forma for p in todas for forma in _formas_singulares(p)}
     for clave in _CLAVES_POR_LARGO:
         if set(clave.split()) <= palabras_con_singular:
-            return _INDICE[clave], f"nombre:contiene({clave})"
+            termino = _INDICE[clave]
+            # "leche condensada" contiene "leche" pero es otro producto: no se mapea.
+            if palabras_con_singular & set(termino.excluye):
+                continue
+            return termino, f"nombre:contiene({clave})"
     return None, None
 
 

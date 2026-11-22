@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Request, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiForbiddenResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {ApiBadRequestResponse, ApiBearerAuth, ApiForbiddenResponse, ApiOperation, ApiTags, ApiUnauthorizedResponse} from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { LIMITE_LOGIN } from '../rate-limit';
@@ -9,6 +9,8 @@ import { UsersService } from './users.service';
 
 @ApiTags('users')
 @ApiBearerAuth()
+@ApiUnauthorizedResponse({ description: 'Falta el token de acceso o no es válido' })
+@ApiBadRequestResponse({ description: 'Los datos enviados no son válidos' })
 @UseGuards(JwtAuthGuard)
 @Controller('users')
 export class UsersController {

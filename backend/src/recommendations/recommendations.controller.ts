@@ -9,7 +9,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {ApiBadRequestResponse, ApiBearerAuth, ApiOperation, ApiTags, ApiUnauthorizedResponse} from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { UsuarioActual } from '../common/current-user.decorator';
 import {
@@ -21,6 +21,8 @@ import { RecommendationsService } from './recommendations.service';
 
 @ApiTags('recommendations')
 @ApiBearerAuth()
+@ApiUnauthorizedResponse({ description: 'Falta el token de acceso o no es válido' })
+@ApiBadRequestResponse({ description: 'Los datos enviados no son válidos' })
 @UseGuards(JwtAuthGuard)
 @Controller('recommendations')
 export class RecommendationsController {

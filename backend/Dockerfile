@@ -27,4 +27,8 @@ RUN rm -rf /usr/local/lib/node_modules/npm /usr/local/bin/npm /usr/local/bin/npx
 
 EXPOSE 3000
 
+# Sin privilegios de root: si alguien explota la aplicacion, no controla el contenedor.
+# La imagen oficial de Node ya trae el usuario "node".
+USER node
+
 CMD ["node", "dist/main"]

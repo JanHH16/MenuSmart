@@ -24,6 +24,8 @@ describe('esProductoRelevante', () => {
     ['arroz', 'Postre Arroz con Leche'],
     ['papa', 'Snack de Papas Fritas'],
     ['manzana', 'Néctar de Manzana 1 L'],
+    ['zanahoria', 'Picado Infantil Zanahoria 113 g'],
+    ['manzana', 'Papilla Bebé Manzana 90 g'],
   ])('descarta %p para %p', (termino, producto) => {
     expect(esProductoRelevante(termino, producto)).toBe(false);
   });
