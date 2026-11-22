@@ -72,7 +72,7 @@ Limitaciones:
 
 - `GET /health` (NestJS) informa estado de la base y del servicio Python; `GET /health` de Python informa el suyo. El despliegue a staging los consulta con reintentos y falla si no responden (`docs/pipeline-y-staging.md`).
 - Una caída de Python no tumba la API: la actualización de precios falla de forma controlada y los datos anteriores siguen disponibles (e2e "si el servicio Python no responde...").
-- Disponibilidad medida en producción: **no hay datos todavía**, porque el staging aún no se despliega. Es un pendiente de la demo.
+- Disponibilidad medida en producción: **no hay datos todavía**: el staging se desplegó el 22-11-2026 y solo se verificó su salud puntual (`/health` en `ok`). Es un pendiente de la demo.
 
 ## 5. Calidad de los datos externos
 

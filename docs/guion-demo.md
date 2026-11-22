@@ -2,7 +2,7 @@
 
 Cubre los 8 escenarios que exige el enunciado (sección 28, "Demostración"): funcionamiento normal, capacidad adaptativa, información web, pipeline de GitHub Actions, evidencia de pruebas, controles de seguridad, logs, métricas y salud, y error o degradación controlada.
 
-> **Regla del enunciado:** no basta con capturas ni videos; la aplicación debe ejecutarse y demostrarse **en el ambiente de staging**. Hoy el staging no está desplegado (ver [checklist-entrega.md](checklist-entrega.md)). Este guion está escrito para el ambiente que exista ese día: si hay staging, se usa su URL; si no, se usa el entorno local con Docker Compose y se dice con claridad. Ver el [plan B](#plan-b).
+> **Regla del enunciado:** no basta con capturas ni videos; la aplicación debe ejecutarse y demostrarse **en el ambiente de staging**. El staging está desplegado en https://menusmart-staging-frontend.onrender.com (plan gratuito: **despertarlo 5 a 10 minutos antes**, abriendo el sitio y generando una lista de compras). Este guion está escrito para el ambiente que exista ese día: si hay staging, se usa su URL; si no, se usa el entorno local con Docker Compose y se dice con claridad. Ver el [plan B](#plan-b).
 
 Algunas rutas y comandos dependen de ramas que deben estar unidas (`/api/metrics` y los logs con id de solicitud: `feature/observability`; límite de solicitudes, cabeceras y `/api/users/me`: `feature/seguridad`; pipeline completo: `feature/pipeline-staging` y `feature/ci-auditoria`). Cada paso lo indica.
 
