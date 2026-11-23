@@ -82,7 +82,6 @@ export class ListaComprasService {
   private readonly baseUrl = `${environment.apiUrl}/shopping-lists`;
 
   private readonly _items = signal<(ItemCompra & { categoria: string })[]>([]);
-  private readonly _resumen = signal<ResumenCostoLista | null>(null);
   private readonly _estado = signal<EstadoLista>('cargando');
   private readonly _generando = signal(false);
   private readonly _mensaje = signal<string | null>(null);
@@ -90,7 +89,6 @@ export class ListaComprasService {
   readonly estado = this._estado.asReadonly();
   readonly generando = this._generando.asReadonly();
   readonly mensaje = this._mensaje.asReadonly();
-  readonly resumen = this._resumen.asReadonly();
   readonly totalComidas = this.planSemanal.totalComidas;
 
   readonly categorias = computed<CategoriaCompra[]>(() => {
@@ -99,6 +97,37 @@ export class ListaComprasService {
       porCategoria.set(item.categoria, [...(porCategoria.get(item.categoria) ?? []), item]);
     }
     return [...porCategoria.entries()].map(([nombre, items]) => ({ nombre, items }));
+  });
+
+  /** Lo que todavía falta comprar: los productos marcados ("ya los tengo" o "en el carro") quedan fuera. */
+  readonly pendientes = computed(() => this._items().filter((item) => !item.comprado));
+
+  /**
+   * Costo estimado SOLO de lo que falta comprar. Se recalcula al instante cada vez que se marca o
+   * desmarca un producto (igual que el backend: solo suma los productos con precio en ambas tiendas).
+   */
+  readonly resumen = computed<ResumenCostoLista | null>(() => {
+    if (this._estado() !== 'listo') {
+      return null;
+    }
+    const pendientes = this.pendientes();
+    const comparables = pendientes.filter((i) => i.costoJumbo !== null && i.costoSantaIsabel !== null);
+    const totalJumbo = comparables.reduce((suma, i) => suma + (i.costoJumbo ?? 0), 0);
+    const totalSantaIsabel = comparables.reduce((suma, i) => suma + (i.costoSantaIsabel ?? 0), 0);
+    return {
+      itemsTotal: pendientes.length,
+      itemsComparables: comparables.length,
+      itemsSinPrecio: pendientes.length - comparables.length,
+      totalJumbo,
+      totalSantaIsabel,
+      masBarata:
+        comparables.length === 0 || totalJumbo === totalSantaIsabel
+          ? null
+          : totalJumbo < totalSantaIsabel
+            ? 'Jumbo'
+            : 'Santa Isabel',
+      ahorro: comparables.length === 0 ? 0 : Math.abs(totalJumbo - totalSantaIsabel),
+    };
   });
 
   readonly totalItems = computed(() => this._items().length);
@@ -116,7 +145,6 @@ export class ListaComprasService {
     } catch (error) {
       if (error instanceof HttpErrorResponse && error.status === 404) {
         this._items.set([]);
-        this._resumen.set(null);
         this._estado.set('sin_lista');
       } else {
         this._estado.set(this._items().length > 0 ? 'listo' : 'error');
@@ -184,22 +212,6 @@ export class ListaComprasService {
         reglas: item.reglas,
       })),
     );
-    const { resumen } = lista;
-    const comparable = resumen.comparable;
-    this._resumen.set({
-      itemsTotal: resumen.itemsTotal,
-      itemsComparables: resumen.itemsComparables,
-      itemsSinPrecio: resumen.itemsSinPrecio,
-      totalJumbo: comparable?.totales.jumbo ?? 0,
-      totalSantaIsabel: comparable?.totales.santa_isabel ?? 0,
-      masBarata:
-        comparable?.masBarata === 'jumbo'
-          ? 'Jumbo'
-          : comparable?.masBarata === 'santa_isabel'
-            ? 'Santa Isabel'
-            : null,
-      ahorro: comparable?.ahorro ?? 0,
-    });
     this._estado.set('listo');
   }
 
