@@ -113,7 +113,7 @@ flowchart LR
 
 **Por qué.** `synchronize` modifica tablas automáticamente según las entidades, lo que en producción puede borrar datos y no deja historial (C2, C3). Las migraciones son versionadas, revisables y repetibles. Atiende la observación de la EP1 ("garantizar que la estructura final sea reproducible exclusivamente mediante migraciones").
 
-**Cómo se garantiza (rama `feature/ci-auditoria`).** El job `migraciones` del CI parte de una base vacía, ejecuta todas las migraciones y corre `migration:generate --check`, que falla si quedan cambios entre entidades y base. `docker-images` y `deploy-staging` dependen de ese job. Detalle y procedimiento en [migraciones-y-auditoria.md](../migraciones-y-auditoria.md), que vive en esa rama. Ver [correcciones-ep1.md](../correcciones-ep1.md).
+**Cómo se garantiza (rama `feature/ci-auditoria`).** El job `migraciones` del CI parte de una base vacía, ejecuta todas las migraciones y corre `migration:generate --check`, que falla si quedan cambios entre entidades y base. `docker-images` y `deploy-staging` dependen de ese job. Detalle y procedimiento en [migraciones-y-auditoria.md](../migraciones-y-auditoria.md), que vive en esa rama.
 
 **Alternativas descartadas.** `synchronize` también en producción (riesgo de pérdida de datos y sin trazabilidad). Eliminar `synchronize` también en desarrollo (más seguro, pero obliga a escribir una migración por cada ajuste de entidad y ralentiza la iteración; el CI ya cubre el riesgo).
 
