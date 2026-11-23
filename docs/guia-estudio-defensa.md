@@ -1,6 +1,6 @@
 # Guía de estudio para la presentación y la defensa técnica individual
 
-**Documento único** para que Jan y Camila estudien el mismo material y respondan de forma coherente. Reúne la guía por componente, el guion de la demostración en el staging, el plan de práctica de hoy y de mañana, el resumen del registro de participación y el esquema de la presentación. Está verificado contra el repositorio al **22-11-2026** (rama `develop`). Si algo cambia en el código, hay que actualizar la sección correspondiente.
+**Documento único** para que Jan y Camila estudien el mismo material y respondan de forma coherente. Reúne la guía por componente, el guion de la demostración en el staging, el plan de práctica de hoy y de mañana, el resumen del registro de participación, el esquema de la presentación y el guion a dos voces para explicar cada funcionalidad durante la demo (Anexo C). Está verificado contra el repositorio al **22-11-2026** (rama `develop`). Si algo cambia en el código, hay que actualizar la sección correspondiente.
 
 - **Repositorio:** https://github.com/JanHH16/MenuSmart
 - **Staging (plan gratuito de Render):** sitio https://menusmart-staging-frontend.onrender.com, API https://menusmart-staging-backend.onrender.com, Swagger https://menusmart-staging-backend.onrender.com/api/docs
@@ -506,7 +506,7 @@ Datos al 22-11-2026 (comando: `git log --no-merges --format='%an|%ad' --date=sho
 
 ## 25. Demostración en el staging: guion completo (10 minutos)
 
-La demostración se hace **en el staging** (el enunciado pide ejecutarla ahí, no con capturas). Los comandos usan PowerShell y la dirección del staging. El plan de preparación de hoy y de mañana está en la sección 30.
+La demostración se hace **en el staging** (el enunciado pide ejecutarla ahí, no con capturas). Los comandos usan PowerShell y la dirección del staging. **La explicación de cada funcionalidad, a dos voces (quien opera y quien narra), está en el Anexo C.** El plan de preparación de hoy y de mañana está en la sección 30.
 
 ### 25.1 Preparación (comprobar 30 minutos antes)
 
@@ -568,7 +568,7 @@ Orden de prioridad si falta tiempo: 1, 2, 3, 8 (el núcleo), luego 7, 6, 5 y 4. 
 1. **Pantalla:** sugerencias del plan semanal.
 2. **Mostrar:** sugerencias ordenadas, costo por porción, ingredientes que reutiliza del plan y la **explicación** de cada una.
 3. **Aceptar** una sugerencia en un hueco libre y volver a pedirlas: las que comparten ingredientes con el plan suben.
-4. **Arrepentirse:** borrar esa comida del plan. **Rechazar** una receta (deja de aparecer) y **restablecer los rechazos** (el estofado de cerdo y las hamburguesas ya están rechazados y vuelven).
+4. **Arrepentirse:** pulsar **"No me interesa"** en una sugerencia (deja de aparecer) y luego **"Volver a mostrar las descartadas"** (el estofado de cerdo y las hamburguesas ya están descartados y vuelven). Para deshacer lo agregado, abrir la comida, **cambiar el día** o quitar un ingrediente y pulsar **"Guardar"**. La interfaz no tiene botón para eliminar una comida entera: se hace desde Swagger con `DELETE /api/meals/{id}`.
 5. **Cambiar la importancia del costo** y mostrar que el orden cambia. **Desactivar la adaptación** para volver al orden base.
 6. **Comparar con la base desde la terminal:**
 
@@ -848,3 +848,158 @@ La presentación grupal es breve y la demostración es lo central. Esquema suger
 6. **Limitaciones y siguientes pasos:** sin medición con usuarios, staging gratuito, APK sin probar en dispositivo, actualización de precios manual; y lo que sigue.
 
 Si hay tiempo, se puede convertir este esquema en un archivo de diapositivas.
+
+## Anexo C. Guion a dos voces: qué se hace y qué se explica
+
+Este anexo junta, escenario por escenario, **lo que hace quien opera** y **lo que explica quien narra**. La sección 25 tiene los comandos y el plan B; aquí está la explicación de cada funcionalidad.
+
+> **Antes de ensayar:** los nombres de botones y controles de este anexo son los de la interfaz actual (se verificaron en el código del frontend). Si algo se ve distinto en pantalla, manda lo que se ve. Un dato importante: **la interfaz no tiene un botón para eliminar una comida completa**; solo permite quitar ingredientes, cambiar el día o el tipo y guardar. Para borrar una comida entera hay que usar Swagger (`DELETE /api/meals/{id}`). Por eso el guion usa "mover" y "quitar un ingrediente" como formas de arrepentirse.
+
+### C.1 Reparto sugerido
+
+| Escenarios | Opera (manos) | Narra (voz) | Por qué |
+|---|---|---|---|
+| Contexto y 1 (plan, lista y costo) | Camila | Jan | Camila conoce la interfaz; Jan explica la normalización y el costo |
+| 2 (sugerencias y "me arrepentí") | Jan | Camila | Camila diseñó la interacción de la capacidad adaptativa y explica qué ve y controla la persona; Jan opera |
+| 3 a 8 (precios, pipeline, pruebas, seguridad, salud, falla) | Camila | Jan | Son temas de backend, Python y DevOps; Camila opera la terminal y los paneles, guiada por la columna de la derecha |
+| Cierre | quien prefieran | la otra persona | Dos frases de limitaciones |
+
+Pueden cambiar el reparto. La regla es que **quien narra conoce el tema** y que **cada uno responde preguntas de todo**: el reparto es solo para la demo. El operador solo anuncia lo que abre ("abro la lista") y no explica.
+
+### C.2 Cada funcionalidad en dos niveles
+
+Todas las explicaciones tienen dos niveles. **Nivel 1:** para cualquier persona, sin términos técnicos. **Nivel 2:** técnico, para las preguntas de la profesora. Empiecen siempre por el nivel 1 y suban al 2 solo si se les pide o si hay tiempo.
+
+| Funcionalidad | Nivel 1: en una frase para cualquiera | Nivel 2: cómo funciona por dentro | Evidencia |
+|---|---|---|---|
+| **Plan semanal** | "Aquí planeo qué como cada día, y cada comida lleva sus ingredientes." | Cada comida tiene día, tipo (desayuno, almuerzo, cena o colación), porciones, notas e ingredientes con cantidad y unidad. Los datos son por usuario: el backend filtra por el id del token | `backend/src/meals/` |
+| **Texto libre en ingredientes** | "Escribo como quiero: 'tomates 500 g'." | No hay catálogo obligatorio. El servicio Python lo limpia y lo lleva a un término del catálogo | `python-service/app/normalizacion.py` |
+| **Lista de compras** | "Con un botón se arma sola la lista de la semana, sumando lo repetido." | `POST /api/shopping-lists/generate` junta los ingredientes de la semana, los manda a Python, guarda la lista (reemplaza la anterior) y conserva lo ya marcado como comprado | `backend/src/shopping-lists/` |
+| **Normalización** | "Entiende que 'Arroz 200 g' y 'arroz 300 G' son lo mismo y los suma: 0,5 kg." | Reglas en orden: limpiar, mapear al catálogo (exacto, singular o contención), excluir falsos amigos ("leche condensada" no es leche), convertir a kg, l o un, unir y guardar las reglas aplicadas | `docs/normalizacion-de-ingredientes.md` |
+| **Costo por tienda** | "Me dice cuánto cuesta la compra en Jumbo y en Santa Isabel, y cuál conviene." | Por ítem y tienda, elige el producto más barato de la misma unidad que pasa un filtro de relevancia. El total solo suma los ítems con precio en ambas tiendas | `backend/src/shopping-lists/costo.ts` |
+| **"Sin precio" con motivo** | "Si no sabe el precio de algo, lo dice y explica por qué." | Motivos: `sin_termino`, `sin_precio_en_tienda`, `unidad_no_comparable`. Nunca se inventan precios | `backend/src/shopping-lists/costo.ts` |
+| **Comparador** | "Veo el mismo producto en las dos tiendas y dónde sale más barato." | Productos idénticos en ambas tiendas (mismo slug), con la fecha de cada precio y un aviso si está desactualizado (más de 48 horas) | `backend/src/prices/compare.ts` |
+| **Precios reales** | "Los precios los lee el sistema de las páginas de las tiendas." | El servicio Python lee el JSON-LD de la búsqueda, respeta `robots.txt`, hace una solicitud por segundo, valida cada registro y NestJS vuelve a validar y guarda con `upsert` | `python-service/app/scrapers/` |
+| **Calidad de datos** | "Podemos medir si los datos son buenos." | `GET /api/prices/quality`: registros válidos, duplicados y descartados, tasa de errores y cobertura de los 31 términos, sobre las últimas 10 corridas por tienda | `docs/calidad-de-datos.md` |
+| **Sugerencias** | "Me propone recetas baratas que aprovechan lo que ya compré." | Puntaje = peso del costo por el costo normalizado, más el peso de la reutilización por la fracción de ingredientes que ya están en el plan. Por defecto 60 y 40 | `backend/src/recommendations/scoring.ts` |
+| **"Por qué te la sugerimos"** | "Cada sugerencia me explica su razón." | Cada recomendación trae su costo por porción y los ingredientes compartidos; sin precios suficientes se muestra al final con aviso | `docs/capacidad-adaptativa.md` |
+| **Control del usuario** | "Yo mando: puedo cambiar cuánto importa el precio, ocultar ingredientes o apagarlo." | El deslizador va de "Gastar menos" a "Reutilizar ingredientes" (peso del costo de 0 a 100); "Ingredientes que no quiero" excluye recetas; "Sugerencias adaptativas" apagado devuelve el orden alfabético | `docs/capacidad-adaptativa.md` |
+| **Arrepentirse** | "Si me arrepiento, lo cambio o lo recupero." | "No me interesa" guarda un rechazo; "Volver a mostrar las descartadas" lo borra (`DELETE /api/recommendations/feedback`). El plan se edita en el detalle de la comida y se guarda con "Guardar" | `backend/src/recommendations/` |
+| **Pipeline** | "Cada cambio se prueba solo antes de llegar a la aplicación." | GitHub Actions: 9 jobs. Las imágenes y el despliegue dependen de que todo lo demás pase (quality gate) | `.github/workflows/ci.yml` |
+| **Rollback** | "Si un cambio sale mal, se vuelve atrás en un minuto." | Workflow manual por SHA y alcance; redespliega ese commit y verifica la salud. No revierte migraciones | `.github/workflows/rollback-staging.yml` |
+| **Seguridad** | "Solo entra quien tiene cuenta y cada uno ve solo lo suyo." | JWT, bcrypt de 12 rondas, validación con lista blanca, límite de solicitudes por IP, secretos fuera del repositorio y clave de servicio entre NestJS y Python | `docs/seguridad-privacidad-etica.md` |
+| **Salud y métricas** | "Puedo saber si el sistema está bien y qué tan rápido responde." | `/health` verifica la base y Python; `/api/metrics` entrega p50 y p95 por ruta; los logs son JSON con un `requestId` que viaja de NestJS a Python | `backend/src/observability/` |
+| **Falla controlada** | "Si se cae una pieza, el resto sigue y avisa con claridad." | Con Python caído: 503 con mensaje claro, `/health` en `degraded` y los datos guardados siguen disponibles | `backend/test/prices.e2e-spec.ts` |
+
+### C.3 Guion paso a paso
+
+**Tiempos.** Contexto 0:45, escenarios 1 a 8 como en la sección 25, cierre 0:30. Si van atrasados, recorten los pasos marcados como *(si hay tiempo)*.
+
+#### Contexto (0:00 a 0:45)
+
+| Operador | Narrador |
+|---|---|
+| Muestra el diagrama de arquitectura del README (o la diapositiva 4) | "MenuSmart ayuda a planificar la semana y a gastar menos. Se compra sin lista, se repiten ingredientes que sobran y casi nadie compara tiendas. Resolvemos eso con una aplicación que arma el plan, la lista de compras y el costo en Jumbo y Santa Isabel. Por dentro hay un frontend Angular, un backend NestJS dueño de la base de datos y un servicio Python que obtiene precios. Todo lo que van a ver corre en el staging." |
+
+*Transición:* "Veamos primero lo que ve una persona."
+
+#### Escenario 1: plan, lista y costo (0:45 a 2:30)
+
+| # | Operador | Narrador |
+|---|---|---|
+| 1 | Abre la pestaña del plan semanal ("tu semana") de la semana del 23 de noviembre | "Este es el plan: comidas por día. Cada una tiene su tipo (desayuno, almuerzo o cena) y sus ingredientes. Es por usuario: nadie más ve esto." |
+| 2 | Abre "Nueva comida". Escribe un nombre, elige día y tipo, agrega el ingrediente "tomates", 500, "g" y guarda | "Para agregar un ingrediente se escribe como uno quiera: 'tomates, 500 g'. No hay un catálogo obligatorio, y lo entiende el servicio Python." |
+| 3 | Va a la lista ("lista de esta semana") y pulsa **"Volver a generar desde mi plan"** | "Al pulsar, el backend junta los ingredientes de la semana, se los manda al servicio Python y guarda la lista. Si ya había marcado cosas como compradas, las conserva." |
+| 4 | Muestra la lista: ingredientes sumados, la barra "En el carro" y el resumen "conviene Jumbo, ahorras $…" | "Mire el arroz: estaba en dos comidas, escrito distinto, y quedó en una línea de 0,5 kilos. Eso es la normalización. Y acá el costo: el sistema elige, en cada tienda, el producto más barato de la misma unidad. Conviene Jumbo y se ahorran unos cinco mil pesos (el monto cambia un poco al sumar los tomates)." |
+| 5 | Señala un ítem "sin precio" (si hay) | "Si no encuentra precio, lo dice y explica por qué. **Nunca inventamos un precio.** Y el total solo suma lo que tiene precio en las dos tiendas, para que la comparación sea justa." |
+| 6 | *(si hay tiempo)* Marca un ítem como comprado | "Así avanza la compra: lo marcado queda guardado." |
+
+*Transición:* "Ahora la parte inteligente: las sugerencias."
+
+#### Escenario 2: capacidad adaptativa y "me arrepentí" (2:30 a 4:00)
+
+| # | Operador | Narrador |
+|---|---|---|
+| 1 | Abre **Sugerencias** (con la semana del 23) | "Esto es la capacidad adaptativa: el sistema propone recetas y ordena según dos cosas: cuánto cuestan por porción, con precios reales, y cuántos ingredientes ya tienes en el plan." |
+| 2 | Abre una sugerencia y señala **"Por qué te la sugerimos"** | "Cada sugerencia explica su razón: cuánto cuesta por porción y qué ingredientes comparte con tu semana. No es una caja negra." |
+| 3 | Pulsa **"Agregar a mi semana"**, elige el día ("¿Qué día?") en un hueco libre | "La persona decide. Si acepta, la receta pasa al plan con todos sus ingredientes." |
+| 4 | Vuelve a las sugerencias: las que comparten ingredientes con lo agregado suben; algunas dicen **"ya en tu semana"** | "Ahora el orden cambió porque el plan cambió: eso es adaptarse. Una limitación que conocemos: lo que ya está en el plan sigue apareciendo, marcado como 'ya en tu semana'." |
+| 5 | Pulsa **"No me interesa"** en una sugerencia. Aparece "descartadas por ti" y **"Volver a mostrar las descartadas"** | "Si algo no me interesa, lo descarto y deja de aparecer. Y si me arrepiento, vuelvo a mostrarlas con un clic." |
+| 6 | Pulsa **"Volver a mostrar las descartadas"** | "Se borra ese rechazo guardado. La persona siempre puede volver atrás." |
+| 7 | Mueve el deslizador entre **"Gastar menos"** y **"Reutilizar ingredientes"** | "Aquí se decide cuánto pesa cada cosa. Hacia 'Gastar menos' el orden sigue al precio; hacia 'Reutilizar ingredientes', a lo que ya tienes. Por defecto es 60 y 40." |
+| 8 | *(si hay tiempo)* Apaga **"Sugerencias adaptativas"** | "Apagada, se ven las recetas en orden alfabético, sin precios ni plan: es la versión base con la que comparamos para saber si adaptarse sirve." |
+| 9 | Abre **"Cómo se calcula"** | "Dejamos escrito cómo funciona: qué variables usa, cuánto pesa cada una, qué se guarda y cómo desactivarlo. Es parte de la transparencia." |
+| 10 | Muestra el cambio en el plan: abre la comida que acaba de agregar, cambia el **día** y pulsa **"Guardar"** | "Y si me arrepiento de haber agregado algo, lo muevo de día o le quito un ingrediente. *(Borrar una comida entera se hace desde la API.)*" |
+
+**Cierre del escenario (narrador):** "El recomendador es de reglas, no un modelo entrenado, porque no hay datos históricos y porque queremos explicarlo. En una simulación con precios reales, el menú adaptativo costó entre 25 % y 56 % menos que uno al azar. Es una simulación: no lo medimos con personas."
+
+*Transición:* "Estos precios, ¿de dónde salen?"
+
+#### Escenario 3: información web (4:00 a 5:00)
+
+| # | Operador | Narrador |
+|---|---|---|
+| 1 | Abre el **Comparador**: "Conviene <tienda>", "ahorras" y la tabla con la columna "Más barato" | "Aquí se comparan productos idénticos en las dos tiendas. Cada precio muestra su fecha, y se avisa si está desactualizado." |
+| 2 | Terminal: `GET /api/prices/quality` | "Estos precios los lee un servicio Python de las páginas de las tiendas, respetando `robots.txt` y una solicitud por segundo. Cada precio guarda de dónde viene. Y podemos medir la calidad: cerca de 99 % y 96 % de registros válidos y 31 de 31 ingredientes con precio." |
+| 3 | *(si hay tiempo)* `POST /api/prices/refresh` y mostrar el estado de la corrida | "La actualización corre en segundo plano porque tarda cerca de un minuto por tienda. Hay un mínimo de 10 minutos entre actualizaciones para no sobrecargar a las tiendas." |
+
+*Transición:* "Veamos cómo nos aseguramos de que esto no se rompa."
+
+#### Escenario 4: pipeline (5:00 a 6:00)
+
+| # | Operador | Narrador |
+|---|---|---|
+| 1 | Abre GitHub Actions y el último run verde de `CI` | "Cada cambio dispara una cadena de comprobaciones automáticas." |
+| 2 | Muestra los 9 jobs en el gráfico del run | "Pruebas del backend, del frontend y de Python, migraciones desde una base vacía, integración entre NestJS y Python, validación de Terraform, búsqueda de secretos y escaneo de seguridad de las imágenes. Si algo falla, no se construyen las imágenes ni se despliega: es un filtro de calidad." |
+| 3 | Abre el job "Desplegar a staging y verificar salud" | "Solo cuando todo pasa y el cambio llega a `develop`, se despliega a staging, por commit exacto, y se verifica que el sistema responda." |
+| 4 | *(si hay tiempo)* Lanza **Rollback de staging** con `solo-frontend` y el SHA de la guía | "Y si un cambio sale mal, este flujo vuelve a un commit anterior en menos de un minuto." |
+
+#### Escenario 5: pruebas (6:00 a 6:45)
+
+| # | Operador | Narrador |
+|---|---|---|
+| 1 | Terminal: corre `pytest -q` (Python) y `npx jest` (backend) | "Son 527 pruebas en total. Prueban la normalización, el cálculo de costos, el recomendador, el contrato entre servicios y qué pasa cuando algo falla." |
+| 2 | Muestra el log del CI con las pruebas e2e | "Las pruebas de extremo a extremo necesitan una base de datos real, así que las mostramos en el CI, donde corren contra PostgreSQL." |
+
+#### Escenario 6: seguridad (6:45 a 7:30)
+
+| # | Operador | Narrador |
+|---|---|---|
+| 1 | `curl.exe -i .../api/prices/compare` sin token (401) | "Sin sesión no se entra." |
+| 2 | `curl.exe -i https://menusmart-staging-python.onrender.com/metrics` (401) y `/health` (200) | "El servicio Python es público en staging porque el plan gratuito no tiene servicios privados. Por eso exige una clave que solo conoce el backend. Es un riesgo que reconocemos y documentamos." |
+| 3 | Login con campos inválidos (400) | "Lo que llega se valida de forma estricta, y lo desconocido se rechaza." |
+| 4 | *(al final)* 11 logins incorrectos hasta ver el 429 | "Hay límite de intentos por IP contra la fuerza bruta." |
+| 5 | Muestra `.env.example` y el job de gitleaks | "Los secretos no están en el repositorio y se revisa el historial en cada cambio." |
+
+#### Escenario 7: logs, métricas y salud (7:30 a 8:30)
+
+| # | Operador | Narrador |
+|---|---|---|
+| 1 | `curl.exe .../health` | "La salud verifica la base y el servicio Python. 'degraded' significa que algo falla pero el sistema sigue." |
+| 2 | `GET /api/metrics` con el token | "Tiempos de respuesta por ruta, con mediana y percentil 95, y errores." |
+| 3 | Panel de Render: logs del backend, busca un `requestId` y lo encuentra en los logs de Python | "Cada petición lleva un identificador que viaja del backend al servicio Python. Así se sigue una petición de punta a punta." |
+
+#### Escenario 8: falla controlada (8:30 a 9:30), en local
+
+| # | Operador | Narrador |
+|---|---|---|
+| 1 | `docker compose stop python-service` | "Vamos a apagar el servicio de procesamiento." |
+| 2 | `curl.exe http://localhost:3000/health` (`degraded`) | "El sistema lo detecta y lo informa." |
+| 3 | Intenta generar una lista (503) y muestra el comparador funcionando | "Lo que necesita a Python falla con un mensaje claro, y lo que ya estaba guardado sigue disponible. No se cae todo." |
+| 4 | `docker compose start python-service` y `/health` en `ok` | "Al volver el servicio, se recupera solo." |
+
+#### Cierre (9:30 a 10:00)
+
+| Operador | Narrador |
+|---|---|
+| Muestra la diapositiva 9 (limitaciones) | "Lo que no está: no lo medimos con personas, el staging es gratuito y se duerme, el APK no se probó en un teléfono y los precios se actualizan a mano. Lo siguiente es medir con 5 a 10 personas, automatizar los precios y pasar a instancias de pago." |
+
+### C.4 Reglas de narración
+
+1. **No leer la pantalla:** si se ve, se dice lo que *no* se ve (por qué y cómo).
+2. **Una idea por clic.** Si hay dos ideas, hay dos clics.
+3. **Nunca dos voces a la vez.** El operador solo anuncia lo que abre; el narrador explica.
+4. **Los silencios de espera sirven:** mientras carga algo (el staging dormido, la actualización de precios), el narrador explica qué está pasando por dentro.
+5. **Se nombra la limitación antes de que la pregunten** ("lo que ya está en el plan sigue apareciendo, marcado...").
+6. **Si algo falla, lo dice el narrador con calma** y pasa al plan B de la sección 25.3. Un fallo bien manejado es el escenario 8.
+7. **Cada uno está preparado para responder cualquier pregunta**, aunque no haya narrado ese escenario.
