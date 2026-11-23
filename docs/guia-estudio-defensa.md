@@ -568,7 +568,7 @@ Orden de prioridad si falta tiempo: 1, 2, 3, 8 (el núcleo), luego 7, 6, 5 y 4. 
 1. **Pantalla:** sugerencias del plan semanal.
 2. **Mostrar:** sugerencias ordenadas, costo por porción, ingredientes que reutiliza del plan y la **explicación** de cada una.
 3. **Aceptar** una sugerencia en un hueco libre y volver a pedirlas: las que comparten ingredientes con el plan suben.
-4. **Arrepentirse:** pulsar **"No me interesa"** en una sugerencia (deja de aparecer) y luego **"Volver a mostrar las descartadas"** (el estofado de cerdo y las hamburguesas ya están descartados y vuelven). Para deshacer lo agregado, abrir la comida, **cambiar el día** o quitar un ingrediente y pulsar **"Guardar"**. La interfaz no tiene botón para eliminar una comida entera: se hace desde Swagger con `DELETE /api/meals/{id}`.
+4. **Arrepentirse:** pulsar **"No me interesa"** en una sugerencia (deja de aparecer) y luego **"Volver a mostrar las descartadas"** (el estofado de cerdo y las hamburguesas ya están descartados y vuelven). Para deshacer lo agregado, abrir la comida y pulsar **"Eliminar comida"** (pide confirmación y borra también sus ingredientes), o cambiar su **día** o **tipo** con los botones y pulsar **"Guardar"**.
 5. **Cambiar la importancia del costo** y mostrar que el orden cambia. **Desactivar la adaptación** para volver al orden base.
 6. **Comparar con la base desde la terminal:**
 
@@ -853,7 +853,7 @@ Si hay tiempo, se puede convertir este esquema en un archivo de diapositivas.
 
 Este anexo junta, escenario por escenario, **lo que hace quien opera** y **lo que explica quien narra**. La sección 25 tiene los comandos y el plan B; aquí está la explicación de cada funcionalidad.
 
-> **Antes de ensayar:** los nombres de botones y controles de este anexo son los de la interfaz actual (se verificaron en el código del frontend). Si algo se ve distinto en pantalla, manda lo que se ve. Un dato importante: **la interfaz no tiene un botón para eliminar una comida completa**; solo permite quitar ingredientes, cambiar el día o el tipo y guardar. Para borrar una comida entera hay que usar Swagger (`DELETE /api/meals/{id}`). Por eso el guion usa "mover" y "quitar un ingrediente" como formas de arrepentirse.
+> **Antes de ensayar:** los nombres de botones y controles de este anexo son los de la interfaz actual (se verificaron en el código del frontend). Si algo se ve distinto en pantalla, manda lo que se ve. En la edición de una comida se puede **cambiar el día y el tipo** (botones), **quitar ingredientes**, **Guardar** y **Eliminar comida** (con confirmación). Los botones de cambiar día y tipo y de eliminar se agregaron el 23-11-2026: antes los chips de día y tipo eran solo texto y no había botón de eliminar. Si ven una versión anterior del sitio o un APK viejo, esos botones no estarán.
 
 ### C.1 Reparto sugerido
 
@@ -884,7 +884,7 @@ Todas las explicaciones tienen dos niveles. **Nivel 1:** para cualquier persona,
 | **Sugerencias** | "Me propone recetas baratas que aprovechan lo que ya compré." | Puntaje = peso del costo por el costo normalizado, más el peso de la reutilización por la fracción de ingredientes que ya están en el plan. Por defecto 60 y 40 | `backend/src/recommendations/scoring.ts` |
 | **"Por qué te la sugerimos"** | "Cada sugerencia me explica su razón." | Cada recomendación trae su costo por porción y los ingredientes compartidos; sin precios suficientes se muestra al final con aviso | `docs/capacidad-adaptativa.md` |
 | **Control del usuario** | "Yo mando: puedo cambiar cuánto importa el precio, ocultar ingredientes o apagarlo." | El deslizador va de "Gastar menos" a "Reutilizar ingredientes" (peso del costo de 0 a 100); "Ingredientes que no quiero" excluye recetas; "Sugerencias adaptativas" apagado devuelve el orden alfabético | `docs/capacidad-adaptativa.md` |
-| **Arrepentirse** | "Si me arrepiento, lo cambio o lo recupero." | "No me interesa" guarda un rechazo; "Volver a mostrar las descartadas" lo borra (`DELETE /api/recommendations/feedback`). El plan se edita en el detalle de la comida y se guarda con "Guardar" | `backend/src/recommendations/` |
+| **Arrepentirse** | "Si me arrepiento, lo cambio o lo recupero." | "No me interesa" guarda un rechazo; "Volver a mostrar las descartadas" lo borra (`DELETE /api/recommendations/feedback`). El plan se edita en el detalle de la comida (día, tipo, ingredientes, notas) y se guarda con "Guardar"; "Eliminar comida" la borra con confirmación (`DELETE /api/meals/{id}`) | `backend/src/recommendations/` |
 | **Pipeline** | "Cada cambio se prueba solo antes de llegar a la aplicación." | GitHub Actions: 9 jobs. Las imágenes y el despliegue dependen de que todo lo demás pase (quality gate) | `.github/workflows/ci.yml` |
 | **Rollback** | "Si un cambio sale mal, se vuelve atrás en un minuto." | Workflow manual por SHA y alcance; redespliega ese commit y verifica la salud. No revierte migraciones | `.github/workflows/rollback-staging.yml` |
 | **Seguridad** | "Solo entra quien tiene cuenta y cada uno ve solo lo suyo." | JWT, bcrypt de 12 rondas, validación con lista blanca, límite de solicitudes por IP, secretos fuera del repositorio y clave de servicio entre NestJS y Python | `docs/seguridad-privacidad-etica.md` |
@@ -929,7 +929,7 @@ Todas las explicaciones tienen dos niveles. **Nivel 1:** para cualquier persona,
 | 7 | Mueve el deslizador entre **"Gastar menos"** y **"Reutilizar ingredientes"** | "Aquí se decide cuánto pesa cada cosa. Hacia 'Gastar menos' el orden sigue al precio; hacia 'Reutilizar ingredientes', a lo que ya tienes. Por defecto es 60 y 40." |
 | 8 | *(si hay tiempo)* Apaga **"Sugerencias adaptativas"** | "Apagada, se ven las recetas en orden alfabético, sin precios ni plan: es la versión base con la que comparamos para saber si adaptarse sirve." |
 | 9 | Abre **"Cómo se calcula"** | "Dejamos escrito cómo funciona: qué variables usa, cuánto pesa cada una, qué se guarda y cómo desactivarlo. Es parte de la transparencia." |
-| 10 | Muestra el cambio en el plan: abre la comida que acaba de agregar, cambia el **día** y pulsa **"Guardar"** | "Y si me arrepiento de haber agregado algo, lo muevo de día o le quito un ingrediente. *(Borrar una comida entera se hace desde la API.)*" |
+| 10 | Muestra el cambio en el plan: abre la comida que acaba de agregar, cambia el **día** y pulsa **"Guardar"**; o pulsa **"Eliminar comida"** y confirma con **"Sí, eliminar"** | "Y si me arrepiento de haber agregado algo, lo muevo de día o lo elimino con 'Eliminar comida', que antes me pide confirmación." |
 
 **Cierre del escenario (narrador):** "El recomendador es de reglas, no un modelo entrenado, porque no hay datos históricos y porque queremos explicarlo. En una simulación con precios reales, el menú adaptativo costó entre 25 % y 56 % menos que uno al azar. Es una simulación: no lo medimos con personas."
 

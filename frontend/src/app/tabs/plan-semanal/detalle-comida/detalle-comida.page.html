@@ -2,6 +2,19 @@
   @if (error) {
     <p class="ms-text-secondary" role="alert">{{ error }}</p>
   }
+  @if (confirmandoEliminar) {
+    <div class="ms-detalle-confirmar" role="alert">
+      <p class="ms-detalle-confirmar-texto">
+        ¿Eliminar «{{ comida.nombre }}» del plan? Se borran también sus ingredientes y no se puede deshacer.
+      </p>
+      <button type="button" class="ms-btn-figma ms-btn-figma--secundario ms-detalle-confirmar-boton" (click)="cancelarEliminar()">
+        Cancelar
+      </button>
+      <button type="button" class="ms-btn-figma ms-btn-figma--primario ms-detalle-confirmar-boton" (click)="eliminar()">
+        Sí, eliminar
+      </button>
+    </div>
+  }
   @if (esDesktop$ | async) {
     <!-- Desktop (Figma "D4. Detalle de comida", buildDetailDesktop): "Volver
          al plan", título y Guardar arriba; tarjeta receta (440px) + tarjeta
@@ -15,9 +28,14 @@
 
         <header class="ms-detalle-desktop-header">
           <h1 class="ms-titulo-desktop ms-detalle-titulo">editar comida</h1>
-          <button type="button" class="ms-btn-figma ms-btn-figma--primario ms-detalle-guardar" (click)="guardar()">
-            Guardar
-          </button>
+          <div class="ms-detalle-acciones">
+            <button type="button" class="ms-btn-figma ms-btn-figma--secundario ms-detalle-eliminar" (click)="pedirEliminar()">
+              Eliminar comida
+            </button>
+            <button type="button" class="ms-btn-figma ms-btn-figma--primario ms-detalle-guardar" (click)="guardar()">
+              Guardar
+            </button>
+          </div>
         </header>
 
         <div class="ms-detalle-columnas">
@@ -32,20 +50,26 @@
               <span class="ms-label-desktop">Día</span>
               <div class="ms-detalle-chips">
                 @for (dia of dias; track dia.corto) {
-                  <span
+                  <button
+                    type="button"
                     class="ms-chip-figma ms-detalle-chip-dia"
                     [class.ms-chip-figma--activo]="dia.nombre === comida.dia"
-                  >{{ dia.nombre.slice(0, 3) }}</span>
+                    [attr.aria-pressed]="dia.nombre === comida.dia"
+                    (click)="elegirDia(dia.nombre)"
+                  >{{ dia.nombre.slice(0, 3) }}</button>
                 }
               </div>
 
               <span class="ms-label-desktop">Tipo de comida</span>
               <div class="ms-detalle-chips">
                 @for (tipo of tipos; track tipo) {
-                  <span
+                  <button
+                    type="button"
                     class="ms-chip-figma ms-detalle-chip-tipo"
                     [class.ms-chip-figma--activo]="tipo === comida.tipo"
-                  >{{ tipo }}</span>
+                    [attr.aria-pressed]="tipo === comida.tipo"
+                    (click)="elegirTipo(tipo)"
+                  >{{ tipo }}</button>
                 }
               </div>
 
@@ -151,10 +175,38 @@
         <div class="ms-comida-info">
           <span class="ms-label-secundario">Nombre de la comida</span>
           <h1 class="ms-heading-libreta">{{ comida.nombre }}</h1>
-          <div class="ms-comida-tags">
-            <ion-chip color="primary" outline="true">{{ comida.dia | uppercase }}</ion-chip>
-            <ion-chip color="primary" outline="true">{{ comida.tipo | uppercase }}</ion-chip>
-          </div>
+        </div>
+      </div>
+
+      <div class="ms-comida-selectores">
+        <span class="ms-label-secundario">Día</span>
+        <div class="ms-chips-row">
+          @for (dia of dias; track dia.corto) {
+            <button
+              class="ms-chip"
+              type="button"
+              [class.ms-chip--activo]="dia.nombre === comida.dia"
+              [attr.aria-pressed]="dia.nombre === comida.dia"
+              (click)="elegirDia(dia.nombre)"
+            >
+              {{ dia.corto }}
+            </button>
+          }
+        </div>
+
+        <span class="ms-label-secundario">Tipo de comida</span>
+        <div class="ms-chips-row ms-chips-row--tipos">
+          @for (tipo of tipos; track tipo) {
+            <button
+              class="ms-chip ms-chip--tipo"
+              type="button"
+              [class.ms-chip--activo]="tipo === comida.tipo"
+              [attr.aria-pressed]="tipo === comida.tipo"
+              (click)="elegirTipo(tipo)"
+            >
+              {{ tipo | uppercase }}
+            </button>
+          }
         </div>
       </div>
 
@@ -202,6 +254,9 @@
       </div>
 
       <ion-button expand="block" class="ms-btn-primary" (click)="guardar()">Guardar</ion-button>
+      <ion-button expand="block" fill="clear" color="danger" class="ms-eliminar-comida" (click)="pedirEliminar()">
+        Eliminar comida
+      </ion-button>
     </ion-content>
   }
 } @else {
