@@ -30,6 +30,8 @@ export class ComparadorPage implements OnInit {
 
   /** Tu lista de la semana con el costo de cada producto en las dos tiendas. */
   readonly itemsLista = computed(() => this.listaCompras.categorias().flatMap((c) => c.items));
+  /** Solo lo que falta comprar: lo marcado en la lista de compras no se compara. */
+  readonly itemsPendientes = computed(() => this.itemsLista().filter((item) => !item.comprado));
   readonly resumenLista = this.listaCompras.resumen;
   /** El usuario puede alternar entre "Mi lista" y "Todos los productos". */
   readonly verMiLista = signal(true);

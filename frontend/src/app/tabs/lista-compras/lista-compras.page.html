@@ -7,9 +7,11 @@
     @if (estado() === 'listo') {
       @if (resumen(); as r) {
         <div class="ms-lista-costo" role="status">
-          @if (r.itemsComparables > 0) {
+          @if (r.itemsTotal === 0) {
+            <p class="ms-lista-costo-nota">Ya marcaste todos los productos: no queda nada por comprar.</p>
+          } @else if (r.itemsComparables > 0) {
             <p>
-              Costo estimado: Jumbo {{ formatPrecio(r.totalJumbo) }} · Santa Isabel
+              Lo que te falta comprar: Jumbo {{ formatPrecio(r.totalJumbo) }} · Santa Isabel
               {{ formatPrecio(r.totalSantaIsabel) }}
               @if (r.masBarata) {
                 · conviene {{ r.masBarata }}, ahorras {{ formatPrecio(r.ahorro) }}
@@ -18,8 +20,8 @@
               }
             </p>
             <p class="ms-lista-costo-nota">
-              Solo suma los {{ r.itemsComparables }} de {{ r.itemsTotal }} productos con precio en ambas
-              tiendas.
+              Solo suma los {{ r.itemsComparables }} de {{ r.itemsTotal }} productos sin marcar que tienen precio
+              en ambas tiendas. Los que marcas (ya los tienes o van en el carro) no cuentan.
             </p>
           } @else {
             <p class="ms-lista-costo-nota">

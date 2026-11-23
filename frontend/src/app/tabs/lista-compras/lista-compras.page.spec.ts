@@ -73,6 +73,21 @@ describe('ListaComprasPage', () => {
     expect(component.resumen()).toMatchObject({ masBarata: 'Santa Isabel', ahorro: 600 });
   });
 
+  it('el costo estimado solo cuenta lo que falta comprar y se recalcula al marcar', async () => {
+    http.expectOne((req) => req.url.endsWith('/meals'));
+    http.expectOne(esLista).flush(lista);
+    await fixture.whenStable();
+
+    // Arroz sin marcar: entra en el costo. Cilantro ya marcado: queda fuera.
+    expect(component.resumen()).toMatchObject({ itemsTotal: 1, itemsComparables: 1, totalJumbo: 3000, totalSantaIsabel: 2400 });
+
+    // Al marcar el arroz ("ya lo tengo") ya no queda nada por comprar.
+    component.alternar('i1');
+    http.expectOne((req) => req.method === 'PATCH' && req.url.endsWith('/items/i1')).flush(null);
+    await fixture.whenStable();
+    expect(component.resumen()).toMatchObject({ itemsTotal: 0, itemsComparables: 0, masBarata: null, ahorro: 0 });
+  });
+
   it('ofrece generar la lista cuando todavía no existe (404)', async () => {
     http.expectOne((req) => req.url.endsWith('/meals'));
     http.expectOne(esLista).flush({ message: 'no hay' }, { status: 404, statusText: 'Not Found' });

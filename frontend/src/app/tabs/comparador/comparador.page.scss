@@ -562,3 +562,14 @@
     color: var(--ms-texto-suave);
   }
 }
+
+.ms-comp-lista-nota {
+  margin: -6px 0 12px;
+  font-size: 0.8rem;
+  color: var(--ms-texto-suave);
+}
+
+.ms-comp-lista-vacia {
+  margin: 8px 0 12px;
+  font-weight: 700;
+}

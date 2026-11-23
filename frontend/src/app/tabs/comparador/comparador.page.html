@@ -63,13 +63,17 @@
 <!-- Tu lista de la semana con el costo de cada producto en cada tienda. -->
 <ng-template #miLista>
   <div class="ms-comp-lista">
-    <p class="ms-comp-lista-titulo">Tu lista de esta semana · {{ itemsLista().length }} productos</p>
+    <p class="ms-comp-lista-titulo">Lo que te falta comprar · {{ itemsPendientes().length }} de {{ itemsLista().length }} productos</p>
+    <p class="ms-comp-lista-nota">Los productos que marcas en tu lista de compras (ya los tienes o van en el carro) no se comparan.</p>
+    @if (itemsPendientes().length === 0) {
+      <p class="ms-comp-lista-vacia">Marcaste todos los productos: no queda nada por comparar.</p>
+    }
     <div class="ms-comp-lista-fila ms-comp-lista-fila--encabezado">
       <span>Producto</span>
       <span class="ms-comp-num">Jumbo</span>
       <span class="ms-comp-num">S. Isabel</span>
     </div>
-    @for (item of itemsLista(); track item.id) {
+    @for (item of itemsPendientes(); track item.id) {
       <div class="ms-comp-lista-fila">
         <span class="ms-comp-lista-producto">
           {{ item.nombre }}
