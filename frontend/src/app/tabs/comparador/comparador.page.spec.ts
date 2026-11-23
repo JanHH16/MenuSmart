@@ -20,6 +20,10 @@ describe('ComparadorPage', () => {
     component = fixture.componentInstance;
     fixture.detectChanges();
     cargaInicial = http.expectOne((req) => req.url.endsWith('/prices/compare'));
+    // La pagina tambien pide tu lista de compras para compararla; aqui no importa su contenido.
+    http
+      .expectOne((req) => req.url.endsWith('/shopping-lists'))
+      .flush('no hay lista', { status: 404, statusText: 'Not Found' });
   });
 
   afterEach(() => http.verify());

@@ -1,6 +1,7 @@
-import { Component, computed, inject, OnInit } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { LayoutService } from '../../core/services/layout.service';
 import { ComparadorService, PrecioProducto } from '../../core/services/comparador.service';
+import { ListaComprasService } from '../../core/services/lista-compras.service';
 
 @Component({
   selector: 'app-comparador',
@@ -11,6 +12,7 @@ import { ComparadorService, PrecioProducto } from '../../core/services/comparado
 export class ComparadorPage implements OnInit {
   private readonly comparadorService = inject(ComparadorService);
   private readonly layoutService = inject(LayoutService);
+  private readonly listaCompras = inject(ListaComprasService);
 
   readonly esDesktop$ = this.layoutService.esDesktop$;
   readonly tiendas = this.comparadorService.tiendas;
@@ -23,13 +25,56 @@ export class ComparadorPage implements OnInit {
   readonly hayDesactualizados = this.comparadorService.hayDesactualizados;
   readonly ultimaActualizacion = this.comparadorService.ultimaActualizacion;
 
+  readonly exito = this.comparadorService.exito;
+  readonly progreso = this.comparadorService.progreso;
+
+  /** Tu lista de la semana con el costo de cada producto en las dos tiendas. */
+  readonly itemsLista = computed(() => this.listaCompras.categorias().flatMap((c) => c.items));
+  readonly resumenLista = this.listaCompras.resumen;
+  /** El usuario puede alternar entre "Mi lista" y "Todos los productos". */
+  readonly verMiLista = signal(true);
+  readonly mostrarMiLista = computed(() => this.verMiLista() && this.itemsLista().length > 0);
+  readonly hayLista = computed(() => this.itemsLista().length > 0);
+  readonly filasEsqueleto = [0, 1, 2, 3, 4, 5];
+
+  private primeraEntrada = true;
+
   readonly ganadora = computed(() => {
     const indice = this.tiendaMasBarata().indice;
     return indice === null ? null : this.tiendas[indice];
   });
 
   ngOnInit(): void {
+    this.cargarTodo();
+  }
+
+  /**
+   * Ionic mantiene las pestañas vivas: ngOnInit no se repite al volver. Sin esto el comparador
+   * seguía mostrando la lista de compras de la primera visita aunque se hubiera cambiado el plan.
+   */
+  ionViewWillEnter(): void {
+    if (this.primeraEntrada) {
+      this.primeraEntrada = false;
+      return;
+    }
+    this.cargarTodo();
+  }
+
+  private cargarTodo(): void {
     this.comparadorService.cargar();
+    void this.listaCompras.cargar();
+  }
+
+  elegirVista(miLista: boolean): void {
+    this.verMiLista.set(miLista);
+  }
+
+  /** Mejor tienda para un producto de la lista, o null si falta algún precio o empatan. */
+  tiendaDeItem(jumbo: number | null, santaIsabel: number | null): 'Jumbo' | 'S. Isabel' | null {
+    if (jumbo === null || santaIsabel === null || jumbo === santaIsabel) {
+      return null;
+    }
+    return jumbo < santaIsabel ? 'Jumbo' : 'S. Isabel';
   }
 
   actualizar(): void {

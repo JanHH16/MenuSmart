@@ -23,7 +23,8 @@ export class AuthInterceptor implements HttpInterceptor {
 
     return next.handle(authRequest).pipe(
       catchError((error: unknown) => {
-        if (error instanceof HttpErrorResponse && error.status === 401) {
+        const esAuth = /\/auth\/(login|register)$/.test(request.url);
+        if (error instanceof HttpErrorResponse && error.status === 401 && !esAuth) {
           // El token ya no es válido (expiró o el backend lo rechazó):
           // cerramos la sesión localmente y mandamos al usuario a loguearse de nuevo.
           this.authService.logout();

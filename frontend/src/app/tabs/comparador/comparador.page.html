@@ -6,7 +6,22 @@
       Jumbo: {{ formatFecha(ultimaActualizacion().jumbo) }} · S. Isabel:
       {{ formatFecha(ultimaActualizacion().santaIsabel) }}
     </p>
-    @if (hayDesactualizados()) {
+    @if (progreso(); as p) {
+      <div class="ms-comp-progreso" role="status" aria-live="polite">
+        <ion-spinner name="crescent"></ion-spinner>
+        <div>
+          <strong>Comparando precios en Jumbo y Santa Isabel…</strong>
+          <span>
+            {{ p.terminadas }} de {{ p.total }} tiendas listas · {{ p.segundos }} s. Puede tardar uno o dos
+            minutos; no cierres esta pantalla, te avisamos cuando termine.
+          </span>
+        </div>
+      </div>
+    }
+    @if (exito()) {
+      <p class="ms-comp-exito" role="status">✓ {{ exito() }}</p>
+    }
+    @if (hayDesactualizados() && !actualizando()) {
       <p class="ms-comp-aviso">Algunos precios tienen varios días. Actualízalos para ver el valor de hoy.</p>
     }
     @if (mensaje()) {
@@ -18,12 +33,81 @@
   </div>
 </ng-template>
 
+<!-- Esqueleto de carga: se ve mientras se piden o se actualizan los precios. -->
+<ng-template #esqueleto>
+  <div class="ms-comp-esqueleto" aria-busy="true" aria-label="Cargando precios">
+    @for (fila of filasEsqueleto; track fila) {
+      <div class="ms-comp-esqueleto-fila">
+        <span class="ms-comp-esqueleto-barra"></span>
+        <span class="ms-comp-esqueleto-barra"></span>
+        <span class="ms-comp-esqueleto-barra"></span>
+      </div>
+    }
+  </div>
+</ng-template>
+
+<!-- Alterna entre los productos de tu lista y la boleta general. -->
+<ng-template #selectorVista>
+  @if (hayLista() && !actualizando()) {
+    <div class="ms-comp-selector" role="group" aria-label="Qué comparar">
+      <button type="button" class="ms-chip" [class.ms-chip--activo]="verMiLista()" [attr.aria-pressed]="verMiLista()" (click)="elegirVista(true)">
+        Mi lista de compras
+      </button>
+      <button type="button" class="ms-chip" [class.ms-chip--activo]="!verMiLista()" [attr.aria-pressed]="!verMiLista()" (click)="elegirVista(false)">
+        Todos los productos
+      </button>
+    </div>
+  }
+</ng-template>
+
+<!-- Tu lista de la semana con el costo de cada producto en cada tienda. -->
+<ng-template #miLista>
+  <div class="ms-comp-lista">
+    <p class="ms-comp-lista-titulo">Tu lista de esta semana · {{ itemsLista().length }} productos</p>
+    <div class="ms-comp-lista-fila ms-comp-lista-fila--encabezado">
+      <span>Producto</span>
+      <span class="ms-comp-num">Jumbo</span>
+      <span class="ms-comp-num">S. Isabel</span>
+    </div>
+    @for (item of itemsLista(); track item.id) {
+      <div class="ms-comp-lista-fila">
+        <span class="ms-comp-lista-producto">
+          {{ item.nombre }}
+          <small>{{ item.cantidad }}</small>
+        </span>
+        <span class="ms-comp-num" [class.ms-comp-lista-mejor]="tiendaDeItem(item.costoJumbo, item.costoSantaIsabel) === 'Jumbo'">
+          {{ item.costoJumbo === null ? 'sin precio' : formatPrecio(item.costoJumbo) }}
+        </span>
+        <span class="ms-comp-num" [class.ms-comp-lista-mejor]="tiendaDeItem(item.costoJumbo, item.costoSantaIsabel) === 'S. Isabel'">
+          {{ item.costoSantaIsabel === null ? 'sin precio' : formatPrecio(item.costoSantaIsabel) }}
+        </span>
+      </div>
+    }
+    @if (resumenLista(); as r) {
+      <div class="ms-comp-lista-total" role="status">
+        @if (r.itemsComparables > 0) {
+          <p>
+            Total Jumbo {{ formatPrecio(r.totalJumbo) }} · Santa Isabel {{ formatPrecio(r.totalSantaIsabel) }}
+            @if (r.masBarata) {
+              · conviene {{ r.masBarata }}, ahorras {{ formatPrecio(r.ahorro) }}
+            } @else {
+              · salen igual
+            }
+          </p>
+          <small>Suma solo los {{ r.itemsComparables }} de {{ r.itemsTotal }} productos con precio en ambas tiendas.</small>
+        } @else {
+          <p>Todavía no hay precios para valorizar tu lista. Pulsa "Actualizar precios".</p>
+        }
+      </div>
+    }
+  </div>
+</ng-template>
+
 <!-- Lo que se muestra mientras no hay boleta: cargando, error o sin datos. -->
 <ng-template #sinBoleta>
   <div class="ms-comp-vacio">
     @if (estado() === 'cargando') {
-      <ion-spinner name="crescent"></ion-spinner>
-      <p>Cargando precios…</p>
+      <ng-container *ngTemplateOutlet="esqueleto"></ng-container>
     } @else if (estado() === 'error') {
       <p>No se pudieron cargar los precios.</p>
       <ion-button size="small" (click)="reintentar()">Reintentar</ion-button>
@@ -41,12 +125,18 @@
     <div class="ms-desktop-page">
       <header class="ms-comp-desktop-header">
         <h1 class="ms-titulo-desktop">comparador de precios</h1>
-        <p class="ms-subtitulo-desktop">{{ tiendas.join(' vs. ') }} · mismos productos en ambas tiendas</p>
+        <p class="ms-subtitulo-desktop">{{ tiendas.join(' vs. ') }} · {{ mostrarMiLista() ? 'tu lista de compras' : 'mismos productos en ambas tiendas' }}</p>
       </header>
 
       <ng-container *ngTemplateOutlet="barraEstado"></ng-container>
 
-      @if (estado() === 'listo' && productos().length > 0) {
+      <ng-container *ngTemplateOutlet="selectorVista"></ng-container>
+
+      @if (actualizando()) {
+        <ng-container *ngTemplateOutlet="esqueleto"></ng-container>
+      } @else if (mostrarMiLista()) {
+        <ng-container *ngTemplateOutlet="miLista"></ng-container>
+      } @else if (estado() === 'listo' && productos().length > 0) {
       <div class="ms-comp-desktop-columnas">
         <!-- Boleta térmica de 720px con borde dentado arriba y abajo. -->
         <div class="ms-comp-boleta-sombra">
@@ -163,12 +253,18 @@
 
   <ion-content class="ion-padding">
     <p class="ms-text-secondary ms-comparador-subtitulo">
-      {{ tiendas.join(' vs. ') }} · mismos productos en ambas tiendas
+      {{ tiendas.join(' vs. ') }} · {{ mostrarMiLista() ? 'tu lista de compras' : 'mismos productos en ambas tiendas' }}
     </p>
 
     <ng-container *ngTemplateOutlet="barraEstado"></ng-container>
 
-    @if (estado() === 'listo' && productos().length > 0) {
+    <ng-container *ngTemplateOutlet="selectorVista"></ng-container>
+
+    @if (actualizando()) {
+      <ng-container *ngTemplateOutlet="esqueleto"></ng-container>
+    } @else if (mostrarMiLista()) {
+      <ng-container *ngTemplateOutlet="miLista"></ng-container>
+    } @else if (estado() === 'listo' && productos().length > 0) {
     <div class="ms-boleta">
       <div class="ms-boleta-header">
         <span class="ms-boleta-marca">MENUSMART</span>
