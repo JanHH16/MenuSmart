@@ -19,6 +19,9 @@ jobs:
     name: APK de depuracion
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    # STAGING_BACKEND_URL es una variable del environment "staging": sin esta linea el job no la ve
+    # y el APK se compila con la direccion de ejemplo, sin poder conectarse al backend.
+    environment: staging
     steps:
       - name: Obtener el codigo fuente
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
