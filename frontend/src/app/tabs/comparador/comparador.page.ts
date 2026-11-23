@@ -1,4 +1,4 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnInit } from '@angular/core';
 import { LayoutService } from '../../core/services/layout.service';
 import { ComparadorService, PrecioProducto } from '../../core/services/comparador.service';
 import { ListaComprasService } from '../../core/services/lista-compras.service';
@@ -17,8 +17,6 @@ export class ComparadorPage implements OnInit {
   readonly esDesktop$ = this.layoutService.esDesktop$;
   readonly tiendas = this.comparadorService.tiendas;
   readonly productos = this.comparadorService.productos;
-  readonly totales = this.comparadorService.totales;
-  readonly tiendaMasBarata = this.comparadorService.tiendaMasBarata;
   readonly estado = this.comparadorService.estado;
   readonly actualizando = this.comparadorService.actualizando;
   readonly mensaje = this.comparadorService.mensaje;
@@ -29,15 +27,58 @@ export class ComparadorPage implements OnInit {
   readonly progreso = this.comparadorService.progreso;
 
   /** Tu lista de la semana con el costo de cada producto en las dos tiendas. */
-  readonly itemsLista = computed(() => this.listaCompras.categorias().flatMap((c) => c.items));
-  /** Solo lo que falta comprar: lo marcado en la lista de compras no se compara. */
+  private readonly itemsLista = computed(() => this.listaCompras.categorias().flatMap((c) => c.items));
+  /** Solo lo que falta comprar: lo marcado en la lista de compras (ya lo tengo / en el carro) no se compara. */
   readonly itemsPendientes = computed(() => this.itemsLista().filter((item) => !item.comprado));
-  readonly resumenLista = this.listaCompras.resumen;
-  /** El usuario puede alternar entre "Mi lista" y "Todos los productos". */
-  readonly verMiLista = signal(true);
-  readonly mostrarMiLista = computed(() => this.verMiLista() && this.itemsLista().length > 0);
+  /** Si hay una lista de compras, el comparador se arma con ella; si no, con los productos idénticos de las tiendas. */
   readonly hayLista = computed(() => this.itemsLista().length > 0);
+  readonly mostrarMiLista = this.hayLista;
   readonly filasEsqueleto = [0, 1, 2, 3, 4, 5];
+
+  /** Filas de la boleta con tu lista: solo los productos sin marcar que tienen precio en las dos tiendas. */
+  private readonly filasDeLista = computed<PrecioProducto[]>(() =>
+    this.itemsPendientes()
+      .filter((item) => item.costoJumbo !== null && item.costoSantaIsabel !== null)
+      .map((item) => ({
+        slug: item.id,
+        producto: `${item.nombre} · ${item.cantidad}`,
+        cantidad: item.cantidad,
+        precios: [item.costoJumbo ?? 0, item.costoSantaIsabel ?? 0],
+      })),
+  );
+
+  /** Lo que se muestra en la boleta: tu lista, o los productos idénticos si todavía no hay lista. */
+  readonly filas = computed(() => (this.hayLista() ? this.filasDeLista() : this.productos()));
+
+  readonly hayBoleta = computed(
+    () => this.filas().length > 0 && (this.hayLista() || this.estado() === 'listo'),
+  );
+
+  readonly subtituloBoleta = computed(() =>
+    this.hayLista()
+      ? `Lo que te falta comprar · ${this.filas().length} productos`
+      : `${this.filas().length} productos`,
+  );
+
+  /** Productos de tu lista que no se pudieron valorizar en alguna tienda: se avisan y no se suman. */
+  readonly sinPrecio = computed(() =>
+    this.itemsPendientes()
+      .filter((item) => item.costoJumbo === null || item.costoSantaIsabel === null)
+      .map((item) => item.nombre),
+  );
+
+  readonly totales = computed(() =>
+    this.tiendas.map((_, i) => this.filas().reduce((total, fila) => total + fila.precios[i], 0)),
+  );
+
+  /** `indice` es null si las dos tiendas suman lo mismo. */
+  readonly tiendaMasBarata = computed<{ indice: number | null; ahorro: number }>(() => {
+    const totales = this.totales();
+    const menor = Math.min(...totales);
+    const mayor = Math.max(...totales);
+    const ganadoras = totales.filter((total) => total === menor).length;
+    return { indice: ganadoras === 1 ? totales.indexOf(menor) : null, ahorro: mayor - menor };
+  });
 
   private primeraEntrada = true;
 
@@ -65,18 +106,6 @@ export class ComparadorPage implements OnInit {
   private cargarTodo(): void {
     this.comparadorService.cargar();
     void this.listaCompras.cargar();
-  }
-
-  elegirVista(miLista: boolean): void {
-    this.verMiLista.set(miLista);
-  }
-
-  /** Mejor tienda para un producto de la lista, o null si falta algún precio o empatan. */
-  tiendaDeItem(jumbo: number | null, santaIsabel: number | null): 'Jumbo' | 'S. Isabel' | null {
-    if (jumbo === null || santaIsabel === null || jumbo === santaIsabel) {
-      return null;
-    }
-    return jumbo < santaIsabel ? 'Jumbo' : 'S. Isabel';
   }
 
   actualizar(): void {
@@ -162,7 +191,7 @@ export class ComparadorPage implements OnInit {
       return null;
     }
     let mejor: { producto: string; ahorro: number; tienda: string } | null = null;
-    for (const producto of this.productos()) {
+    for (const producto of this.filas()) {
       const barata = this.indiceMasBarato(producto);
       const ahorro = this.diferencia(producto);
       if (barata !== null && barata !== ganadora && (!mejor || ahorro > mejor.ahorro)) {

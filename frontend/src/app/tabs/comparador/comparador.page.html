@@ -46,71 +46,16 @@
   </div>
 </ng-template>
 
-<!-- Alterna entre los productos de tu lista y la boleta general. -->
-<ng-template #selectorVista>
-  @if (hayLista() && !actualizando()) {
-    <div class="ms-comp-selector" role="group" aria-label="Qué comparar">
-      <button type="button" class="ms-chip" [class.ms-chip--activo]="verMiLista()" [attr.aria-pressed]="verMiLista()" (click)="elegirVista(true)">
-        Mi lista de compras
-      </button>
-      <button type="button" class="ms-chip" [class.ms-chip--activo]="!verMiLista()" [attr.aria-pressed]="!verMiLista()" (click)="elegirVista(false)">
-        Todos los productos
-      </button>
-    </div>
-  }
-</ng-template>
-
-<!-- Tu lista de la semana con el costo de cada producto en cada tienda. -->
-<ng-template #miLista>
-  <div class="ms-comp-lista">
-    <p class="ms-comp-lista-titulo">Lo que te falta comprar · {{ itemsPendientes().length }} de {{ itemsLista().length }} productos</p>
-    <p class="ms-comp-lista-nota">Los productos que marcas en tu lista de compras (ya los tienes o van en el carro) no se comparan.</p>
-    @if (itemsPendientes().length === 0) {
-      <p class="ms-comp-lista-vacia">Marcaste todos los productos: no queda nada por comparar.</p>
-    }
-    <div class="ms-comp-lista-fila ms-comp-lista-fila--encabezado">
-      <span>Producto</span>
-      <span class="ms-comp-num">Jumbo</span>
-      <span class="ms-comp-num">S. Isabel</span>
-    </div>
-    @for (item of itemsPendientes(); track item.id) {
-      <div class="ms-comp-lista-fila">
-        <span class="ms-comp-lista-producto">
-          {{ item.nombre }}
-          <small>{{ item.cantidad }}</small>
-        </span>
-        <span class="ms-comp-num" [class.ms-comp-lista-mejor]="tiendaDeItem(item.costoJumbo, item.costoSantaIsabel) === 'Jumbo'">
-          {{ item.costoJumbo === null ? 'sin precio' : formatPrecio(item.costoJumbo) }}
-        </span>
-        <span class="ms-comp-num" [class.ms-comp-lista-mejor]="tiendaDeItem(item.costoJumbo, item.costoSantaIsabel) === 'S. Isabel'">
-          {{ item.costoSantaIsabel === null ? 'sin precio' : formatPrecio(item.costoSantaIsabel) }}
-        </span>
-      </div>
-    }
-    @if (resumenLista(); as r) {
-      <div class="ms-comp-lista-total" role="status">
-        @if (r.itemsComparables > 0) {
-          <p>
-            Total Jumbo {{ formatPrecio(r.totalJumbo) }} · Santa Isabel {{ formatPrecio(r.totalSantaIsabel) }}
-            @if (r.masBarata) {
-              · conviene {{ r.masBarata }}, ahorras {{ formatPrecio(r.ahorro) }}
-            } @else {
-              · salen igual
-            }
-          </p>
-          <small>Suma solo los {{ r.itemsComparables }} de {{ r.itemsTotal }} productos con precio en ambas tiendas.</small>
-        } @else {
-          <p>Todavía no hay precios para valorizar tu lista. Pulsa "Actualizar precios".</p>
-        }
-      </div>
-    }
-  </div>
-</ng-template>
-
 <!-- Lo que se muestra mientras no hay boleta: cargando, error o sin datos. -->
 <ng-template #sinBoleta>
   <div class="ms-comp-vacio">
-    @if (estado() === 'cargando') {
+    @if (hayLista()) {
+      @if (itemsPendientes().length === 0) {
+        <p>Marcaste todos los productos de tu lista: no queda nada por comparar.</p>
+      } @else {
+        <p>Todavía no hay precios para tu lista. Pulsa &quot;Actualizar precios&quot;.</p>
+      }
+    } @else if (estado() === 'cargando') {
       <ng-container *ngTemplateOutlet="esqueleto"></ng-container>
     } @else if (estado() === 'error') {
       <p>No se pudieron cargar los precios.</p>
@@ -134,19 +79,16 @@
 
       <ng-container *ngTemplateOutlet="barraEstado"></ng-container>
 
-      <ng-container *ngTemplateOutlet="selectorVista"></ng-container>
 
       @if (actualizando()) {
         <ng-container *ngTemplateOutlet="esqueleto"></ng-container>
-      } @else if (mostrarMiLista()) {
-        <ng-container *ngTemplateOutlet="miLista"></ng-container>
-      } @else if (estado() === 'listo' && productos().length > 0) {
+      } @else if (hayBoleta()) {
       <div class="ms-comp-desktop-columnas">
         <!-- Boleta térmica de 720px con borde dentado arriba y abajo. -->
         <div class="ms-comp-boleta-sombra">
           <div class="ms-comp-boleta">
             <p class="ms-comp-boleta-marca">MENUSMART</p>
-            <p class="ms-comp-boleta-sub">Boleta comparativa · {{ productos().length }} productos</p>
+            <p class="ms-comp-boleta-sub">Boleta comparativa · {{ subtituloBoleta() }}</p>
             <div class="ms-comp-punteada ms-comp-punteada--84"></div>
 
             <div class="ms-comp-fila ms-comp-fila--encabezado">
@@ -160,7 +102,7 @@
             <div class="ms-comp-punteada"></div>
 
             <div class="ms-comp-filas">
-              @for (producto of productos(); track producto.slug ?? producto.producto; let i = $index) {
+              @for (producto of filas(); track producto.slug ?? producto.producto; let i = $index) {
                 <div class="ms-comp-fila">
                   <span class="ms-comp-producto">{{ producto.producto }}</span>
                   @for (precio of producto.precios; track $index) {
@@ -241,6 +183,11 @@
               ojo: {{ c.producto }} sale {{ formatPrecio(c.ahorro) }} más barato en {{ c.tienda }}
             </div>
           }
+          @if (sinPrecio().length > 0) {
+            <p class="ms-comp-sinprecio">
+              Sin precio en alguna tienda, no se suman: {{ sinPrecio().join(', ') }}.
+            </p>
+          }
         </div>
       </div>
       } @else {
@@ -262,13 +209,10 @@
 
     <ng-container *ngTemplateOutlet="barraEstado"></ng-container>
 
-    <ng-container *ngTemplateOutlet="selectorVista"></ng-container>
 
     @if (actualizando()) {
       <ng-container *ngTemplateOutlet="esqueleto"></ng-container>
-    } @else if (mostrarMiLista()) {
-      <ng-container *ngTemplateOutlet="miLista"></ng-container>
-    } @else if (estado() === 'listo' && productos().length > 0) {
+    } @else if (hayBoleta()) {
     <div class="ms-boleta">
       <div class="ms-boleta-header">
         <span class="ms-boleta-marca">MENUSMART</span>
@@ -285,7 +229,7 @@
           </tr>
         </thead>
         <tbody>
-          @for (producto of productos(); track producto.slug ?? producto.producto) {
+          @for (producto of filas(); track producto.slug ?? producto.producto) {
             <tr>
               <td>{{ producto.producto }}</td>
               @for (precio of producto.precios; track $index) {
@@ -315,6 +259,9 @@
           Empate: las dos tiendas suman lo mismo
         }
       </div>
+      @if (sinPrecio().length > 0) {
+        <p class="ms-comp-sinprecio">Sin precio en alguna tienda, no se suman: {{ sinPrecio().join(', ') }}.</p>
+      }
     </div>
     } @else {
       <ng-container *ngTemplateOutlet="sinBoleta"></ng-container>

@@ -3,6 +3,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting, TestRequest } from '@angular/common/http/testing';
 import { ComparadorPage } from './comparador.page';
 import { PrecioProducto } from '../../core/services/comparador.service';
+import { ListaComprasService } from '../../core/services/lista-compras.service';
 
 describe('ComparadorPage', () => {
   let component: ComparadorPage;
@@ -60,6 +61,49 @@ describe('ComparadorPage', () => {
     expect(component.estado()).toBe('listo');
     expect(component.productos()).toHaveLength(1);
     expect(component.ganadora()).toBe('Santa Isabel');
+  });
+
+  describe('con una lista de compras', () => {
+    const item = (id: string, nombre: string, comprado: boolean, jumbo: number | null, santa: number | null) => ({
+      id,
+      nombre,
+      cantidad: 1,
+      unidad: 'kg',
+      categoria: 'despensa',
+      comprado,
+      nombresOriginales: [nombre],
+      reglas: [],
+      costo: {
+        tiendas: {
+          jumbo: jumbo === null ? null : { total: jumbo },
+          santa_isabel: santa === null ? null : { total: santa },
+        },
+      },
+    });
+
+    it('arma la boleta solo con lo que falta comprar y avisa lo que no tiene precio', async () => {
+      const carga = TestBed.inject(ListaComprasService).cargar();
+      http.expectOne((req) => req.url.endsWith('/shopping-lists')).flush({
+        id: 'l1',
+        semana: '2026-11-23',
+        items: [
+          item('i1', 'arroz', false, 3000, 2400),
+          item('i2', 'aceite', false, 2000, 2500),
+          item('i3', 'sal', true, 500, 400),
+          item('i4', 'cilantro', false, null, null),
+        ],
+        resumen: { itemsTotal: 4, itemsComparables: 3, itemsSinPrecio: 1, comparable: null },
+      });
+      await carga;
+
+      expect(component.hayLista()).toBe(true);
+      // "sal" ya está marcada (la tienes) y "cilantro" no tiene precio: solo entran arroz y aceite.
+      expect(component.filas().map((fila) => fila.slug)).toEqual(['i1', 'i2']);
+      expect(component.totales()).toEqual([5000, 4900]);
+      expect(component.ganadora()).toBe('Santa Isabel');
+      expect(component.tiendaMasBarata().ahorro).toBe(100);
+      expect(component.sinPrecio()).toEqual(['Cilantro']);
+    });
   });
 
   // Regresión: masBaratoNombre() usaba `precios[0] < precios[1] ? 0 : 1`,
