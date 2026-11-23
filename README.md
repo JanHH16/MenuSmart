@@ -27,8 +27,6 @@ Proyecto de la asignatura **Ingeniería Web Avanzada**.
 | Jan Houter. ([@JanHH16](https://github.com/JanHH16)) | Backend (NestJS), persistencia de datos (PostgreSQL/TypeORM), recuperación de información web (servicio Python/FastAPI, scraping), DevOps e infraestructura (GitHub Actions, Docker, Terraform), documentación técnica |
 | Camila Torres. [@camitwrs](https://github.com/camitwrs) | Frontend (Angular/Ionic), experiencia de usuario (arquitectura de layout adaptativo mobile/desktop, prototipo Figma), capacidad adaptativa o inteligente (diseño de la interacción y presentación al usuario), pruebas (cobertura del frontend), seguridad y calidad de código (revisión) |
 
-El registro de participación (commits por autor y por área, y el uso de asistencia de IA) está en [`docs/registro-participacion.md`](docs/registro-participacion.md).
-
 ## Problema y usuarios objetivo
 
 Planificar comidas y hacer las compras de supermercado consume tiempo y suele hacerse de forma desordenada: sin una lista clara, repitiendo ingredientes que se usan una sola vez, o sin comparar precios entre supermercados por falta de tiempo o de información centralizada. Eso genera sobregasto y desperdicio de comida.
@@ -300,7 +298,7 @@ cd python-service && pytest
 
 Estado el 22-11-2026, ejecutado en local: backend **257 pruebas en verde** (201 unitarias y 56 e2e contra PostgreSQL, cobertura de 97,8% de sentencias medida antes de agregar la clave de servicio), servicio Python **161 en verde** (96% de cobertura medida antes de ese cambio) y frontend **109 en verde** (58% de cobertura). Detalle por niveles, cobertura, tiempos de respuesta y limitaciones en [`docs/plan-de-pruebas.md`](docs/plan-de-pruebas.md); accesibilidad en [`docs/accesibilidad.md`](docs/accesibilidad.md).
 
-Además de las pruebas de funcionalidad hay pruebas de las partes sensibles de la entrega: contrato entre servicios, normalización de ingredientes, recuperación ante fallas del scraper, cálculo de costos y recomendador. La evaluación del recomendador se repite con `cd backend && npm run evaluar:recomendador` (reescribe `docs/evaluacion-recomendador.md`). La lista completa de evidencias por criterio de la rúbrica está en [`docs/checklist-entrega.md`](docs/checklist-entrega.md).
+Además de las pruebas de funcionalidad hay pruebas de las partes sensibles de la entrega: contrato entre servicios, normalización de ingredientes, recuperación ante fallas del scraper, cálculo de costos y recomendador. La evaluación del recomendador se repite con `cd backend && npm run evaluar:recomendador` (reescribe `docs/evaluacion-recomendador.md`).
 
 ## Documentación de la API
 
