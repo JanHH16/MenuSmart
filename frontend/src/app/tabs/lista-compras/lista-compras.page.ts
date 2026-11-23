@@ -33,7 +33,22 @@ export class ListaComprasPage implements OnInit {
     this.totalItems() === 0 ? 0 : Math.round((this.itemsComprados() / this.totalItems()) * 100),
   );
 
+  private primeraEntrada = true;
+
   ngOnInit(): void {
+    this.recargar();
+  }
+
+  /** Las pestañas de Ionic siguen vivas: al volver hay que pedir de nuevo plan y lista. */
+  ionViewWillEnter(): void {
+    if (this.primeraEntrada) {
+      this.primeraEntrada = false;
+      return;
+    }
+    this.recargar();
+  }
+
+  private recargar(): void {
     // El plan se carga para poder decir "generada desde N comidas".
     void this.planSemanalService.cargar();
     void this.listaComprasService.cargar();

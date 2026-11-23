@@ -2,6 +2,7 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, forkJoin, switchMap, takeWhile, timer } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { ListaComprasService } from './lista-compras.service';
 
 export interface PrecioProducto {
   producto: string;
@@ -11,6 +12,13 @@ export interface PrecioProducto {
   slug?: string;
   /** El precio de alguna tienda es más antiguo que el límite del backend. */
   desactualizado?: boolean;
+}
+
+export interface ProgresoActualizacion {
+  /** Tiendas cuya consulta ya terminó, y total de tiendas. */
+  terminadas: number;
+  total: number;
+  segundos: number;
 }
 
 export type EstadoComparador = 'cargando' | 'listo' | 'error';
@@ -64,6 +72,7 @@ function formatearCantidad(cantidad: number | null, unidad: string | null): stri
 @Injectable({ providedIn: 'root' })
 export class ComparadorService {
   private readonly http = inject(HttpClient);
+  private readonly listaCompras = inject(ListaComprasService);
   private readonly baseUrl = `${environment.apiUrl}/prices`;
 
   readonly tiendas = ['Jumbo', 'Santa Isabel'];
@@ -76,6 +85,8 @@ export class ComparadorService {
   });
   private readonly _actualizando = signal(false);
   private readonly _mensaje = signal<string | null>(null);
+  private readonly _exito = signal<string | null>(null);
+  private readonly _progreso = signal<ProgresoActualizacion | null>(null);
 
   readonly productos = this._productos.asReadonly();
   readonly estado = this._estado.asReadonly();
@@ -83,6 +94,10 @@ export class ComparadorService {
   readonly actualizando = this._actualizando.asReadonly();
   /** Resultado de la última acción de actualizar (aviso o error), para mostrar al usuario. */
   readonly mensaje = this._mensaje.asReadonly();
+  /** Aviso de "listo" al terminar una actualización completa. */
+  readonly exito = this._exito.asReadonly();
+  /** Avance de la actualización en curso (null si no hay ninguna). */
+  readonly progreso = this._progreso.asReadonly();
 
   readonly totales = computed(() =>
     this.tiendas.map((_, i) =>
@@ -135,17 +150,21 @@ export class ComparadorService {
     }
     this._actualizando.set(true);
     this._mensaje.set(null);
+    this._exito.set(null);
+    this._progreso.set({ terminadas: 0, total: this.tiendas.length, segundos: 0 });
 
     this.http.post<CorridaApi[]>(`${this.baseUrl}/refresh`, {}).subscribe({
       next: (corridas) => this.esperarCorridas(corridas.map((corrida) => corrida.id)),
       error: (error: unknown) => {
         this._mensaje.set(this.mensajeDeError(error));
         this._actualizando.set(false);
+        this._progreso.set(null);
       },
     });
   }
 
   private esperarCorridas(ids: string[]): void {
+    const inicio = Date.now();
     timer(0, INTERVALO_SONDEO_MS)
       .pipe(
         switchMap(() => this.consultarCorridas(ids)),
@@ -153,6 +172,11 @@ export class ComparadorService {
       )
       .subscribe({
         next: (corridas) => {
+          this._progreso.set({
+            terminadas: corridas.filter((corrida) => corrida.estado !== 'en_curso').length,
+            total: corridas.length,
+            segundos: Math.round((Date.now() - inicio) / 1000),
+          });
           if (corridas.some((corrida) => corrida.estado === 'en_curso')) {
             return;
           }
@@ -161,6 +185,7 @@ export class ComparadorService {
         error: () => {
           this._mensaje.set('No se pudo consultar el avance de la actualización.');
           this._actualizando.set(false);
+          this._progreso.set(null);
         },
       });
   }
@@ -175,9 +200,15 @@ export class ComparadorService {
       this._mensaje.set('No se pudieron obtener precios nuevos. Se muestran los últimos datos.');
     } else if (fallidas > 0 || corridas.some((corrida) => corrida.estado === 'parcial')) {
       this._mensaje.set('La actualización quedó incompleta. Algunos precios pueden ser antiguos.');
+    } else {
+      const hora = new Date().toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' });
+      this._exito.set(`Listo: precios actualizados a las ${hora}. Tu lista de compras ya usa los valores nuevos.`);
     }
     this._actualizando.set(false);
+    this._progreso.set(null);
     this.cargar();
+    // El costo de la lista se calcula con los precios vigentes: se vuelve a pedir para que no quede viejo.
+    void this.listaCompras.recargarSiHay();
   }
 
   private mensajeDeError(error: unknown): string {

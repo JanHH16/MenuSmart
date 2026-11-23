@@ -417,3 +417,148 @@
     margin: 0;
   }
 }
+
+// ---------------------------------------------------------------------------
+// Progreso, esqueleto de carga y comparación de la lista de compras.
+// ---------------------------------------------------------------------------
+.ms-comp-progreso {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px dashed var(--ms-tinta-azul);
+  border-radius: 8px;
+  background: var(--ms-papel-hoja);
+
+  div {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  span {
+    color: var(--ms-texto-suave);
+  }
+}
+
+.ms-comp-exito {
+  color: var(--ms-tinta-azul);
+  font-weight: 700;
+}
+
+.ms-comp-esqueleto {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px;
+  border-radius: 8px;
+  background: var(--ms-papel-hoja);
+}
+
+.ms-comp-esqueleto-fila {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 16px;
+}
+
+.ms-comp-esqueleto-barra {
+  height: 18px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, var(--ms-renglon) 25%, rgba(255, 255, 255, 0.6) 50%, var(--ms-renglon) 75%);
+  background-size: 200% 100%;
+  animation: ms-comp-brillo 1.2s linear infinite;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+@keyframes ms-comp-brillo {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+.ms-comp-selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 16px;
+
+  .ms-chip {
+    padding: 8px 14px;
+    border-radius: 6px;
+    border: 1.2px solid var(--ms-lapiz);
+    background: transparent;
+    color: var(--ms-tinta-oscura);
+    font-family: var(--ms-font-boleta);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    cursor: pointer;
+
+    &--activo {
+      background: var(--ms-tinta-azul);
+      border-color: var(--ms-tinta-oscura);
+      color: #ffffff;
+    }
+  }
+}
+
+.ms-comp-lista {
+  padding: 16px;
+  border-radius: 8px;
+  background: var(--ms-papel-hoja);
+}
+
+.ms-comp-lista-titulo {
+  margin: 0 0 12px;
+  font-family: var(--ms-font-libreta);
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--ms-tinta-oscura);
+}
+
+.ms-comp-lista-fila {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr);
+  gap: 8px;
+  align-items: baseline;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--ms-renglon);
+  font-size: 0.9rem;
+}
+
+.ms-comp-lista-fila--encabezado {
+  font-weight: 700;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+}
+
+.ms-comp-lista-producto {
+  overflow-wrap: anywhere;
+
+  small {
+    display: block;
+    color: var(--ms-texto-suave);
+  }
+}
+
+.ms-comp-lista-mejor {
+  font-weight: 700;
+  color: var(--ion-color-success, #2e7d32);
+}
+
+.ms-comp-lista-total {
+  margin-top: 12px;
+
+  p {
+    margin: 0 0 4px;
+    font-weight: 700;
+  }
+
+  small {
+    color: var(--ms-texto-suave);
+  }
+}

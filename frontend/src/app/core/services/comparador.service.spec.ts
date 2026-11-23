@@ -120,17 +120,21 @@ describe('ComparadorService', () => {
           { id: 'b', estado: 'en_curso' },
         ]);
         expect(servicio.actualizando()).toBe(true);
+        expect(servicio.progreso()).toEqual({ terminadas: 0, total: 2, segundos: 0 });
 
         vi.advanceTimersByTime(0);
         http.expectOne((req) => req.url.endsWith('/prices/runs/a')).flush({ id: 'a', estado: 'ok' });
         http.expectOne((req) => req.url.endsWith('/prices/runs/b')).flush({ id: 'b', estado: 'en_curso' });
         expect(servicio.actualizando()).toBe(true);
+        expect(servicio.progreso()?.terminadas).toBe(1);
 
         vi.advanceTimersByTime(3000);
         http.expectOne((req) => req.url.endsWith('/prices/runs/a')).flush({ id: 'a', estado: 'ok' });
         http.expectOne((req) => req.url.endsWith('/prices/runs/b')).flush({ id: 'b', estado: 'ok' });
 
         expect(servicio.actualizando()).toBe(false);
+        expect(servicio.progreso()).toBeNull();
+        expect(servicio.exito()).toContain('Listo: precios actualizados');
         http.expectOne(esCompare).flush(comparacion);
         expect(servicio.productos()).toHaveLength(2);
       } finally {

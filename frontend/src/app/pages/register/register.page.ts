@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, inject } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
@@ -15,6 +15,7 @@ export class RegisterPage {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly layoutService = inject(LayoutService);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   readonly esDesktop$ = this.layoutService.esDesktop$;
 
@@ -51,11 +52,13 @@ export class RegisterPage {
     this.authService.register({ name, email, password }).subscribe({
       next: () => {
         this.loading = false;
+        this.cdr.detectChanges();
         this.router.navigateByUrl('/tabs/plan-semanal');
       },
       error: () => {
         this.loading = false;
         this.errorMessage = 'No se pudo crear la cuenta. Verifica los datos.';
+        this.cdr.detectChanges();
       },
     });
   }

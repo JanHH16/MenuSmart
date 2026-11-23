@@ -54,6 +54,8 @@
 
 .ms-item-nombre {
   flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
   font-family: var(--ms-font-libreta);
   font-size: 1.3rem;
   color: var(--ms-tinta-oscura);
@@ -95,6 +97,7 @@
 
 .ms-lista-grupo-wrap {
   position: relative;
+  display: flex;
 }
 
 // tape(x + colW/2 - 36, y - 12, 72, rot * 3).
@@ -106,19 +109,12 @@
 
 // card(colW × 440, lines: 96, step: 40) — renglones desde y=96 cada 40px.
 .ms-lista-grupo {
-  height: 440px;
-  padding: 20px 20px 0;
-  overflow: hidden;
-  background-image: repeating-linear-gradient(
-    to bottom,
-    var(--ms-renglon) 0,
-    var(--ms-renglon) 1px,
-    transparent 1px,
-    transparent 40px
-  );
-  background-size: 100% calc(100% - 96px);
-  background-position: 0 96px;
-  background-repeat: no-repeat;
+  // La tarjeta crece con los productos (antes tenía alto fijo y overflow
+  // oculto: con muchos ingredientes se cortaba la lista).
+  flex: 1;
+  min-width: 0;
+  min-height: 440px;
+  padding: 20px 20px 16px;
 }
 
 // Nombre del grupo a mano 32 en y=20; "N productos" monoBold 10 rojo en y=64.
@@ -147,10 +143,12 @@
 // Filas de 40px desde y=96 (checkbox en x=20, nombre en x=50, cantidad
 // alineada a la derecha).
 .ms-lista-item {
-  height: 40px;
+  min-height: 40px;
   display: flex;
   align-items: center;
   gap: 12px;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--ms-renglon);
   cursor: pointer;
 }
 
@@ -159,11 +157,11 @@
   min-width: 0;
   font-family: var(--ms-font-libreta);
   font-weight: 700;
-  font-size: 24px;
+  font-size: 22px;
+  line-height: 1.15;
   color: var(--ms-tinta-oscura);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  // El nombre completo se ve en varias líneas en vez de cortarse con "...".
+  overflow-wrap: anywhere;
 
   &--comprado {
     color: var(--ms-texto-suave);
@@ -173,6 +171,9 @@
 
 .ms-lista-item-cantidad {
   flex-shrink: 0;
+  max-width: 45%;
+  text-align: right;
+  overflow-wrap: anywhere;
   font-family: var(--ms-font-boleta);
   font-size: 11px;
   color: var(--ms-texto-suave);
