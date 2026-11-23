@@ -1,8 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router';
+import { ActivatedRoute, Router, convertToParamMap, provideRouter } from '@angular/router';
 import { ModalController } from '@ionic/angular/lazy';
+import { vi } from 'vitest';
 import { DetalleComidaPage } from './detalle-comida.page';
 
 const comidaApi = {
@@ -69,6 +70,63 @@ describe('DetalleComidaPage', () => {
 
     expect(component.comida?.ingredientes).toHaveLength(1);
     expect(component.error).toBe('');
+  });
+
+  it('cambia el día y el tipo en pantalla y los envía al guardar', async () => {
+    const router = TestBed.inject(Router);
+    const navegar = vi.spyOn(router, 'navigateByUrl').mockResolvedValue(true);
+    component.elegirDia('Martes');
+    component.elegirTipo('Cena');
+    expect(component.comida?.dia).toBe('Martes');
+    expect(component.comida?.tipo).toBe('Cena');
+
+    const guardado = component.guardar();
+    const peticion = http.expectOne((req) => req.method === 'PATCH' && req.url.endsWith('/meals/m1'));
+    expect(peticion.request.body).toMatchObject({ tipo: 'cena', diaSemana: 'martes' });
+    peticion.flush({ ...comidaApi, tipo: 'cena', diaSemana: 'martes' });
+    await guardado;
+    expect(navegar).toHaveBeenCalledWith('/tabs/plan-semanal');
+  });
+
+  it('pide confirmación antes de eliminar y no borra hasta confirmar', () => {
+    component.pedirEliminar();
+    expect(component.confirmandoEliminar).toBe(true);
+    http.expectNone((req) => req.method === 'DELETE');
+
+    component.cancelarEliminar();
+    expect(component.confirmandoEliminar).toBe(false);
+    http.expectNone((req) => req.method === 'DELETE');
+  });
+
+  it('elimina la comida confirmada y vuelve al plan', async () => {
+    const router = TestBed.inject(Router);
+    const navegar = vi.spyOn(router, 'navigateByUrl').mockResolvedValue(true);
+    component.pedirEliminar();
+
+    const eliminada = component.eliminar();
+    http.expectOne((req) => req.method === 'DELETE' && req.url.endsWith('/meals/m1')).flush(null, {
+      status: 204,
+      statusText: 'No Content',
+    });
+    await eliminada;
+
+    expect(navegar).toHaveBeenCalledWith('/tabs/plan-semanal');
+    expect(component.confirmandoEliminar).toBe(false);
+    expect(component.error).toBe('');
+  });
+
+  it('muestra un aviso si no se pudo eliminar y no sale de la pantalla', async () => {
+    const router = TestBed.inject(Router);
+    const navegar = vi.spyOn(router, 'navigateByUrl').mockResolvedValue(true);
+    component.pedirEliminar();
+
+    const eliminada = component.eliminar();
+    http.expectOne((req) => req.method === 'DELETE').flush('error', { status: 500, statusText: 'Error' });
+    await eliminada;
+
+    expect(component.error).toContain('No se pudo eliminar');
+    expect(navegar).not.toHaveBeenCalled();
+    expect(component.confirmandoEliminar).toBe(false);
   });
 
   it('muestra un aviso si no se pudo quitar el ingrediente', async () => {

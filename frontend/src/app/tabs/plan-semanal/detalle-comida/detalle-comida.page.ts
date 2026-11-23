@@ -32,6 +32,8 @@ export class DetalleComidaPage implements OnInit {
 
   cargando = true;
   error = '';
+  /** Muestra el aviso "¿Eliminar esta comida?" antes de borrar: borrar no se puede deshacer. */
+  confirmandoEliminar = false;
 
   async ngOnInit(): Promise<void> {
     const id = this.route.snapshot.paramMap.get('id');
@@ -80,6 +82,42 @@ export class DetalleComidaPage implements OnInit {
     await this.ejecutar(async () => {
       this.comida = await this.planSemanalService.eliminarIngrediente(comida, ingredienteId);
     }, 'No se pudo quitar el ingrediente.');
+    this.cdr.detectChanges();
+  }
+
+  /** Cambia el día de la comida en pantalla; se guarda al pulsar "Guardar". */
+  elegirDia(nombre: string): void {
+    if (this.comida) {
+      this.comida.dia = nombre;
+    }
+  }
+
+  /** Cambia el tipo de la comida (desayuno, almuerzo o cena) en pantalla; se guarda con "Guardar". */
+  elegirTipo(tipo: string): void {
+    if (this.comida) {
+      this.comida.tipo = tipo;
+    }
+  }
+
+  pedirEliminar(): void {
+    this.confirmandoEliminar = true;
+  }
+
+  cancelarEliminar(): void {
+    this.confirmandoEliminar = false;
+  }
+
+  /** Borra la comida (y sus ingredientes) del plan y vuelve a la semana. Se llama tras confirmar. */
+  async eliminar(): Promise<void> {
+    if (!this.comida) {
+      return;
+    }
+    const { id } = this.comida;
+    await this.ejecutar(async () => {
+      await this.planSemanalService.eliminarComida(id);
+      this.volver();
+    }, 'No se pudo eliminar la comida.');
+    this.confirmandoEliminar = false;
     this.cdr.detectChanges();
   }
 
