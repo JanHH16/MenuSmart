@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
@@ -16,6 +16,7 @@ export class LoginPage {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly layoutService = inject(LayoutService);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   readonly esDesktop$ = this.layoutService.esDesktop$;
 
@@ -36,6 +37,7 @@ export class LoginPage {
     this.authService.login(this.form.value).subscribe({
       next: () => {
         this.loading = false;
+        this.cdr.detectChanges();
         this.router.navigateByUrl('/tabs/plan-semanal');
       },
       error: (error: HttpErrorResponse) => {
@@ -47,6 +49,9 @@ export class LoginPage {
           error.status === 0 || error.status >= 500
             ? 'no pudimos conectar con el servidor, intenta más tarde'
             : 'ups, credenciales incorrectas';
+        // Sin zone.js Angular no revisa la vista solo al terminar la petición:
+        // sin esto el botón se quedaba en "cargando" y el aviso no aparecía.
+        this.cdr.detectChanges();
       },
     });
   }

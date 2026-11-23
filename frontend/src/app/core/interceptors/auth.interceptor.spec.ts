@@ -62,6 +62,17 @@ describe('AuthInterceptor', () => {
     expect(router.navigateByUrl).toHaveBeenCalledWith('/login');
   });
 
+  it('no trata como sesión vencida el 401 de un login con credenciales incorrectas', () => {
+    authService.getToken.mockReturnValue(null);
+
+    httpClient.post('/api/auth/login', {}).subscribe({ error: () => undefined });
+
+    httpMock.expectOne('/api/auth/login').flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
+
+    expect(authService.logout).not.toHaveBeenCalled();
+    expect(router.navigateByUrl).not.toHaveBeenCalled();
+  });
+
   it('no desloguea cuando el error no es 401', () => {
     authService.getToken.mockReturnValue('abc123');
 

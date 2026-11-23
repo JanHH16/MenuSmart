@@ -124,6 +124,13 @@ export class ListaComprasService {
     }
   }
 
+  /** Vuelve a pedir la lista (con costos al día) solo si ya había una cargada. */
+  async recargarSiHay(): Promise<void> {
+    if (this._items().length > 0) {
+      await this.cargar();
+    }
+  }
+
   /** Arma la lista desde el plan de la semana (reemplaza la anterior, conserva lo comprado). */
   async generar(): Promise<void> {
     if (this._generando()) {
